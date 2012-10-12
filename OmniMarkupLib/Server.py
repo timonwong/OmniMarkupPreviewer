@@ -96,6 +96,14 @@ def handler_view(buffer_id):
 
 class StoppableWSGIServerAdapter(ServerAdapter):
     """ HACK for making a stoppable server """
+    def __int__(self, *args, **kargs):
+        ServerAdapter.__init__(self, *args, **kargs)
+        self.srv = None
+
+    def __del__(self):
+        if self.srv is not None:
+            self.stop()
+
     def run(self, handler):
         class QuietHandler(wsgiref.simple_server.WSGIRequestHandler):
             def log_request(*args, **kw):
@@ -109,6 +117,7 @@ class StoppableWSGIServerAdapter(ServerAdapter):
 
     def stop(self):
         self.srv.shutdown()
+        self.srv = None
 
 
 def bottle_run(server):

@@ -20,26 +20,55 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import sys
+import webbrowser
+import sublime
 import sublime_plugin
+from OmniMarkupLib import log
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
 
 
+g_port = 51004
+
+
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        RendererManager.queue_current_view(self.view)
+    def run(self, edit, immediate=True):
+        RendererManager.queue_current_view(self.view, immediate=True)
+        # Open browser
+        try:
+            global g_port
+            webbrowser.open('http://localhost:%d/view/%d' % (g_port, self.view.buffer_id()))
+        except:
+            log.exception("Error on opening web browser")
 
     def is_enabled(self):
         return RendererManager.is_renderers_enabled_in_view(self.view)
 
 
+def reload_settings():
+    global g_port
+    settings = sublime.load_settings("OmniMarkupPreviewer.sublime-settings")
+    g_port = settings.get("port", 51004)
+    RendererManager.load_renderers()
+
+
+class ReloadOmniMarkupPreviewerCommand(sublime_plugin.ApplicationCommand):
+    def run(self):
+        reload_settings()
+
+
 class PluginEventListener(sublime_plugin.EventListener):
     def __init__(self):
-        RendererManager.load_renderers()
-        self.server = Server(51004)
+        global g_port
+        reload_settings()
+        self.server = Server(g_port)
 
     def __del__(self):
         self.server.stop()
+
+    def on_modified(self, view):
+        pass
 
     def on_post_save(self, view):
         if RendererManager.is_renderers_enabled_in_view(view):
@@ -52,8 +81,13 @@ class PluginEventListener(sublime_plugin.EventListener):
 
 
 def unload_handler():
-    import sys
-    # Reload all necessary modules
-    for key in sys.modules.keys():
-        if key.startswith('OmniMarkupLib.') or key == 'OmniMarkupLib':
-            del sys.modules[key]
+    try:
+        reload_lists = set([
+            'OmniMarkupLib.' + item
+            for item in 'log Common LibraryPathManager LibraryPathManager RendererManager'.split()])
+        # Reload all necessary modules
+        for key in sys.modules.keys():
+            if key in reload_lists:
+                reload(sys.modules[key])
+    except Exception as e:
+        print e

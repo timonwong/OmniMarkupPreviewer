@@ -55,16 +55,36 @@ class RendererWorker(threading.Thread):
         self.cond = threading.Condition(self.mutex)
         self.que = {}
 
-    def queue(self, buffer_id, fullpath, lang, text):
+    def queue(self, buffer_id, fullpath, lang, text, immediate=False):
         item = WorkerQueueItem(
             timestamp=generate_timestamp(),
             fullpath=fullpath,
             lang=lang,
             text=text
         )
-        with self.cond:
-            self.que[buffer_id] = item
-            self.cond.notify()
+        if not immediate:
+            with self.cond:
+                self.que[buffer_id] = item
+                self.cond.notify()
+        else:
+            self.run_queue_item(buffer_id, item)
+
+    def run_queue_item(self, buffer_id, item):
+        try:
+            filename = os.path.basename(item.fullpath)
+            dirname = os.path.dirname(item.fullpath)
+            html_part = RendererManager._render_text(filename, item.lang, item.text)
+            entry = RenderedMarkupCacheEntry(
+                timestamp=generate_timestamp(),
+                filename=filename,
+                dirname=dirname,
+                html_part=html_part
+            )
+            RenderedMarkupCache.instance().set_entry(buffer_id, entry)
+        except NotImplementedError:
+            pass
+        except:
+            log.exception("")
 
     def run(self):
         while True:
@@ -73,21 +93,7 @@ class RendererWorker(threading.Thread):
                 items = self.que.items()
                 self.que.clear()
             for buffer_id, item in items:
-                try:
-                    filename = os.path.basename(item.fullpath)
-                    dirname = os.path.dirname(item.fullpath)
-                    html_part = RendererManager._render_text(filename, item.lang, item.text)
-                    entry = RenderedMarkupCacheEntry(
-                        timestamp=generate_timestamp(),
-                        filename=filename,
-                        dirname=dirname,
-                        html_part=html_part
-                    )
-                    RenderedMarkupCache.instance().set_entry(buffer_id, entry)
-                except NotImplementedError:
-                    pass
-                except:
-                    log.exception("")
+                self.run_queue_item(buffer_id, item)
 
 
 class RendererManager:
@@ -142,12 +148,12 @@ class RendererManager:
         raise NotImplementedError()
 
     @classmethod
-    def queue_current_view(cls, view):
+    def queue_current_view(cls, view, immediate=False):
         import sublime
         region = sublime.Region(0, view.size())
         text = view.substr(region)
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
-        cls.WORKER.queue(view.buffer_id(), view.file_name(), lang, text)
+        cls.WORKER.queue(view.buffer_id(), view.file_name(), lang, text, immediate=immediate)
 
     @staticmethod
     def load_renderers():
@@ -162,15 +168,16 @@ class RendererManager:
         os.chdir(renderers_path)
         try:
             module_list = [f
-                for f in os.listdir(renderers_path) if f.endswith(".py")
+                for f in os.listdir(renderers_path) if f.endswith("Renderer.py")
             ]
             # Load each renderer
             for module_file in module_list:
                 module_name = module_file[:-3]
                 try:
-                    if module_name in sys.modules:
-                        del sys.modules[module_name]
-                    __import__(module_name, globals(), locals(), [], -1)
+                    log.info("Loading renderer: %s", module_name)
+                    __import__(module_name)
+                    sys.modules[module_name] = reload(sys.modules[module_name])
+                    #mod.__file__ = os.path.abspath(mod.__file__).rstrip('co')
                 except:
                     log.exception("Failed to load renderer: %s", module_name)
 

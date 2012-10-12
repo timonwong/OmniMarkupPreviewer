@@ -1,4 +1,5 @@
 {
+    // Need restart on port change
     "port": 51004,
     "refresh_on_modified": true,
     "refresh_on_saved": true,
