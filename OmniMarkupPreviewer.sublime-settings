@@ -1,0 +1,6 @@
+{
+    "port": 51004,
+    "refresh_on_modified": true,
+    "refresh_on_saved": true,
+    "throttle_millis": 800
+}

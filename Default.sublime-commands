@@ -1,0 +1,11 @@
+[
+    {
+        "caption": "SublimeAStyleFormatter: Format Current File",
+        "command": "astyleformat"
+    },
+    {
+        "caption": "SublimeAStyleFormmatter: Format Current Selection",
+        "command": "astyleformat",
+        "args": {"selection_only": true}
+    }
+]
