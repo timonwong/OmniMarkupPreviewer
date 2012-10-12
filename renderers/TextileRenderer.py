@@ -1,8 +1,8 @@
-from OmniMarkupLib.RendererManager import *
+from base_renderer import *
 import textile
 
 
-@RendererManager.register
+@renderer
 class TextileRenderer(MarkupRenderer):
     def is_enabled(self, filename, syntax):
         return filename.endswith(".textile")

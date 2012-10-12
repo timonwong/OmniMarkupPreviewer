@@ -26,6 +26,7 @@ import os.path
 import re
 import log
 import threading
+import inspect
 from collections import namedtuple
 from Common import RenderedMarkupCache, RenderedMarkupCacheEntry, generate_timestamp
 import LibraryPathManager
@@ -38,14 +39,6 @@ __path__ = os.path.dirname(__file__)
 WorkerQueueItem = namedtuple('WorkerQueueItem',
     ['timestamp', 'fullpath', 'lang', 'text']
 )
-
-
-class MarkupRenderer:
-    def is_enabled(self, filename, lang):
-        return False
-
-    def render(self, text):
-        raise NotImplementedError()
 
 
 class RendererWorker(threading.Thread):
@@ -102,11 +95,6 @@ class RendererManager:
     RENDERER_TYPES = {}
 
     @classmethod
-    def register(cls, renderer_type):
-        if renderer_type not in cls.RENDERER_TYPES:
-            cls.RENDERER_TYPES[renderer_type] = None
-
-    @classmethod
     def create_or_get_renderer(cls, renderer_type):
         renderer = cls.RENDERER_TYPES[renderer_type]
         if renderer is None:  # then create a new instance
@@ -155,35 +143,43 @@ class RendererManager:
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
         cls.WORKER.queue(view.buffer_id(), view.file_name(), lang, text, immediate=immediate)
 
-    @staticmethod
-    def load_renderers():
+    @classmethod
+    def load_renderers(cls):
         # Add library path to sys.path
         st2_dir = LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
+        libs_dir = LibraryPathManager.add_search_path(os.path.join(__path__, '../renderers/libs/'))
 
         # Change the current directory to that of the module. It's not safe to just
         # add the modules directory to sys.path, as that won't accept unicode paths
         # on Windows
-        renderers_path = os.path.normpath(os.path.join(__path__, '..', 'renderers'))
+        renderers_path = os.path.join(__path__, '../renderers/')
+        basepath = os.path.join(__path__, '..')
         oldpath = os.getcwdu()
-        os.chdir(renderers_path)
+        os.chdir(basepath)
         try:
             module_list = [f
                 for f in os.listdir(renderers_path) if f.endswith("Renderer.py")
             ]
             # Load each renderer
             for module_file in module_list:
-                module_name = module_file[:-3]
+                module_name = 'renderers.' + module_file[:-3]
                 try:
                     log.info("Loading renderer: %s", module_name)
                     __import__(module_name)
-                    sys.modules[module_name] = reload(sys.modules[module_name])
-                    #mod.__file__ = os.path.abspath(mod.__file__).rstrip('co')
+                    mod = sys.modules[module_name] = reload(sys.modules[module_name])
+                    # Get classes
+                    classes = inspect.getmembers(mod, inspect.isclass)
+                    for classname, classtype in classes:
+                        if hasattr(classtype, 'IS_VALID_RENDERER__'):
+                            # Register renderer into manager
+                            cls.RENDERER_TYPES[classtype] = None
                 except:
                     log.exception("Failed to load renderer: %s", module_name)
 
         finally:
             # Restore the current directory
             os.chdir(oldpath)
+            LibraryPathManager.remove_search_path(libs_dir)
             # Clean sys path for library loading
             LibraryPathManager.remove_search_path(st2_dir)
 

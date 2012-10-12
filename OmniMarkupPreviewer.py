@@ -78,16 +78,3 @@ class PluginEventListener(sublime_plugin.EventListener):
         if key == 'omp_is_enabled':
             return RendererManager.is_renderers_enabled_in_view(view)
         return None
-
-
-def unload_handler():
-    try:
-        reload_lists = set([
-            'OmniMarkupLib.' + item
-            for item in 'log Common LibraryPathManager LibraryPathManager RendererManager'.split()])
-        # Reload all necessary modules
-        for key in sys.modules.keys():
-            if key in reload_lists:
-                reload(sys.modules[key])
-    except Exception as e:
-        print e

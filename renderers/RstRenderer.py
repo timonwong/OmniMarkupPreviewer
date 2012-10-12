@@ -1,4 +1,4 @@
-from OmniMarkupLib.RendererManager import *
+from base_renderer import *
 from docutils.core import publish_parts
 from docutils.writers.html4css1 import Writer, HTMLTranslator
 
@@ -14,7 +14,7 @@ class GitHubHTMLTranslator(HTMLTranslator):
             self.body.append(self.starttag(node, 'pre'))
 
 
-@RendererManager.register
+@renderer
 class RstRenderer(MarkupRenderer):
     def is_enabled(self, filename, syntax):
         return syntax == "text.restructuredtext"

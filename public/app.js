@@ -1,5 +1,6 @@
 $(function() {
     var query_update = function() {
+        var default_interval = 500;
         var buffer_id = $('article').data('buffer-id');
         var timestamp = $('article').data('timestamp');
         var request = {'buffer_id': buffer_id, 'timestamp': timestamp};
@@ -23,12 +24,12 @@ $(function() {
         });
     };
 
-    var intervalId = setInterval(query_update, 1000);
+    var intervalId = setInterval(query_update, default_interval);
 
     $(window).focus(function() {
         console.log('Focus');
         if (!intervalId) {
-            intervalId = setInterval(query_update, 1000);
+            intervalId = setInterval(query_update, default_interval);
         }
     });
 
