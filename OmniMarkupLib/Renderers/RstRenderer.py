@@ -1,4 +1,5 @@
 from base_renderer import *
+import re
 from docutils.core import publish_parts
 from docutils.writers.html4css1 import Writer, HTMLTranslator
 
@@ -16,8 +17,13 @@ class GitHubHTMLTranslator(HTMLTranslator):
 
 @renderer
 class RstRenderer(MarkupRenderer):
-    def is_enabled(self, filename, syntax):
-        return syntax == "text.restructuredtext"
+    filename_pattern = re.compile(r'\.re?st$')
+
+    @classmethod
+    def is_enabled(cls, filename, syntax):
+        if syntax == "text.restructuredtext":
+            return True
+        return cls.filename_pattern.search(filename)
 
     def render(self, text):
         settings_overrides = {

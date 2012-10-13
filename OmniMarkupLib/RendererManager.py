@@ -102,22 +102,14 @@ class RendererWorker(threading.Thread):
 class RendererManager:
     WORKER = RendererWorker()
     LANG_RE = re.compile(r"^[^\s]+(?=\s+)")
-    RENDERER_TYPES = {}
-
-    @classmethod
-    def create_or_get_renderer(cls, renderer_type):
-        renderer = cls.RENDERER_TYPES[renderer_type]
-        if renderer is None:  # then create a new instance
-            renderer = renderer_type()
-        return renderer
+    RENDERER_TYPES = []
 
     @classmethod
     def is_renderers_enabled(cls, filename, lang):
         # filename may be None, so prevent it
         filename = filename or ""
-        for renderer_type in cls.RENDERER_TYPES.keys():
-            renderer = cls.create_or_get_renderer(renderer_type)
-            if renderer.is_enabled(filename, lang):
+        for renderer_type in cls.RENDERER_TYPES:
+            if renderer_type.is_enabled(filename, lang):
                 return True
         return False
 
@@ -138,10 +130,10 @@ class RendererManager:
 
     @classmethod
     def _render_text(cls, filename, lang, text):
-        for renderer_type in cls.RENDERER_TYPES.keys():
+        for renderer_type in cls.RENDERER_TYPES:
             try:
-                renderer = cls.create_or_get_renderer(renderer_type)
-                if renderer.is_enabled(filename, lang):
+                if renderer_type.is_enabled(filename, lang):
+                    renderer = renderer_type()
                     return renderer.render(text)
             except:
                 log.exception('Exception occured while rendering using %s', renderer_type)
@@ -158,7 +150,7 @@ class RendererManager:
     @classmethod
     def load_renderers(cls):
         # Clean old renderers
-        cls.RENDERER_TYPES.clear()
+        cls.RENDERER_TYPES[:] = []
 
         # Add library path to sys.path
         st2_dir = LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
@@ -186,7 +178,7 @@ class RendererManager:
                     for classname, classtype in classes:
                         # Register renderer into manager
                         if hasattr(classtype, 'IS_VALID_RENDERER__'):
-                            cls.RENDERER_TYPES[classtype] = None
+                            cls.RENDERER_TYPES.append(classtype)
                 except:
                     log.exception("Failed to load renderer: %s", module_name)
 

@@ -1,5 +1,6 @@
 class MarkupRenderer(object):
-    def is_enabled(self, filename, lang):
+    @classmethod
+    def is_enabled(cls, filename, lang):
         return False
 
     def render(self, text):

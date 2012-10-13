@@ -4,7 +4,8 @@ import creoleparser
 
 @renderer
 class CreoleRenderer(MarkupRenderer):
-    def is_enabled(self, filename, syntax):
+    @classmethod
+    def is_enabled(cls, filename, syntax):
         if syntax == 'text.html.creole':
             return True
         return filename.endswith(".creole")

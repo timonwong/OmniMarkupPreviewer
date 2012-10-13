@@ -88,7 +88,7 @@ def unload_handler():
     # Reload modules
     import sys
     import types
-    for key in sys.modules:
+    for key in sys.modules.keys():
         if key.startswith('OmniMarkupLib'):
             try:
                 mod = sys.modules[key]
