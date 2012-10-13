@@ -77,6 +77,7 @@ g_server = Server(g_server_port)
 
 
 def unload_handler():
+    # Cleaning up resources...
     # Stopping server
     global g_server
     log.info('Bottle server shuting down...')

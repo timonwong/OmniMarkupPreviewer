@@ -157,23 +157,26 @@ class RendererManager:
 
     @classmethod
     def load_renderers(cls):
+        # Clean old renderers
+        cls.RENDERER_TYPES.clear()
+
         # Add library path to sys.path
         st2_dir = LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
-        libs_dir = LibraryPathManager.add_search_path(os.path.join(__path__, './renderers/libs/'))
+        libs_dir = LibraryPathManager.add_search_path(os.path.join(__path__, './Renderers/libs/'))
 
         # Change the current directory to that of the module. It's not safe to just
         # add the modules directory to sys.path, as that won't accept unicode paths
         # on Windows
-        renderers_path = os.path.join(__path__, './renderers/')
+        renderers_path = os.path.join(__path__, './Renderers/')
         oldpath = os.getcwdu()
-        os.chdir(__path__)
+        os.chdir(os.path.join(__path__, '..'))
         try:
             module_list = [f
                 for f in os.listdir(renderers_path) if f.endswith("Renderer.py")
             ]
             # Load each renderer
             for module_file in module_list:
-                module_name = 'renderers.' + module_file[:-3]
+                module_name = 'OmniMarkupLib.Renderers.' + module_file[:-3]
                 try:
                     log.info("Loading renderer: %s", module_name)
                     __import__(module_name)
