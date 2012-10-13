@@ -47,6 +47,8 @@ class RendererWorker(threading.Thread):
         self.mutex = threading.Lock()
         self.cond = threading.Condition(self.mutex)
         self.que = {}
+        self._stopping = False
+        self._stopped = True
 
     def queue(self, buffer_id, fullpath, lang, text, immediate=False):
         item = WorkerQueueItem(
@@ -80,13 +82,19 @@ class RendererWorker(threading.Thread):
             log.exception("")
 
     def run(self):
-        while True:
+        self._stopped = False
+        while not self._stopping:
             with self.cond:
-                self.cond.wait()
+                self.cond.wait(1)
                 items = self.que.items()
                 self.que.clear()
             for buffer_id, item in items:
                 self.run_queue_item(buffer_id, item)
+        self._stopped = True
+
+    def stop(self):
+        self._stopping = True
+        self.join()
 
 
 class RendererManager:
@@ -147,15 +155,14 @@ class RendererManager:
     def load_renderers(cls):
         # Add library path to sys.path
         st2_dir = LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
-        libs_dir = LibraryPathManager.add_search_path(os.path.join(__path__, '../renderers/libs/'))
+        libs_dir = LibraryPathManager.add_search_path(os.path.join(__path__, './renderers/libs/'))
 
         # Change the current directory to that of the module. It's not safe to just
         # add the modules directory to sys.path, as that won't accept unicode paths
         # on Windows
-        renderers_path = os.path.join(__path__, '../renderers/')
-        basepath = os.path.join(__path__, '..')
+        renderers_path = os.path.join(__path__, './renderers/')
         oldpath = os.getcwdu()
-        os.chdir(basepath)
+        os.chdir(__path__)
         try:
             module_list = [f
                 for f in os.listdir(renderers_path) if f.endswith("Renderer.py")
@@ -170,8 +177,8 @@ class RendererManager:
                     # Get classes
                     classes = inspect.getmembers(mod, inspect.isclass)
                     for classname, classtype in classes:
+                        # Register renderer into manager
                         if hasattr(classtype, 'IS_VALID_RENDERER__'):
-                            # Register renderer into manager
                             cls.RENDERER_TYPES[classtype] = None
                 except:
                     log.exception("Failed to load renderer: %s", module_name)

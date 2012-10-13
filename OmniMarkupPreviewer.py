@@ -20,7 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import sys
 import webbrowser
 import sublime
 import sublime_plugin
@@ -29,7 +28,8 @@ from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
 
 
-g_port = 51004
+g_server_port = 51004
+g_server = None
 
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
@@ -37,8 +37,8 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
         RendererManager.queue_current_view(self.view, immediate=True)
         # Open browser
         try:
-            global g_port
-            webbrowser.open('http://localhost:%d/view/%d' % (g_port, self.view.buffer_id()))
+            global g_server_port
+            webbrowser.open('http://localhost:%d/view/%d' % (g_server_port, self.view.buffer_id()))
         except:
             log.exception("Error on opening web browser")
 
@@ -47,9 +47,9 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
 
 
 def reload_settings():
-    global g_port
+    global g_server_port
     settings = sublime.load_settings("OmniMarkupPreviewer.sublime-settings")
-    g_port = settings.get("port", 51004)
+    g_server_port = settings.get("server_port", 51004)
     RendererManager.load_renderers()
 
 
@@ -59,14 +59,6 @@ class ReloadOmniMarkupPreviewerCommand(sublime_plugin.ApplicationCommand):
 
 
 class PluginEventListener(sublime_plugin.EventListener):
-    def __init__(self):
-        global g_port
-        reload_settings()
-        self.server = Server(g_port)
-
-    def __del__(self):
-        self.server.stop()
-
     def on_modified(self, view):
         pass
 
@@ -78,3 +70,28 @@ class PluginEventListener(sublime_plugin.EventListener):
         if key == 'omp_is_enabled':
             return RendererManager.is_renderers_enabled_in_view(view)
         return None
+
+
+reload_settings()
+g_server = Server(g_server_port)
+
+
+def unload_handler():
+    # Stopping server
+    global g_server
+    log.info('Bottle server shuting down...')
+    g_server.stop()
+    # Stopping renderer worker
+    RendererManager.WORKER.stop()
+
+    # Reload modules
+    import sys
+    import types
+    for key in sys.modules:
+        if key.startswith('OmniMarkupLib'):
+            try:
+                mod = sys.modules[key]
+                if type(mod) is types.ModuleType:
+                    reload(mod)
+            except:
+                pass
