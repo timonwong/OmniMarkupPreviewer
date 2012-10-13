@@ -86,6 +86,8 @@ class RendererWorker(threading.Thread):
         while not self._stopping:
             with self.cond:
                 self.cond.wait(1)
+                if len(self.que) == 0:
+                    continue
                 items = self.que.items()
                 self.que.clear()
             for buffer_id, item in items:
@@ -111,6 +113,8 @@ class RendererManager:
 
     @classmethod
     def is_renderers_enabled(cls, filename, lang):
+        # filename may be None, so prevent it
+        filename = filename or ""
         for renderer_type in cls.RENDERER_TYPES.keys():
             renderer = cls.create_or_get_renderer(renderer_type)
             if renderer.is_enabled(filename, lang):

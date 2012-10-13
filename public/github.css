@@ -6,6 +6,7 @@ body {
     padding-bottom: 10px;
     background-color: white;
     padding: 30px; 
+    color: #333;
 }
 body > *:first-child {
     margin-top: 0 !important; 
@@ -15,6 +16,10 @@ body > *:last-child {
 }
 a {
     color: #4183C4;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
 }
 a.absent {
     color: #cc0000;
