@@ -54,11 +54,11 @@ The default key bindings for this plugin:
 
 **Windows, Linux:**
 
-* <kbd>Ctrl+Alt+O</kbd>: Preview current file
+* <kbd>Ctrl+Alt+O</kbd>: Preview current file.
 
 **OSX:**
 
-* <kbd>Super+Alt+O</kbd>: Preview current file
+* <kbd>Super+Alt+O</kbd>: Preview current file.
 
 
 ### Command Palette
@@ -68,6 +68,11 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 
 What's New
 ----------
+
+v1.0.1 (10/14/2012)
+
+* OSX support added to Package Control.
+* Added ability to clean cache.
 
 v1.0 (10/14/2012)
 
