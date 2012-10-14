@@ -13,7 +13,7 @@ $(function() {
             success: function(entry) {
                 if (entry && entry.html_part) {
                     // Change title first
-                    document.title = entry.filename + '&mdash;' + entry.dirname;
+                    document.title = entry.filename + '—' + entry.dirname;
                     $('article').data('timestamp', entry.timestamp);
                     // Replace content with latest one
                     $('article').html(entry.html_part);

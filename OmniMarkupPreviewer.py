@@ -159,6 +159,7 @@ class DelayedViewsWorker(threading.Thread):
                     o = self.delayed_views[view_id]
                     o.timeout -= self.WAIT_TIMEOUT
                     if o.timeout <= 0:
+                        del self.delayed_views[view_id]
                         sublime.set_timeout(partial(self.__queue_checked, o.view, o.filename), 0)
 
     def stop(self):
