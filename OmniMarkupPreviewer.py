@@ -21,59 +21,169 @@ SOFTWARE.
 """
 
 import webbrowser
+import threading
+import time
 import sublime
 import sublime_plugin
+from functools import partial
 from OmniMarkupLib import log
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
 
 
-g_server_port = 51004
+class Setting(object):
+    def __init__(self, server_port=51004, refresh_on_modified=True,
+                 refresh_on_saved=True, refresh_on_modified_delay=500):
+        self.server_port = server_port
+        self.refresh_on_modified = refresh_on_modified
+        self.refresh_on_saved = refresh_on_saved
+        self.refresh_on_modified_delay = refresh_on_modified_delay
+
+
+g_setting = Setting()
 g_server = None
 
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, immediate=True):
-        RendererManager.queue_current_view(self.view, immediate=True)
+        RendererManager.queue_view(self.view, immediate=True)
         # Open browser
         try:
-            global g_server_port
-            webbrowser.open('http://localhost:%d/view/%d' % (g_server_port, self.view.buffer_id()))
+            global g_setting
+            webbrowser.open('http://localhost:%d/view/%d' % (g_setting.server_port, self.view.buffer_id()))
         except:
             log.exception("Error on opening web browser")
 
     def is_enabled(self):
-        return RendererManager.is_renderers_enabled_in_view(self.view)
+        return RendererManager.has_renderer_enabled_in_view(self.view)
+
+
+def settings_changed():
+    log.info('Reload settings...')
+    reload_settings()
 
 
 def reload_settings():
-    global g_server_port
-    settings = sublime.load_settings("OmniMarkupPreviewer.sublime-settings")
-    g_server_port = settings.get("server_port", 51004)
+    global g_setting
+    settings = sublime.load_settings(__name__ + '.sublime-settings')
+    settings.clear_on_change(__name__)
+    settings.add_on_change(__name__, settings_changed)
+    g_setting.server_port = settings.get("server_port", 51004)
+    g_setting.refresh_on_modified = settings.get("refresh_on_modified", True)
+    g_setting.refresh_on_saved = settings.get("refresh_on_saved", True)
+    g_setting.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
     RendererManager.load_renderers()
 
 
-class ReloadOmniMarkupPreviewerCommand(sublime_plugin.ApplicationCommand):
+class DelayedViewsWorker(threading.Thread):
+    WAIT_TIMEOUT = 0.02
+
+    class Entry(object):
+        def __init__(self, view, filename, timeout):
+            self.view = view
+            self.filename = filename
+            self.timeout = timeout
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.mutex = threading.Lock()
+        self.cond = threading.Condition(self.mutex)
+        self.stopping = False
+        self.last_signaled = time.time()
+        self.delayed_views = {}
+
+    def queue(self, view, preemptive=True, timeout=0.5):
+        if not RendererManager.has_renderer_enabled_in_view(view):
+            return
+
+        view_id = view.id()
+        now = time.time()
+
+        with self.mutex:
+            if view_id in self.delayed_views:
+                if now - self.last_signaled <= 0.01:  # Too fast, cancel this operation
+                    return
+
+        if preemptive:
+            # Cancel pending actions
+            with self.mutex:
+                if view_id in self.delayed_views:
+                    del self.delayed_views[view_id]
+            RendererManager.queue_view(view, only_exists=True)
+            self.last_signaled = now
+        else:
+            with self.mutex:
+                filename = view.file_name()
+                if view_id not in self.delayed_views:
+                    self.delayed_views[view_id] = self.Entry(view, filename, timeout)
+                else:
+                    entry = self.delayed_views[view_id]
+                    entry.view = view
+                    entry.filename = filename
+                    entry.timeout = timeout
+
+    def __queue_checked(self, view, filename):
+        view_id = view.id()
+        valid_view = False
+        for window in sublime.windows():
+            if valid_view:
+                break
+            for v in window.views():
+                if v.id() == view_id:  # Got view
+                    valid_view = view
+                    break
+
+        if not valid_view or view.is_loading() or view.file_name() != filename:
+            return
+        if RendererManager.has_renderer_enabled_in_view(view):
+            RendererManager.queue_view(view, only_exists=True)
+            self.last_signaled = time.time()
+
     def run(self):
-        reload_settings()
+        while not self.stopping:
+            with self.cond:
+                self.cond.wait(self.WAIT_TIMEOUT)
+                if len(self.delayed_views) == 0:
+                    continue
+                for view_id in self.delayed_views.keys():
+                    o = self.delayed_views[view_id]
+                    o.timeout -= self.WAIT_TIMEOUT
+                    if o.timeout <= 0:
+                        sublime.set_timeout(partial(self.__queue_checked, o.view, o.filename), 0)
+
+    def stop(self):
+        self.stopping = True
+        self.join()
 
 
 class PluginEventListener(sublime_plugin.EventListener):
+    def __init__(self):
+        self.mutex = threading.Lock()
+        self.delayed_views_worker = DelayedViewsWorker()
+        self.delayed_views_worker.start()
+
+    def __del__(self):
+        self.delayed_views_worker.stop()
+
     def on_modified(self, view):
-        pass
+        if view.is_scratch() or not g_setting.refresh_on_modified:
+            return
+        self.delayed_views_worker.queue(view, preemptive=False,
+                                        timeout=float(g_setting.refresh_on_modified_delay) / 1000)
 
     def on_post_save(self, view):
-        if RendererManager.is_renderers_enabled_in_view(view):
-            RendererManager.queue_current_view(view)
+        if not g_setting.refresh_on_saved:
+            return
+        self.delayed_views_worker.queue(view, preemptive=True)
 
     def on_query_context(self, view, key, operator, operand, match_all):
         if key == 'omp_is_enabled':
-            return RendererManager.is_renderers_enabled_in_view(view)
+            return RendererManager.has_renderer_enabled_in_view(view)
         return None
 
 
 reload_settings()
-g_server = Server(g_server_port)
+g_server = Server(g_setting.server_port)
 
 
 def unload_handler():
@@ -84,8 +194,7 @@ def unload_handler():
     g_server.stop()
     # Stopping renderer worker
     RendererManager.WORKER.stop()
-
-    # Reload modules
+    # Reloading modules
     import sys
     import types
     for key in sys.modules.keys():

@@ -20,14 +20,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import threading
 from threading import Condition, Lock, currentThread
 from contextlib import contextmanager
 from time import time
-from collections import namedtuple
 
 
-class Singleton:
+class Singleton(object):
     def __init__(self, decorated):
         self._decorated = decorated
 
@@ -262,17 +260,23 @@ def generate_timestamp():
     return str(time())
 
 
-RenderedMarkupCacheEntry = namedtuple(
-    'RenderedMarkupCacheEntry',
-    ['timestamp', 'filename', 'dirname', 'html_part']
-)
+class RenderedMarkupCacheEntry(object):
+    def __init__(self, timestamp=0, filename='', dirname='', html_part=''):
+        self.timestamp = timestamp
+        self.filename = filename
+        self.dirname = dirname
+        self.html_part = html_part
 
 
 @Singleton
-class RenderedMarkupCache:
+class RenderedMarkupCache(object):
     def __init__(self):
         self.rwlock = RWLock()
         self.cache = {}
+
+    def exists(self, buffer_id):
+        with self.rwlock.readlock:
+            return buffer_id in self.cache
 
     def get_entry(self, buffer_id):
         with self.rwlock.readlock:

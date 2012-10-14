@@ -27,7 +27,7 @@ import re
 import log
 import threading
 import inspect
-from collections import namedtuple
+import sublime
 from Common import RenderedMarkupCache, RenderedMarkupCacheEntry, generate_timestamp
 import LibraryPathManager
 
@@ -36,9 +36,12 @@ __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
 
 
-WorkerQueueItem = namedtuple('WorkerQueueItem',
-    ['timestamp', 'fullpath', 'lang', 'text']
-)
+class WorkerQueueItem(object):
+    def __init__(self, timestamp=0, fullpath='', lang='', text=''):
+        self.timestamp = timestamp
+        self.fullpath = fullpath
+        self.lang = lang
+        self.text = text
 
 
 class RendererWorker(threading.Thread):
@@ -47,8 +50,7 @@ class RendererWorker(threading.Thread):
         self.mutex = threading.Lock()
         self.cond = threading.Condition(self.mutex)
         self.que = {}
-        self._stopping = False
-        self._stopped = True
+        self.stopping = False
 
     def queue(self, buffer_id, fullpath, lang, text, immediate=False):
         item = WorkerQueueItem(
@@ -57,18 +59,19 @@ class RendererWorker(threading.Thread):
             lang=lang,
             text=text
         )
-        if not immediate:
+        if immediate:  # Render in the main thread
+            self._run_queued_item(buffer_id, item)
+        else:
             with self.cond:
                 self.que[buffer_id] = item
                 self.cond.notify()
-        else:
-            self.run_queue_item(buffer_id, item)
 
-    def run_queue_item(self, buffer_id, item):
+    def _run_queued_item(self, buffer_id, item):
         try:
+            # Render text and save to cache
             filename = os.path.basename(item.fullpath)
             dirname = os.path.dirname(item.fullpath)
-            html_part = RendererManager._render_text(filename, item.lang, item.text)
+            html_part = RendererManager.render_text(filename, item.lang, item.text)
             entry = RenderedMarkupCacheEntry(
                 timestamp=generate_timestamp(),
                 filename=filename,
@@ -82,24 +85,22 @@ class RendererWorker(threading.Thread):
             log.exception("")
 
     def run(self):
-        self._stopped = False
-        while not self._stopping:
+        while not self.stopping:
             with self.cond:
-                self.cond.wait(1)
+                self.cond.wait(0.1)
                 if len(self.que) == 0:
                     continue
                 items = self.que.items()
                 self.que.clear()
             for buffer_id, item in items:
-                self.run_queue_item(buffer_id, item)
-        self._stopped = True
+                self._run_queued_item(buffer_id, item)
 
     def stop(self):
-        self._stopping = True
+        self.stopping = True
         self.join()
 
 
-class RendererManager:
+class RendererManager(object):
     WORKER = RendererWorker()
     LANG_RE = re.compile(r"^[^\s]+(?=\s+)")
     RENDERER_TYPES = []
@@ -123,13 +124,13 @@ class RendererManager:
         return lang
 
     @classmethod
-    def is_renderers_enabled_in_view(cls, view):
+    def has_renderer_enabled_in_view(cls, view):
         filename = view.file_name()
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
         return cls.is_renderers_enabled(filename, lang)
 
     @classmethod
-    def _render_text(cls, filename, lang, text):
+    def render_text(cls, filename, lang, text):
         for renderer_type in cls.RENDERER_TYPES:
             try:
                 if renderer_type.is_enabled(filename, lang):
@@ -140,12 +141,14 @@ class RendererManager:
         raise NotImplementedError()
 
     @classmethod
-    def queue_current_view(cls, view, immediate=False):
-        import sublime
+    def queue_view(cls, view, only_exists=False, immediate=False):
+        buffer_id = view.buffer_id()
+        if only_exists and not RenderedMarkupCache.instance().exists(buffer_id):
+            return
         region = sublime.Region(0, view.size())
         text = view.substr(region)
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
-        cls.WORKER.queue(view.buffer_id(), view.file_name(), lang, text, immediate=immediate)
+        cls.WORKER.queue(buffer_id, view.file_name(), lang, text, immediate=immediate)
 
     @classmethod
     def load_renderers(cls):

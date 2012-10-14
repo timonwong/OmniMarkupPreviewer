@@ -1,7 +1,9 @@
+/* OmniMarkupPreviewer default setting, DO NOT MODIFY */
 {
-    // Need restart on port change
+    // Require restart on port change
     "server_port": 51004,
     "refresh_on_modified": true,
-    "refresh_on_saved": true,
-    "throttle_millis": 800
+    // delay after modified, in ms
+    "refresh_on_modified_delay": 500,
+    "refresh_on_saved": true
 }

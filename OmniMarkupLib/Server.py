@@ -24,7 +24,6 @@ import threading
 import os.path
 import wsgiref.simple_server
 import log
-import LibraryPathManager
 from Common import RenderedMarkupCache
 
 
@@ -87,6 +86,7 @@ def handler_view(buffer_id):
     storage = RenderedMarkupCache.instance()
     entry = storage.get_entry(buffer_id)
     if entry is None:
+        # TODO: Try loading text from buffer
         return bottle.HTTPError(404, 'buffer_id(%d) is not valid' % buffer_id)
     return template(
         'github', filename=entry.filename, dirname=entry.dirname,
@@ -131,7 +131,7 @@ def bottle_run(server):
         raise
 
 
-class Server:
+class Server(object):
     class ServerThread(threading.Thread):
         def __init__(self, server):
             threading.Thread.__init__(self)
