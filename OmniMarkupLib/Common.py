@@ -22,33 +22,30 @@ SOFTWARE.
 
 import sys
 import copy
+import thread
 from threading import Condition, Lock, current_thread
 from contextlib import contextmanager
 from time import time
+import log
 
 
 class Singleton(object):
     def __init__(self, decorated):
-        self._decorated = decorated
+        decorated.__lock_obj = thread.allocate_lock()
+        decorated.__instance = None
+        self.__decorated = decorated
 
     def instance(self):
-        """
-        Returns the singleton instance. Upon its first call, it creates a
-        new instance of the decorated class and calls its `__init__` method.
-        On all subsequent calls, the already created instance is returned.
-
-        """
-        try:
-            return self._instance
-        except AttributeError:
-            self._instance = self._decorated()
-            return self._instance
+        with self.__decorated.__lock_obj:
+            if self.__decorated.__instance is None:
+                self.__decorated.__instance = self.__decorated()
+            return self.__decorated.__instance
 
     def __call__(self):
         raise TypeError('Singletons must be accessed through `Instance()`.')
 
     def __instancecheck__(self, inst):
-        return isinstance(inst, self._decorated)
+        return isinstance(inst, self.__decorated)
 
 
 ## {{{ http://code.activestate.com/recipes/502283/ (r1)
@@ -322,5 +319,18 @@ class RenderedMarkupCache(object):
         with self.rwlock.writelock:
             try:
                 self.cache[buffer_id] = entry
+            except:
+                pass
+
+    def clean(self, keep_ids=set()):
+        with self.rwlock.writelock:
+            try:
+                remove_ids = set(self.cache.keys())
+                remove_ids -= keep_ids
+                if len(remove_ids) == 0:
+                    return
+                for buffer_id in remove_ids:
+                    del self.cache[buffer_id]
+                log.info("Clean buffer ids in: %s" % list(remove_ids))
             except:
                 pass

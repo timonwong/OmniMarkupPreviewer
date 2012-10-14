@@ -63,16 +63,19 @@ def handler_api_query():
 
         storage = RenderedMarkupCache.instance()
         entry = storage.get_entry(buffer_id)
-        html_part = None
 
-        if entry.timestamp != timestamp:
-            html_part = entry.html_part
-
+        if entry.timestamp == timestamp:
+            return {
+                'timestamp': entry.timestamp,
+                'filename': None,
+                'dirname': None,
+                'html_part': None
+            }
         return {
             'timestamp': entry.timestamp,
             'filename': entry.filename,
             'dirname': entry.dirname,
-            'html_part': html_part
+            'html_part': entry.html_part
         }
     except:
         return {

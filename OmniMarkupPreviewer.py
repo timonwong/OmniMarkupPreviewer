@@ -29,6 +29,7 @@ from functools import partial
 from OmniMarkupLib import log
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
+from OmniMarkupLib.Common import RenderedMarkupCache
 
 
 class Setting(object):
@@ -56,6 +57,19 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
 
     def is_enabled(self):
         return RendererManager.has_renderer_enabled_in_view(self.view)
+
+
+class OmniMarkupCleanCacheCommand(sublime_plugin.ApplicationCommand):
+    def run(self, remove_all=False):
+        storage = RenderedMarkupCache.instance()
+        if remove_all:
+            storage.clean()
+            return
+        keep_ids_list = []
+        for window in sublime.windows():
+            for view in window.views():
+                keep_ids_list.append(view.buffer_id())
+        storage.clean(keep_ids=set(keep_ids_list))
 
 
 def settings_changed():
@@ -86,7 +100,7 @@ g_server = Server(g_setting.server_port)
 
 
 class DelayedViewsWorker(threading.Thread):
-    WAIT_TIMEOUT = 0.02
+    WAIT_TIMEOUT = 0.05
 
     class Entry(object):
         def __init__(self, view, filename, timeout):
