@@ -32,12 +32,12 @@ from OmniMarkupLib.RendererManager import RendererManager
 
 
 class Setting(object):
-    def __init__(self, server_port=51004, refresh_on_modified=True,
-                 refresh_on_saved=True, refresh_on_modified_delay=500):
-        self.server_port = server_port
-        self.refresh_on_modified = refresh_on_modified
-        self.refresh_on_saved = refresh_on_saved
-        self.refresh_on_modified_delay = refresh_on_modified_delay
+    def __init__(self):
+        self.server_port = 51004
+        self.refresh_on_modified = True
+        self.refresh_on_modified_delay = 500
+        self.refresh_on_saved = True
+        self.refresh_on_loaded = True
 
 
 g_setting = Setting()
@@ -68,11 +68,21 @@ def reload_settings():
     settings = sublime.load_settings(__name__ + '.sublime-settings')
     settings.clear_on_change(__name__)
     settings.add_on_change(__name__, settings_changed)
+
+    old_server_port = g_setting.server_port
     g_setting.server_port = settings.get("server_port", 51004)
     g_setting.refresh_on_modified = settings.get("refresh_on_modified", True)
-    g_setting.refresh_on_saved = settings.get("refresh_on_saved", True)
     g_setting.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
+    g_setting.refresh_on_saved = settings.get("refresh_on_saved", True)
+    g_setting.refresh_on_loaded = settings.get("refresh_on_loaded", True)
     RendererManager.load_renderers()
+    # Show status on server port change
+    if g_setting.server_port != old_server_port:
+        sublime.status_message(__name__ + ' requires restart due to server port change')
+
+
+reload_settings()
+g_server = Server(g_setting.server_port)
 
 
 class DelayedViewsWorker(threading.Thread):
@@ -165,6 +175,11 @@ class PluginEventListener(sublime_plugin.EventListener):
     def __del__(self):
         self.delayed_views_worker.stop()
 
+    def on_load(self, view):
+        if view.is_scratch() or not g_setting.refresh_on_loaded:
+            return
+        self.delayed_views_worker.queue(view, preemptive=True)
+
     def on_modified(self, view):
         if view.is_scratch() or not g_setting.refresh_on_modified:
             return
@@ -172,7 +187,7 @@ class PluginEventListener(sublime_plugin.EventListener):
                                         timeout=float(g_setting.refresh_on_modified_delay) / 1000)
 
     def on_post_save(self, view):
-        if not g_setting.refresh_on_saved:
+        if view.is_scratch() or not g_setting.refresh_on_saved:
             return
         self.delayed_views_worker.queue(view, preemptive=True)
 
@@ -180,10 +195,6 @@ class PluginEventListener(sublime_plugin.EventListener):
         if key == 'omp_is_enabled':
             return RendererManager.has_renderer_enabled_in_view(view)
         return None
-
-
-reload_settings()
-g_server = Server(g_setting.server_port)
 
 
 def unload_handler():
