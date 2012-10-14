@@ -24,7 +24,9 @@ import threading
 import os.path
 import wsgiref.simple_server
 import log
-from Common import RenderedMarkupCache
+import sublime
+from RendererManager import RendererManager
+from Common import RenderedMarkupCache, Future
 
 
 __file__ = os.path.normpath(os.path.abspath(__file__))
@@ -81,12 +83,30 @@ def handler_api_query():
         }
 
 
+def render_text_by_buffer_id(buffer_id):
+    valid_view = None
+    for window in sublime.windows():
+        if valid_view is not None:
+            break
+        for view in window.views():
+            if view.buffer_id() == buffer_id:
+                valid_view = view
+                break
+    if valid_view is None:
+        return None
+    RendererManager.queue_view(valid_view, immediate=True)
+    return RenderedMarkupCache.instance().get_entry(buffer_id)
+
+
 @app.route('/view/<buffer_id:int>')
 def handler_view(buffer_id):
     storage = RenderedMarkupCache.instance()
     entry = storage.get_entry(buffer_id)
+    if entry is None:  # Loading text into cache by buffer_id, if not exists
+        f = Future(render_text_by_buffer_id, buffer_id)
+        sublime.set_timeout(f, 0)
+        entry = f.result()
     if entry is None:
-        # TODO: Try loading text from buffer
         return bottle.HTTPError(404, 'buffer_id(%d) is not valid' % buffer_id)
     return template(
         'github', filename=entry.filename, dirname=entry.dirname,

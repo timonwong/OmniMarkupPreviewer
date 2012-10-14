@@ -28,7 +28,7 @@ import log
 import threading
 import inspect
 import sublime
-from Common import RenderedMarkupCache, RenderedMarkupCacheEntry, generate_timestamp
+from Common import RenderedMarkupCache, RenderedMarkupCacheEntry
 import LibraryPathManager
 
 
@@ -53,12 +53,7 @@ class RendererWorker(threading.Thread):
         self.stopping = False
 
     def queue(self, buffer_id, fullpath, lang, text, immediate=False):
-        item = WorkerQueueItem(
-            timestamp=generate_timestamp(),
-            fullpath=fullpath,
-            lang=lang,
-            text=text
-        )
+        item = WorkerQueueItem(fullpath=fullpath, lang=lang, text=text)
         if immediate:  # Render in the main thread
             self._run_queued_item(buffer_id, item)
         else:
@@ -72,12 +67,7 @@ class RendererWorker(threading.Thread):
             filename = os.path.basename(item.fullpath)
             dirname = os.path.dirname(item.fullpath)
             html_part = RendererManager.render_text(filename, item.lang, item.text)
-            entry = RenderedMarkupCacheEntry(
-                timestamp=generate_timestamp(),
-                filename=filename,
-                dirname=dirname,
-                html_part=html_part
-            )
+            entry = RenderedMarkupCacheEntry(filename=filename, dirname=dirname, html_part=html_part)
             RenderedMarkupCache.instance().set_entry(buffer_id, entry)
         except NotImplementedError:
             pass

@@ -20,7 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from threading import Condition, Lock, currentThread
+import sys
+import copy
+from threading import Condition, Lock, current_thread
 from contextlib import contextmanager
 from time import time
 
@@ -83,7 +85,7 @@ class RWLock(object):
             endtime = time() + timeout
         else:
             endtime = None
-        me = currentThread()
+        me = current_thread()
         self.__condition.acquire()
         try:
             if self.__writer is me:
@@ -133,7 +135,7 @@ class RWLock(object):
 
         if timeout is not None:
             endtime = time() + timeout
-        me, upgradewriter = currentThread(), False
+        me, upgradewriter = current_thread(), False
         self.__condition.acquire()
         try:
             if self.__writer is me:
@@ -210,7 +212,7 @@ class RWLock(object):
 
         In case the current thread holds no lock, a ValueError is thrown."""
 
-        me = currentThread()
+        me = current_thread()
         self.__condition.acquire()
         try:
             if self.__writer is me:
@@ -256,13 +258,43 @@ class RWLock(object):
 ## end of http://code.activestate.com/recipes/502283/ }}}
 
 
+class Future(object):
+    def __init__(self, func, *args, **kwargs):
+        self.__done = False
+        self.__result = None
+        self.__cond = Condition()
+        self.__func = func
+        self.__args = args
+        self.__kwargs = kwargs
+        self.__except = None
+
+    def __call__(self):
+        with self.__cond:
+            try:
+                self.__result = self.__func(*self.__args, **self.__kwargs)
+            except:
+                self.__result = None
+                self.__except = sys.exc_info()
+            self.__done = True
+            self.__cond.notify()
+
+    def result(self):
+        with self.__cond:
+            while not self.__done:
+                self.__cond.wait()
+        if self.__except:
+            raise self.__except[0], self.__except[1], self.__except[2]
+        result = copy.deepcopy(self.__result)
+        return result
+
+
 def generate_timestamp():
     return str(time())
 
 
 class RenderedMarkupCacheEntry(object):
-    def __init__(self, timestamp=0, filename='', dirname='', html_part=''):
-        self.timestamp = timestamp
+    def __init__(self, timestamp=None, filename='', dirname='', html_part=''):
+        self.timestamp = timestamp or generate_timestamp()
         self.filename = filename
         self.dirname = dirname
         self.html_part = html_part

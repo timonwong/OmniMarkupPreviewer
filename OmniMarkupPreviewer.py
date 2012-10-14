@@ -75,13 +75,13 @@ def reload_settings():
     g_setting.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
     g_setting.refresh_on_saved = settings.get("refresh_on_saved", True)
     g_setting.refresh_on_loaded = settings.get("refresh_on_loaded", True)
-    RendererManager.load_renderers()
     # Show status on server port change
     if g_setting.server_port != old_server_port:
         sublime.status_message(__name__ + ' requires restart due to server port change')
 
 
 reload_settings()
+RendererManager.load_renderers()
 g_server = Server(g_setting.server_port)
 
 
