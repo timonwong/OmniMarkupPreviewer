@@ -18,7 +18,7 @@ Installation
 ------------
 
 ### With the Package Control plugin
-The easiest way to install OmniMarkupPreviewer is through [Package Control](http://wbond.net/sublimepackages/package_control).
+The easiest way to install OmniMarkupPreviewer is through [Package Control](http://wbond.net/sublime_packages/package_control).
 
 Once you have Package Control installed, restart Sublime Text 2.
 
