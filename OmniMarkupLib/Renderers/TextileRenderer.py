@@ -8,5 +8,5 @@ class TextileRenderer(MarkupRenderer):
     def is_enabled(cls, filename, syntax):
         return filename.endswith(".textile")
 
-    def render(self, text):
+    def render(self, text, **kwargs):
         return textile.textile(text)

@@ -25,7 +25,7 @@ class RstRenderer(MarkupRenderer):
             return True
         return cls.filename_pattern.search(filename)
 
-    def render(self, text):
+    def render(self, text, **kwargs):
         settings_overrides = {
             'cloak_email_addresses': True,
             'file_insertion_enabled': False,

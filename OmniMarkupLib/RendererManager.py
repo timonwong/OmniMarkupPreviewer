@@ -75,9 +75,11 @@ class RendererWorker(threading.Thread):
             log.exception("")
 
     def run(self):
-        while not self.stopping:
+        while True:
             with self.cond:
-                self.cond.wait(0.1)
+                self.cond.wait()
+                if self.stopping:
+                    break
                 if len(self.que) == 0:
                     continue
                 items = self.que.items()
@@ -87,6 +89,8 @@ class RendererWorker(threading.Thread):
 
     def stop(self):
         self.stopping = True
+        with self.cond:
+            self.cond.notify()
         self.join()
 
 
@@ -163,7 +167,6 @@ class RendererManager(object):
             for module_file in module_list:
                 module_name = 'OmniMarkupLib.Renderers.' + module_file[:-3]
                 try:
-                    log.info("Loading renderer: %s", module_name)
                     __import__(module_name)
                     mod = sys.modules[module_name] = reload(sys.modules[module_name])
                     # Get classes
@@ -171,6 +174,7 @@ class RendererManager(object):
                     for classname, classtype in classes:
                         # Register renderer into manager
                         if hasattr(classtype, 'IS_VALID_RENDERER__'):
+                            log.info("Loading renderer: OmniMarkupLib.Renderers.%s", classname)
                             cls.RENDERER_TYPES.append(classtype)
                 except:
                     log.exception("Failed to load renderer: %s", module_name)

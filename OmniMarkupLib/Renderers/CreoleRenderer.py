@@ -10,5 +10,5 @@ class CreoleRenderer(MarkupRenderer):
             return True
         return filename.endswith(".creole")
 
-    def render(self, text):
+    def render(self, text, **kwargs):
         return creoleparser.text2html(text)

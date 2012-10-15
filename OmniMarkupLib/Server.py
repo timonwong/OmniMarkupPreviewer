@@ -139,7 +139,8 @@ class StoppableWSGIServerAdapter(ServerAdapter):
         self.srv.serve_forever()
 
     def stop(self):
-        self.srv.shutdown()
+        if self.srv:
+            self.srv.shutdown()
         self.srv = None
 
 
@@ -170,4 +171,5 @@ class Server(object):
         t.start()
 
     def stop(self):
+        log.info('Bottle server shuting down...')
         self.server.stop()
