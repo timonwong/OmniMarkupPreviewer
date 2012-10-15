@@ -12,6 +12,9 @@ OmniMarkupPreviewer has builtin support following markups:
 * [reStructuredText](http://docutils.sourceforge.net/rst.html)
 * [WikiCreole](http://wikicreole.org/)
 * [Textile](http://www.textism.com/tools/textile/)
+* [Pod](http://search.cpan.org/dist/perl/pod/perlpod.pod)
+(Requires Perl >= 5.10 and can be found in `PATH`, if the perl version < 5.10, 
+Pod::Simple should be installed from CPAN.)
 
 
 Installation
@@ -22,7 +25,8 @@ The easiest way to install OmniMarkupPreviewer is through [Package Control](http
 
 Once you have Package Control installed, restart Sublime Text 2.
 
-1. Bring up the Command Palette (<kbd>Ctrl+Shift+P</kbd> on Windows and Linux. <kbd>Command+Shift+P</kbd> on OS X).
+1. Bring up the Command Palette (<kbd>Ctrl+Shift+P</kbd> on Windows and Linux. 
+<kbd>Command+Shift+P</kbd> on OS X).
 2. Type "Install" and select "Package Control: Install Package".
 3. Select "OmniMarkupPreviewer" from list.
 

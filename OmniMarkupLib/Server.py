@@ -147,7 +147,6 @@ class StoppableWSGIServerAdapter(ServerAdapter):
 def bottle_run(server):
     try:
         global app
-
         log.info("Bottle v%s server starting up..." % (bottle.__version__))
         log.info("Listening on http://%s:%d/" % (server.host, server.port))
         server.run(app)
