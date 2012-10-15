@@ -129,7 +129,7 @@ class RendererManager(object):
             try:
                 if renderer_type.is_enabled(filename, lang):
                     renderer = renderer_type()
-                    return renderer.render(text)
+                    return renderer.render(text, filename=filename)
             except:
                 log.exception('Exception occured while rendering using %s', renderer_type)
         raise NotImplementedError()
