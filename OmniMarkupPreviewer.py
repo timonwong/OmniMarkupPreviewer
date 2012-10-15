@@ -156,7 +156,7 @@ class DelayedViewsWorker(threading.Thread):
                 break
             for v in window.views():
                 if v.id() == view_id:  # Got view
-                    valid_view = view
+                    valid_view = True
                     break
 
         if not valid_view or view.is_loading() or view.file_name() != filename:

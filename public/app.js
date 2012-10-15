@@ -56,7 +56,7 @@ $(function() {
             dataType: 'json',
             contentType:"application/json; charset=utf-8",
             success: function(entry) {
-                if (entry && entry.html_part) {
+                if (entry && (entry.html_part != null)) {
                     var old_scroll_props = get_vertical_scrollbar_props();
                     // Change title first
                     document.title = entry.filename + '—' + entry.dirname;
