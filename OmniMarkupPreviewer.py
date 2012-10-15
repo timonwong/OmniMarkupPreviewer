@@ -221,6 +221,7 @@ class PluginEventListener(sublime_plugin.EventListener):
         self.delayed_views_worker.queue(view, preemptive=True)
 
     def on_query_context(self, view, key, operator, operand, match_all):
+        # omp_is_enabled is here for backwards compatibility
         if key == 'omnimarkup_is_enabled' or key == 'omp_is_enabled':
             return RendererManager.has_renderer_enabled_in_view(view)
         return None

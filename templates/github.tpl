@@ -3,9 +3,9 @@
   <head>
     <meta charset='utf-8'/>
     <title>{{filename}}—{{dirname}}</title>
-    <link rel="stylesheet" type="text/css" href="/public/github.css" />
+    <link rel="stylesheet" type="text/css" href="/public/github.min.css" />
     <script type="text/javascript" src="/public/jquery-1.8.2.min.js"></script>
-    <script type="text/javascript" src="/public/app.js"></script>
+    <script type="text/javascript" src="/public/app.min.js"></script>
   </head>
   <body>
     <div class="container"> 
