@@ -172,6 +172,8 @@ class DelayedViewsWorker(threading.Thread):
                 if self.stopping:
                     break
                 self.cond.wait(self.WAIT_TIMEOUT)
+                if self.stopping:
+                        break
                 if len(self.delayed_views) > 0:
                     now = time.time()
                     diff_time = now - prev_time
@@ -219,7 +221,7 @@ class PluginEventListener(sublime_plugin.EventListener):
         self.delayed_views_worker.queue(view, preemptive=True)
 
     def on_query_context(self, view, key, operator, operand, match_all):
-        if key == 'omp_is_enabled':
+        if key == 'omnimarkup_is_enabled':
             return RendererManager.has_renderer_enabled_in_view(view)
         return None
 

@@ -137,8 +137,12 @@ class RendererManager(object):
     @classmethod
     def queue_view(cls, view, only_exists=False, immediate=False):
         buffer_id = view.buffer_id()
+        settings = view.settings()
         if only_exists and not RenderedMarkupCache.instance().exists(buffer_id):
-            return
+            # If current view is previously rendered, then ignore 'only_exists'
+            if not settings.get('omnimarkup_enabled', False):
+                return
+        settings.set('omnimarkup_enabled', True)
         region = sublime.Region(0, view.size())
         text = view.substr(region)
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
