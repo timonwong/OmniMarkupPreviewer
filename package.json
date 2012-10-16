@@ -4,5 +4,5 @@
     "description": "Preview markup files (markdown, rst, creole, textile and so on) in web browsers in realtime.",
     "author": "timonwong",
     "homepage": "https://github.com/timonwong/OmniMarkupPreviewer",
-    "platforms": ["windows", "osx"]
+    "platforms": ["*"]
 }
