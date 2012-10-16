@@ -26,8 +26,8 @@ import os
 def cannot_import_some_modules_in_linux():
     import sublime
     import os.path
-    if not sublime.ok_cancel_dialog("SublimeAStyleFormatter cannot work "
-        "because module 'ctypes' cannot be imported under Sublime Text 2\n"
+    if not sublime.ok_cancel_dialog("OmniMarkupPreviewer cannot work "
+        "because some modules is missing from Sublime Text 2 Linux version.\n"
         "Click \"OK\" to see how to fix it"):
         return
     sublime_app_path = os.path.dirname(os.path.realpath(os.path.join('/proc',
@@ -46,7 +46,7 @@ ln -s "$HOME/.pythonbrew/pythons/Python-2.6/lib/python2.6/" "${SUBLIME_TEXT2_FOL
     # Open this script in a new view
     window = sublime.active_window()
     view = window.new_file()
-    view.set_name('Workaround for importing ctypes.sh')
+    view.set_name('Fix missing modules.sh')
     view.set_scratch(True)
     edit = view.begin_edit()
     view.set_syntax_file('Packages/ShellScript/Shell-Unix-Generic.tmLanguage')

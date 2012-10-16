@@ -74,7 +74,7 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
-v1.1.1 (10/16/2012)
+v1.2 (10/16/2012)
 
 * OmniMarkupPreviewer now can be installed from Package Control under Linux.
 
