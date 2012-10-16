@@ -26,18 +26,24 @@ class CommandlineRenderer(MarkupRenderer):
         self.executable = executable
         self.args = args
 
+    def pre_process_encoding(self, text, **kwargs):
+        return text.encode('utf-8')
+
     def pre_process(self, text, **kwargs):
         return text
 
     def post_process(self, rendered_text, **kwargs):
         return rendered_text
 
+    def post_process_encoding(self, rendered_text, **kwargs):
+        return rendered_text.decode('utf-8')
+
     def render(self, text, **kwargs):
-        text = text.encode('utf-8')
+        text = self.pre_process_encoding(text, **kwargs)
         text = self.pre_process(text, **kwargs)
         text = self.executable_check(text, kwargs['filename'])
-        text = text.decode('utf-8')
-        return self.post_process(text, **kwargs)
+        text = self.post_process(text, **kwargs)
+        return self.post_process_encoding(text, **kwargs)
 
     def executable_check(self, text, filename):
         tempfile_ = None

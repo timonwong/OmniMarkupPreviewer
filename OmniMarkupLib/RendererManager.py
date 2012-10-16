@@ -131,7 +131,7 @@ class RendererManager(object):
                     renderer = renderer_type()
                     return renderer.render(text, filename=filename)
             except:
-                log.exception('Exception occured while rendering using %s', renderer_type)
+                log.exception('Exception occured while rendering using %s', renderer_type.__name__)
         raise NotImplementedError()
 
     @classmethod

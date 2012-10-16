@@ -56,7 +56,7 @@ $(function() {
             dataType: 'json',
             contentType:"application/json; charset=utf-8",
             success: function(entry) {
-                if (entry && (entry.html_part != null)) {
+                if (entry && (entry.html_part !== null)) {
                     var old_scroll_props = get_vertical_scrollbar_props();
                     // Change title first
                     document.title = entry.filename + '—' + entry.dirname;
@@ -64,7 +64,7 @@ $(function() {
                     // Replace content with latest one
                     $('article').html(entry.html_part);
                     // scroll to position, if necessary
-                    var top_threshold = Math.max(80, Math.floor(old_scroll_props.height * 0.1));
+                    var top_threshold = Math.min(80, Math.floor(old_scroll_props.height * 0.1));
                     if (old_scroll_props.slider_pos > top_threshold) {
                         var new_scroll_props = get_vertical_scrollbar_props();
                         var increment = new_scroll_props.height - old_scroll_props.height;
