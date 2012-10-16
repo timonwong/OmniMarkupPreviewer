@@ -46,7 +46,7 @@ Type the following command in your Sublime Text 2 Packages directory:
 The "Packages" directory is located at:
 
 * **Windows:**  `%APPDATA%\Sublime Text 2\Packages\`
-* **Linux:**    `~/.Sublime Text 2/Packages/`
+* **Linux:**    `~/.config/sublime-text-2/Packages/`
 * **OS X:**     `~/Library/Application Support/Sublime Text 2/Packages/`
 
 
@@ -73,6 +73,10 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 
 What's New
 ----------
+
+v1.1.1 (10/16/2012)
+
+* OmniMarkupPreviewer now can be installed from Package Control under Linux.
 
 v1.1 (10/16/2012)
 

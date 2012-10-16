@@ -39,6 +39,9 @@ for key in sys.modules.keys():
         except:
             pass
 
+import OmniMarkupLib.LinuxModuleChecker
+OmniMarkupLib.LinuxModuleChecker.check()
+
 from OmniMarkupLib import log
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
