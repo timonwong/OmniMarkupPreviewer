@@ -63,17 +63,13 @@ $(function() {
                     $('article').data('timestamp', entry.timestamp);
                     // Replace content with latest one
                     $('article').html(entry.html_part);
-                    // scroll to position, if necessary
-                    var top_threshold = Math.min(80, Math.floor(old_scroll_props.height * 0.1));
-                    if (old_scroll_props.slider_pos > top_threshold) {
-                        var new_scroll_props = get_vertical_scrollbar_props();
-                        var increment = new_scroll_props.height - old_scroll_props.height;
-                        $('html, body').animate(
-                            { scrollTop: old_scroll_props.slider_pos + increment},
-                            'fast'
-                        );
-                    }
-
+                    // 'auto' scroll, if necessary
+                    var new_scroll_props = get_vertical_scrollbar_props();
+                    var increment = new_scroll_props.height - old_scroll_props.height;
+                    $('html, body').animate(
+                        { scrollTop: old_scroll_props.slider_pos + increment},
+                        'fast'
+                    );
                 }
             }
         });

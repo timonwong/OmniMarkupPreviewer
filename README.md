@@ -74,6 +74,12 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
+v1.1 (10/16/2012)
+
+* Added support for [RDoc](http://rdoc.sourceforge.net/) (Requires ruby).
+* Added support for [Pod](http://search.cpan.org/dist/perl/pod/perlpod.pod) (Requires perl).
+* Auto scroll while text added/deleted.
+
 v1.0.1 (10/14/2012)
 
 * OSX support added to Package Control.
