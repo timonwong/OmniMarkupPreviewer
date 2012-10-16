@@ -20,12 +20,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import sys
+import types
 import webbrowser
 import threading
 import time
 import sublime
 import sublime_plugin
 from functools import partial
+
+# Reloading modules
+for key in sys.modules.keys():
+    if key.startswith('OmniMarkupLib'):
+        try:
+            mod = sys.modules[key]
+            if type(mod) is types.ModuleType:
+                reload(mod)
+        except:
+            pass
+
 from OmniMarkupLib import log
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
@@ -92,11 +105,6 @@ def reload_settings():
     # Show status on server port change
     if g_setting.server_port != old_server_port:
         sublime.status_message(__name__ + ' requires restart due to server port change')
-
-
-reload_settings()
-RendererManager.load_renderers()
-g_server = Server(g_setting.server_port)
 
 
 class DelayedViewsWorker(threading.Thread):
@@ -227,20 +235,15 @@ class PluginEventListener(sublime_plugin.EventListener):
 
 
 def unload_handler():
+    print 'Unloading'
     # Cleaning up resources...
     # Stopping server
     global g_server
     g_server.stop()
     # Stopping renderer worker
     RendererManager.WORKER.stop()
-    # Reloading modules
-    import sys
-    import types
-    for key in sys.modules.keys():
-        if key.startswith('OmniMarkupLib'):
-            try:
-                mod = sys.modules[key]
-                if type(mod) is types.ModuleType:
-                    reload(mod)
-            except:
-                pass
+
+
+reload_settings()
+RendererManager.load_renderers()
+g_server = Server(g_setting.server_port)
