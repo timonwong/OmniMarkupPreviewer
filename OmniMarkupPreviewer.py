@@ -130,7 +130,7 @@ class DelayedViewsWorker(threading.Thread):
 
         if preemptive:
             # Cancel pending actions
-            with self.mutex:
+            with self.cond:
                 if view_id in self.delayed_views:
                     del self.delayed_views[view_id]
                     self.cond.notify()
@@ -197,7 +197,6 @@ class DelayedViewsWorker(threading.Thread):
 
 class PluginEventListener(sublime_plugin.EventListener):
     def __init__(self):
-        self.mutex = threading.Lock()
         self.delayed_views_worker = DelayedViewsWorker()
         self.delayed_views_worker.start()
 

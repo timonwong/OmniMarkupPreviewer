@@ -1,0 +1,37 @@
+OmniMarkupPreviewer
+===================
+
+[OmniMarkupPreviewer](https://github.com/timonwong/OmniMarkupPreviewer) is a 
+[Sublime Text 2](http://www.sublimetext.com/2) plugin that preview markup languages
+in web browsers. OmniMarkupPreviewer renders markup files to htmls and send them
+to web brwosers in the backgound, in order to preview them in realtime.
+
+OmniMarkupPreviewer has builtin support following markups:
+
+* Markdown
+* reStructuredText
+* WikiCreole
+* Textile
+* Pod
+* RDoc
+
+
+Usage
+-----
+
+### Key Bindings
+
+The default key bindings for this plugin:
+
+**Windows, Linux:**
+
+* <kbd>Ctrl+Alt+O</kbd>: Preview current file.
+
+**OSX:**
+
+* <kbd>Super+Alt+O</kbd>: Preview current file.
+
+
+### Command Palette
+
+Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current File`.
