@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>OmniMarkupPreviewer by timonwong</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>OmniMarkupPreviewer</h1>
+        <h2>SublimeText2 plugin to preview markup files such as markdown, reStructuredText, textile and so on</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/timonwong/OmniMarkupPreviewer/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/timonwong/OmniMarkupPreviewer/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/timonwong/OmniMarkupPreviewer" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>OmniMarkupPreviewer</h1>
+
+<p>OmniMarkupPreviewer is a <a href="http://www.sublimetext.com/2">Sublime Text 2</a> plugin
+that preview markup languages in web browsers. OmniMarkupPreviewer renders markup
+files to htmls and send them to web brwosers in the backgound, in order to preview
+them in realtime.</p>
+
+<p>OmniMarkupPreviewer has builtin support following markups:</p>
+
+<ul>
+<li><a href="http://daringfireball.net/projects/markdown/">Markdown</a></li>
+<li><a href="http://docutils.sourceforge.net/rst.html">reStructuredText</a></li>
+<li><a href="http://wikicreole.org/">WikiCreole</a></li>
+<li><a href="http://www.textism.com/tools/textile/">Textile</a></li>
+<li>
+<a href="http://search.cpan.org/dist/perl/pod/perlpod.pod">Pod</a>
+(Requires Perl &gt;= 5.10 and can be found in <code>PATH</code>, if the perl version &lt; 5.10, 
+Pod::Simple should be installed from CPAN.)</li>
+<li>
+<a href="http://rdoc.sourceforge.net/">RDoc</a> (Requires ruby in your <code>PATH</code>)</li>
+</ul><h2>Installation</h2>
+
+<h3>With the Package Control plugin</h3>
+
+<p>The easiest way to install OmniMarkupPreviewer is through <a href="http://wbond.net/sublime_packages/package_control">Package Control</a>.</p>
+
+<p>Once you have Package Control installed, restart Sublime Text 2.</p>
+
+<ol>
+<li>Bring up the Command Palette (<kbd>Ctrl+Shift+P</kbd> on Windows and Linux. 
+<kbd>Command+Shift+P</kbd> on OS X).</li>
+<li>Type "Install" and select "Package Control: Install Package".</li>
+<li>Select "OmniMarkupPreviewer" from list.</li>
+</ol><p>The advantage of using Package Control is that it will keep OmniMarkupPreviewer up to date automatically.</p>
+
+<h3>Manual Install</h3>
+
+<p><strong>Without Git:</strong>
+<a href="https://github.com/timonwong/OmniMarkupPreviewer">Download</a> the latest source code, and extract to the Packages directory.</p>
+
+<p><strong>With Git:</strong>
+Type the following command in your Sublime Text 2 Packages directory:</p>
+
+<p><code>git clone git://github.com/timonwong/OmniMarkupPreviewer.git</code></p>
+
+<p>The "Packages" directory is located at:</p>
+
+<ul>
+<li>
+<strong>Windows:</strong>  <code>%APPDATA%\Sublime Text 2\Packages\</code>
+</li>
+<li>
+<strong>Linux:</strong>    <code>~/.config/sublime-text-2/Packages/</code>
+</li>
+<li>
+<strong>OS X:</strong>     <code>~/Library/Application Support/Sublime Text 2/Packages/</code>
+</li>
+</ul><h2>Usage</h2>
+
+<h3>Key Bindings</h3>
+
+<p>The default key bindings for this plugin:</p>
+
+<p><strong>Windows, Linux:</strong></p>
+
+<ul>
+<li>
+<kbd>Ctrl+Alt+O</kbd>: Preview current file.</li>
+</ul><p><strong>OSX:</strong></p>
+
+<ul>
+<li>
+<kbd>Super+Alt+O</kbd>: Preview current file.</li>
+</ul><h3>Command Palette</h3>
+
+<p>Open the command palette, it apperas as <code>OmniMarkupPreviewer: Preview Current File</code>.</p>
+
+<h2>What's New</h2>
+
+<p>v1.2 (10/16/2012)</p>
+
+<ul>
+<li>OmniMarkupPreviewer now can be installed from Package Control under Linux.</li>
+</ul><p>v1.1 (10/16/2012)</p>
+
+<ul>
+<li>Added support for <a href="http://rdoc.sourceforge.net/">RDoc</a> (Requires ruby).</li>
+<li>Added support for <a href="http://search.cpan.org/dist/perl/pod/perlpod.pod">Pod</a> (Requires perl).</li>
+<li>Auto scroll while text added/deleted.</li>
+</ul><p>v1.0.1 (10/14/2012)</p>
+
+<ul>
+<li>OSX support added to Package Control.</li>
+<li>Added ability to clean cache.</li>
+</ul><p>v1.0 (10/14/2012)</p>
+
+<ul>
+<li>First release.</li>
+</ul><h2>License</h2>
+
+<p>This plugin is using MIT License</p>
+
+<pre><code>Copyright (c) 2012 Timon Wong
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</code></pre>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
