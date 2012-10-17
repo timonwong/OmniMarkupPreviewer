@@ -197,7 +197,3 @@ class RendererManager(object):
             LibraryPathManager.remove_search_path(st2_dir)
 
         #log.info("%d rendere(s) loaded successfully", cls.RENDERERS)
-
-
-RendererManager.WORKER.daemon = True
-RendererManager.WORKER.start()

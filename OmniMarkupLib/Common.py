@@ -147,9 +147,10 @@ class RWLock(object):
                     # else also wants to upgrade, there is no way we can do
                     # this except if one of us releases all his read locks.
                     # Signal this to user.
-                    raise ValueError(
-                        "Inevitable dead lock, denying write lock"
-                    )
+                    if timeout is not None:
+                        raise RuntimeError("Write lock upgrade would deadlock until timeout")
+                    else:
+                        raise ValueError("Inevitable dead lock, denying write lock")
                 upgradewriter = True
                 self.__upgradewritercount = self.__readers.pop(me)
             else:
@@ -309,28 +310,20 @@ class RenderedMarkupCache(object):
 
     def get_entry(self, buffer_id):
         with self.rwlock.readlock:
-            try:
+            if buffer_id in self.cache:
                 return self.cache[buffer_id]
-            except:
-                pass
         return None
 
     def set_entry(self, buffer_id, entry):
         with self.rwlock.writelock:
-            try:
-                self.cache[buffer_id] = entry
-            except:
-                pass
+            self.cache[buffer_id] = entry
 
     def clean(self, keep_ids=set()):
         with self.rwlock.writelock:
-            try:
-                remove_ids = set(self.cache.keys())
-                remove_ids -= keep_ids
-                if len(remove_ids) == 0:
-                    return
-                for buffer_id in remove_ids:
-                    del self.cache[buffer_id]
-                log.info("Clean buffer ids in: %s" % list(remove_ids))
-            except:
-                pass
+            remove_ids = set(self.cache.keys())
+            remove_ids -= keep_ids
+            if len(remove_ids) == 0:
+                return
+            for buffer_id in remove_ids:
+                del self.cache[buffer_id]
+            log.info("Clean buffer ids in: %s" % list(remove_ids))

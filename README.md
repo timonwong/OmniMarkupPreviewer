@@ -26,8 +26,8 @@ The easiest way to install OmniMarkupPreviewer is through [Package Control](http
 
 Once you have Package Control installed, restart Sublime Text 2.
 
-1. Bring up the Command Palette (<kbd>Ctrl+Shift+P</kbd> on Windows and Linux. 
-<kbd>Command+Shift+P</kbd> on OS X).
+1. Bring up the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on Windows and Linux.
+<kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> on OS X).
 2. Type "Install" and select "Package Control: Install Package".
 3. Select "OmniMarkupPreviewer" from list.
 
@@ -59,11 +59,11 @@ The default key bindings for this plugin:
 
 **Windows, Linux:**
 
-* <kbd>Ctrl+Alt+O</kbd>: Preview current file.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>: Preview current file.
 
 **OSX:**
 
-* <kbd>Super+Alt+O</kbd>: Preview current file.
+* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>: Preview current file.
 
 
 ### Command Palette
