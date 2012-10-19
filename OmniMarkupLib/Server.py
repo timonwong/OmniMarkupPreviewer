@@ -103,12 +103,10 @@ def render_text_by_buffer_id(buffer_id):
 
 @app.route('/view/<buffer_id:int>')
 def handler_view(buffer_id):
-    storage = RenderedMarkupCache.instance()
-    entry = storage.get_entry(buffer_id)
-    if entry is None:  # Loading text into cache by buffer_id, if not exists
-        f = Future(render_text_by_buffer_id, buffer_id)
-        sublime.set_timeout(f, 0)
-        entry = f.result()
+    # A browser refresh always get the latest result
+    f = Future(render_text_by_buffer_id, buffer_id)
+    sublime.set_timeout(f, 0)
+    entry = f.result()
     if entry is None:
         return bottle.HTTPError(404, 'buffer_id(%d) is not valid' % buffer_id)
     return template(

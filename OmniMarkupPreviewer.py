@@ -63,8 +63,7 @@ g_server = None
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, immediate=True):
-        RendererManager.queue_view(self.view, immediate=True)
-        # Open browser
+        # Open default browser
         try:
             global g_setting
             webbrowser.open('http://localhost:%d/view/%d' % (g_setting.server_port, self.view.buffer_id()))
