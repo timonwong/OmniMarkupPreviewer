@@ -26,13 +26,21 @@ import os
 def cannot_import_some_modules_in_linux():
     import sublime
     import os.path
+
+    settings = sublime.load_settings('OmniMarkupPreviewer.sublime-settings')
+    reported = settings.get('missing_module_reported', False)
+    if reported:  # Only once
+        return
+    settings.set('missing_module_reported', True)
+    sublime.save_settings('OmniMarkupPreviewer.sublime-settings')
+
     if not sublime.ok_cancel_dialog("OmniMarkupPreviewer cannot work "
         "because some modules is missing from Sublime Text 2 Linux version.\n"
         "Click \"OK\" to see how to fix it"):
         return
     sublime_app_path = os.path.dirname(os.path.realpath(os.path.join('/proc',
         str(os.getpid()), 'exe')))
-    script = """#!/bin/sh
+    script = """#!/bin/bash
 # The purpose of this script is installing missing python libraries to Sublime Text 2
 # NOTE: Make sure SUBLIME_TEXT2_FOLDER is assigned correctly.
 # Once the script is executed, you have to restart SublimeText2 to get modules work.
