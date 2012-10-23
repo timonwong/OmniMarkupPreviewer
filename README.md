@@ -73,6 +73,9 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 
 What's New
 ----------
+v1.2.1 (TBD)
+
+* Updated github template.
 
 v1.2 (10/16/2012)
 
@@ -97,7 +100,7 @@ v1.0 (10/14/2012)
 License
 -------
 
-This plugin is using MIT License
+This plugin released under MIT License:
 
     Copyright (c) 2012 Timon Wong
 

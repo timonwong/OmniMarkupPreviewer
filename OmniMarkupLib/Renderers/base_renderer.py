@@ -72,6 +72,8 @@ class CommandlineRenderer(MarkupRenderer):
                                     stderr=subprocess.PIPE,
                                     startupinfo=self.get_startupinfo())
             result, errdata = proc.communicate(text)
+            if len(errdata) > 0:
+                print errdata
         finally:
             if tempfile_ is not None:
                 tempfile_.close()  # Also delete file

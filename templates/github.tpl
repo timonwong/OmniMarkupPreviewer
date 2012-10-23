@@ -4,14 +4,17 @@
     <meta charset='utf-8'/>
     <title>{{filename}}—{{dirname}}</title>
     <link rel="stylesheet" type="text/css" href="/public/github.min.css" />
-    <script type="text/javascript" src="/public/jquery-1.8.2.min.js"></script>
-    <script type="text/javascript" src="/public/app.min.js"></script>
   </head>
   <body>
-    <div class="container"> 
-      <article class="markdown-body" data-buffer-id="{{buffer_id}}" data-timestamp="{{timestamp}}">
-        {{!text}}
-      </article>
+    <div class="container">
+      <div id="markup">
+        <span id="filename" class="name">{{filename}}</span>
+        <article id="content" class="markdown-body" data-polling-interval="500" data-buffer-id="{{buffer_id}}" data-timestamp="{{timestamp}}">
+          {{!text}}
+        </article>
+      </div>
     </div>
   </body>
+  <script type="text/javascript" src="/public/jquery-1.8.2.min.js"></script>
+  <script type="text/javascript" src="/public/app.min.js"></script>
 </html>

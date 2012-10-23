@@ -1,7 +1,7 @@
 OmniMarkupPreviewer
 ===================
 
-[OmniMarkupPreviewer](https://github.com/timonwong/OmniMarkupPreviewer) is a 
+[OmniMarkupPreviewer](http://timonwong.github.com/OmniMarkupPreviewer/) is a
 [Sublime Text 2](http://www.sublimetext.com/2) plugin that preview markup languages
 in web browsers. OmniMarkupPreviewer renders markup files to htmls and send them
 to web brwosers in the backgound, in order to preview them in realtime.

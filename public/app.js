@@ -46,8 +46,9 @@ $(function() {
     };
 
     var query_update = function() {
-        var buffer_id = $('article').data('buffer-id');
-        var timestamp = $('article').data('timestamp');
+        var content$ = $('#content');
+        var buffer_id = content$.data('buffer-id');
+        var timestamp = content$.data('timestamp');
         var request = {'buffer_id': buffer_id, 'timestamp': timestamp};
         $.ajax({
             type: 'POST',
@@ -58,11 +59,12 @@ $(function() {
             success: function(entry) {
                 if (entry && (entry.html_part !== null)) {
                     var old_scroll_props = get_vertical_scrollbar_props();
-                    // Change title first
-                    document.title = entry.filename + '—' + entry.dirname;
-                    $('article').data('timestamp', entry.timestamp);
+                    // Fill the filename
+                    document.title = entry.filename + '\u2014' + entry.dirname;
+                    $('#filename').text(entry.filename);
+                    content$.data('timestamp', entry.timestamp);
                     // Replace content with latest one
-                    $('article').html(entry.html_part);
+                    content$.html(entry.html_part);
                     // 'auto' scroll, if necessary
                     var new_scroll_props = get_vertical_scrollbar_props();
                     var increment = new_scroll_props.height - old_scroll_props.height;
@@ -75,6 +77,5 @@ $(function() {
         });
     };
 
-    var default_interval = 500;
-    setInterval(query_update, default_interval);
+    setInterval(query_update, $('#content').data('polling-interval'));
 });

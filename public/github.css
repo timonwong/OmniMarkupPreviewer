@@ -52,9 +52,62 @@ kbd {
     line-height: 10px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+#realtime .status {
+  overflow: visible;
+  position: absolute;
+  top: -5px;
+  left: 0;
+  background: url("/public/images/github-status.png");
+  width: 26px;
+  height: 26px;
+  display: block;
+  margin: 0 5px 0 0;
+}
+#realtime .up {
+  background-position: 0 0;
+}
+#realtime .problem {
+  background-position: 0 -53px;
+}
+#realtime .down {
+  background-position: 0 -26px;
+}
 .container {
     width: 920px;
-    margin: 0 auto;
+    margin: 0 auto 20px auto;
+}
+#header {
+    background: #FAFAFA;
+    background: -moz-linear-gradient(#FAFAFA, #EAEAEA);
+    background: -webkit-linear-gradient(#FAFAFA, #EAEAEA);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#fafafa', endColorstr='#eaeaea')";
+    border-bottom: 1px solid #CACACA;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4),0 0 10px rgba(0, 0, 0, 0.1);
+}
+#markup {
+    padding: 3px;
+    background: #eee;
+    border-radius: 3px;
+}
+#markup .name {
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: bold;
+    padding: 10px 10px;
+    color: #555;
+    text-shadow: 0 1px 0 white;
+    display: block;
+    border: 1px solid #CACACA;
+    border-bottom: 0 none;
+    background: #FAFAFA;
+    background: -moz-linear-gradient(#FAFAFA, #EAEAEA);
+    background: -webkit-linear-gradient(#FAFAFA, #EAEAEA);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#fafafa', endColorstr='#eaeaea')";
+}
+#markup article, #markup .plain {
+    background-color: white;
+    border: 1px solid #CACACA;
+    padding: 30px;
 }
 .markdown-body {
     font-size: 14px;
