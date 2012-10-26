@@ -73,9 +73,9 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 
 What's New
 ----------
-v1.2.1 (TBD)
+v1.3 (10/27/2012)
 
-* Added Markdown code highlight support, using [Python Markdown Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
+* Added syntax highlight support for Markdown, using [Python Markdown Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
 * Unsaved buffer can now be previewed without error.
 * Updated github template.
 

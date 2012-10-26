@@ -1,0 +1,5 @@
+OmniMarkupPreviewer 1.3 Changelog:
+
+* Added syntax highlight support for Markdown, using [Python Markdown Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
+* Unsaved buffer can now be previewed without error.
+* Updated github template.
