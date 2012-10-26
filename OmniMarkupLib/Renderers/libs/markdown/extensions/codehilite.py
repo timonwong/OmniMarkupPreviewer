@@ -111,7 +111,7 @@ class CodeHilite:
                 classes.append('linenums')
             class_str = ''
             if classes:
-                class_str = ' class="%s"' % ' '.join(classes) 
+                class_str = ' class="%s"' % ' '.join(classes)
             return '<pre class="%s"><code%s>%s</code></pre>\n'% \
                         (self.css_class, class_str, txt)
 

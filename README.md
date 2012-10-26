@@ -13,7 +13,7 @@ OmniMarkupPreviewer has builtin support following markups:
 * [WikiCreole](http://wikicreole.org/)
 * [Textile](http://www.textism.com/tools/textile/)
 * [Pod](http://search.cpan.org/dist/perl/pod/perlpod.pod)
-(Requires Perl >= 5.10 and can be found in `PATH`, if the perl version < 5.10, 
+(Requires Perl >= 5.10 and can be found in `PATH`, if the perl version < 5.10,
 Pod::Simple should be installed from CPAN.)
 * [RDoc](http://rdoc.sourceforge.net/) (Requires ruby in your `PATH`)
 
@@ -75,6 +75,7 @@ What's New
 ----------
 v1.2.1 (TBD)
 
+* Added Markdown code highlight support, using [Python Markdown Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
 * Updated github template.
 
 v1.2 (10/16/2012)

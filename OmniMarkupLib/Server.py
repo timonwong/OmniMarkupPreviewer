@@ -22,12 +22,10 @@ SOFTWARE.
 
 import threading
 import os.path
-import wsgiref.simple_server
 import log
 import sublime
 from RendererManager import RendererManager
 from Common import RenderedMarkupCache, Future
-
 
 __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
@@ -35,9 +33,22 @@ __path__ = os.path.dirname(__file__)
 STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
 TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
 
-import bottle
-from bottle import Bottle, ServerAdapter
-from bottle import static_file, request, template
+
+import sys
+import os.path
+import LibraryPathManager
+
+LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
+LibraryPathManager.push_search_path(os.path.join(__path__, 'libs'))
+try:
+    import wsgiref.simple_server
+    import bottle
+    from bottle import Bottle, ServerAdapter
+    from bottle import static_file, request, template
+finally:
+    LibraryPathManager.pop_search_path()
+    LibraryPathManager.pop_search_path()
+
 
 bottle.TEMPLATE_PATH = [TEMPLATE_FILES_DIR]
 
@@ -56,6 +67,7 @@ def handler_public(filepath):
 @app.post('/api/query')
 def handler_api_query():
     """ Querying for updates """
+    entry = None
     try:
         obj = request.json
         buffer_id = obj['buffer_id']
@@ -63,26 +75,30 @@ def handler_api_query():
 
         storage = RenderedMarkupCache.instance()
         entry = storage.get_entry(buffer_id)
-
-        if entry.timestamp == timestamp:
-            return {
-                'timestamp': entry.timestamp,
-                'filename': None,
-                'dirname': None,
-                'html_part': None
-            }
-        return {
-            'timestamp': entry.timestamp,
-            'filename': entry.filename,
-            'dirname': entry.dirname,
-            'html_part': entry.html_part
-        }
     except:
+        pass
+
+    if entry is None:
         return {
             'timestamp': -1,
             'filename': '',
             'dirname': '',
             'html_part': None
+        }
+
+    if entry.timestamp == timestamp:  # Keep old entry
+        return {
+            'timestamp': entry.timestamp,
+            'filename': None,
+            'dirname': None,
+            'html_part': None
+        }
+    else:
+        return {
+            'timestamp': entry.timestamp,
+            'filename': entry.filename,
+            'dirname': entry.dirname,
+            'html_part': entry.html_part
         }
 
 

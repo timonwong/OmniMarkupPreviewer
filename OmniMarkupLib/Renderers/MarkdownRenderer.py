@@ -14,4 +14,4 @@ class Renderer(MarkupRenderer):
         return cls.filename_pattern.search(filename)
 
     def render(self, text, **kwargs):
-        return markdown.markdown(text, tab_length=2, output_format='html5')
+        return markdown.markdown(text, ['codehilite'], tab_length=2, output_format='html5')

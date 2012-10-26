@@ -171,8 +171,8 @@ class RendererManager(object):
         cls.RENDERERS[:] = []
 
         # Add library path to sys.path
-        st2_dir = LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
-        libs_dir = LibraryPathManager.add_search_path(os.path.join(__path__, './Renderers/libs/'))
+        LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
+        LibraryPathManager.add_search_path_if_not_exists(os.path.join(__path__, './Renderers/libs/'))
 
         # Change the current directory to that of the module. It's not safe to just
         # add the modules directory to sys.path, as that won't accept unicode paths
@@ -192,8 +192,6 @@ class RendererManager(object):
         finally:
             # Restore the current directory
             os.chdir(oldpath)
-            LibraryPathManager.remove_search_path(libs_dir)
-            # Clean sys path for library loading
-            LibraryPathManager.remove_search_path(st2_dir)
+            LibraryPathManager.pop_search_path()
 
         #log.info("%d rendere(s) loaded successfully", cls.RENDERERS)

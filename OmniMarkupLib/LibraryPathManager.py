@@ -24,20 +24,25 @@ import sys
 import os
 
 
-def add_search_path(lib_path):
+def _try_get_short_path(path):
     if os.name == 'nt':
         from ctypes import windll, create_unicode_buffer
         buf = create_unicode_buffer(512)
-        lib_path = unicode(lib_path)
-        if windll.kernel32.GetShortPathNameW(lib_path, buf, len(buf)):
-            lib_path = buf.value
+        path = unicode(path)
+        if windll.kernel32.GetShortPathNameW(path, buf, len(buf)):
+            path = buf.value
+    return path
+
+
+def add_search_path_if_not_exists(lib_path):
+    lib_path = _try_get_short_path(lib_path)
     if lib_path not in sys.path:
-        sys.path.insert(0, lib_path)
-    return lib_path
+        sys.path.append(lib_path)
 
 
-def remove_search_path(lib_path):
-    if lib_path in sys.path:
-        sys.path.remove(lib_path)
-        return True
-    return False
+def push_search_path(lib_path):
+    sys.path.insert(0, _try_get_short_path(lib_path))
+
+
+def pop_search_path():
+    del sys.path[0]
