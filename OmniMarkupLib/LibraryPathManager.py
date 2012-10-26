@@ -22,9 +22,11 @@ SOFTWARE.
 
 import sys
 import os
+import os.path
 
 
 def _try_get_short_path(path):
+    path = os.path.normpath(path)
     if os.name == 'nt':
         from ctypes import windll, create_unicode_buffer
         buf = create_unicode_buffer(512)

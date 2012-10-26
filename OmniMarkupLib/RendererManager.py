@@ -37,9 +37,9 @@ __path__ = os.path.dirname(__file__)
 
 
 class WorkerQueueItem(object):
-    def __init__(self, timestamp=0, fullpath='', lang='', text=''):
+    def __init__(self, timestamp=0, fullpath='untitled', lang='', text=''):
         self.timestamp = timestamp
-        self.fullpath = fullpath
+        self.fullpath = fullpath or 'untitled'
         self.lang = lang
         self.text = text
 

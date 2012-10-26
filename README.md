@@ -76,6 +76,7 @@ What's New
 v1.2.1 (TBD)
 
 * Added Markdown code highlight support, using [Python Markdown Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
+* Unsaved buffer can now be previewed without error.
 * Updated github template.
 
 v1.2 (10/16/2012)
