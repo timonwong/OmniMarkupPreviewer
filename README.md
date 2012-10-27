@@ -73,9 +73,18 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 
 What's New
 ----------
+
+v1.4 (TBD)
+
+* Code blocks from [GitHub flavored markdown](http://github.github.com/github-flavored-markdown/) is supported now,
+through [Fenced Code Blocks Extension](http://packages.python.org/Markdown/extensions/fenced_code_blocks.html).
+* [PHP Markdown tables](http://michelf.ca/projects/php-markdown/extra/#table) support is added,
+through [Tables Extension](http://packages.python.org/Markdown/extensions/tables.html).
+
+
 v1.3 (10/27/2012)
 
-* Added syntax highlight support for Markdown, using [Python Markdown Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
+* Added syntax highlight support for Markdown, through [CodeHilite Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
 * Unsaved buffer can now be previewed without error.
 * Updated github template.
 

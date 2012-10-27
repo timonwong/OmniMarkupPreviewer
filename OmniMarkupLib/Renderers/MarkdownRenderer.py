@@ -16,6 +16,7 @@ class Renderer(MarkupRenderer):
     def render(self, text, **kwargs):
         return markdown.markdown(text, tab_length=2, output_format='html5',
             extensions=[
+                'tables',
                 'fenced_code',
                 'codehilite',
             ]
