@@ -17,6 +17,7 @@ class MarkdownRenderer(MarkupRenderer):
         return markdown.markdown(text, tab_length=2, output_format='html5',
             extensions=[
                 'tables',
+                'strikeout',
                 'fenced_code',
                 'codehilite',
             ]
