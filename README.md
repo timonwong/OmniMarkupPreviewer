@@ -80,6 +80,7 @@ v1.4 (TBD)
 through [Fenced Code Blocks Extension](http://packages.python.org/Markdown/extensions/fenced_code_blocks.html).
 * [PHP Markdown tables](http://michelf.ca/projects/php-markdown/extra/#table) support is added,
 through [Tables Extension](http://packages.python.org/Markdown/extensions/tables.html).
+* Added `"ignored_renderers"` options to settings, in order to ignore specific markup renderers.
 
 
 v1.3 (10/27/2012)

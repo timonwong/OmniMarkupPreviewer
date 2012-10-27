@@ -28,6 +28,7 @@ import log
 import threading
 import inspect
 import sublime
+from Setting import Setting
 from Common import RenderedMarkupCache, RenderedMarkupCacheEntry
 import LibraryPathManager
 
@@ -100,10 +101,13 @@ class RendererManager(object):
     RENDERERS = []
 
     @classmethod
-    def is_renderers_enabled(cls, filename, lang):
+    def has_any_valid_renderer(cls, filename, lang):
         # filename may be None, so prevent it
         filename = filename or ""
         for renderer in cls.RENDERERS:
+            if renderer.__class__.__name__ in Setting.instance().ignored_renderers:
+                # Ignore renderer
+                continue
             if renderer.is_enabled(filename, lang):
                 return True
         return False
@@ -121,7 +125,7 @@ class RendererManager(object):
     def has_renderer_enabled_in_view(cls, view):
         filename = view.file_name()
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
-        return cls.is_renderers_enabled(filename, lang)
+        return cls.has_any_valid_renderer(filename, lang)
 
     @classmethod
     def render_text(cls, filename, lang, text):

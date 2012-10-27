@@ -4,7 +4,7 @@ import markdown
 
 
 @renderer
-class Renderer(MarkupRenderer):
+class MarkdownRenderer(MarkupRenderer):
     filename_pattern = re.compile(r'\.(md|mkdn?|mdwn|mdown|markdown)$')
 
     @classmethod

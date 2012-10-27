@@ -6,5 +6,12 @@
     // delay after modified, in ms
     "refresh_on_modified_delay": 500,
     "refresh_on_saved": true,
-    "refresh_on_loaded": true
+    "refresh_on_loaded": true,
+
+    // A list of renderer to be ignored, case sensitive.
+    // Valid renderers are: "CreoleRenderer", "MarkdownRenderer", "PodRenderer",
+    //     "RDocRenderer", "RstRenderer", "TextitleRenderer"
+    // for example, to disable Textile and Pod renderer:
+    //   "ignored_renderers": ["TextitleRenderer", "PodRenderer"]
+    "ignored_renderers": []
 }

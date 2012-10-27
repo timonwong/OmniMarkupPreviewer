@@ -43,21 +43,12 @@ import OmniMarkupLib.LinuxModuleChecker
 OmniMarkupLib.LinuxModuleChecker.check()
 
 from OmniMarkupLib import log
+from OmniMarkupLib.Setting import Setting
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
 from OmniMarkupLib.Common import RenderedMarkupCache
 
 
-class Setting(object):
-    def __init__(self):
-        self.server_port = 51004
-        self.refresh_on_modified = True
-        self.refresh_on_modified_delay = 500
-        self.refresh_on_saved = True
-        self.refresh_on_loaded = True
-
-
-g_setting = Setting()
 g_server = None
 
 
@@ -65,8 +56,7 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, immediate=True):
         # Open default browser
         try:
-            global g_setting
-            webbrowser.open('http://localhost:%d/view/%d' % (g_setting.server_port, self.view.buffer_id()))
+            webbrowser.open('http://localhost:%d/view/%d' % (Setting.instance().server_port, self.view.buffer_id()))
         except:
             log.exception("Error on opening web browser")
 
@@ -85,28 +75,6 @@ class OmniMarkupCleanCacheCommand(sublime_plugin.ApplicationCommand):
             for view in window.views():
                 keep_ids_list.append(view.buffer_id())
         storage.clean(keep_ids=set(keep_ids_list))
-
-
-def settings_changed():
-    log.info('Reload settings...')
-    reload_settings()
-
-
-def reload_settings():
-    global g_setting
-    settings = sublime.load_settings(__name__ + '.sublime-settings')
-    settings.clear_on_change(__name__)
-    settings.add_on_change(__name__, settings_changed)
-
-    old_server_port = g_setting.server_port
-    g_setting.server_port = settings.get("server_port", 51004)
-    g_setting.refresh_on_modified = settings.get("refresh_on_modified", True)
-    g_setting.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
-    g_setting.refresh_on_saved = settings.get("refresh_on_saved", True)
-    g_setting.refresh_on_loaded = settings.get("refresh_on_loaded", True)
-    # Show status on server port change
-    if g_setting.server_port != old_server_port:
-        sublime.status_message(__name__ + ' requires restart due to server port change')
 
 
 class DelayedViewsWorker(threading.Thread):
@@ -214,18 +182,18 @@ class PluginEventListener(sublime_plugin.EventListener):
         self.delayed_views_worker.stop()
 
     def on_load(self, view):
-        if view.is_scratch() or not g_setting.refresh_on_loaded:
+        if view.is_scratch() or not Setting.instance().refresh_on_loaded:
             return
         self.delayed_views_worker.queue(view, preemptive=True)
 
     def on_modified(self, view):
-        if view.is_scratch() or not g_setting.refresh_on_modified:
+        if view.is_scratch() or not Setting.instance().refresh_on_modified:
             return
         self.delayed_views_worker.queue(view, preemptive=False,
-                                        timeout=float(g_setting.refresh_on_modified_delay) / 1000)
+                                        timeout=float(Setting.instance().refresh_on_modified_delay) / 1000)
 
     def on_post_save(self, view):
-        if view.is_scratch() or not g_setting.refresh_on_saved:
+        if view.is_scratch() or not Setting.instance().refresh_on_saved:
             return
         self.delayed_views_worker.queue(view, preemptive=True)
 
@@ -246,7 +214,7 @@ def unload_handler():
     RendererManager.WORKER.stop()
 
 
-reload_settings()
+Setting.instance().reload()
 RendererManager.load_renderers()
 RendererManager.WORKER.start()
-g_server = Server(g_setting.server_port)
+g_server = Server(Setting.instance().server_port)
