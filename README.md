@@ -74,7 +74,7 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
-v1.4 (TBD)
+v1.4 (10/28/2012)
 
 * Code blocks from [GitHub flavored markdown](http://github.github.com/github-flavored-markdown/) is supported now,
 through [Fenced Code Blocks Extension](http://packages.python.org/Markdown/extensions/fenced_code_blocks.html).
