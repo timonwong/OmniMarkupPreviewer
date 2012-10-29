@@ -290,12 +290,21 @@ def generate_timestamp():
     return str(time())
 
 
-class RenderedMarkupCacheEntry(object):
+class RenderedMarkupCacheEntry(dict):
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
     def __init__(self, timestamp=None, filename='', dirname='', html_part=''):
-        self.timestamp = timestamp or generate_timestamp()
-        self.filename = filename
-        self.dirname = dirname
-        self.html_part = html_part
+        timestamp = timestamp or generate_timestamp()
+        for name, val in locals().iteritems():
+            if name == 'self':
+                continue
+            self[name] = val
+        self['__deepcopy__'] = self.__deepcopy__
+
+    def __deepcopy__(self, memo={}):
+        return self.copy()
 
 
 @Singleton

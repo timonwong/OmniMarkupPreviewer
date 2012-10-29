@@ -10,7 +10,7 @@
       <div id="markup">
         <span id="filename" class="name">{{filename}}</span>
         <article id="content" class="markdown-body" data-polling-interval="500" data-buffer-id="{{buffer_id}}" data-timestamp="{{timestamp}}">
-          {{!text}}
+          {{!html_part}}
         </article>
       </div>
     </div>

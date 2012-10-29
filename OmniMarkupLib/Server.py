@@ -125,10 +125,7 @@ def handler_view(buffer_id):
     entry = f.result()
     if entry is None:
         return bottle.HTTPError(404, 'buffer_id(%d) is not valid' % buffer_id)
-    return template(
-        'github', filename=entry.filename, dirname=entry.dirname,
-        buffer_id=buffer_id, timestamp=entry.timestamp, text=entry.html_part
-    )
+    return template('github', buffer_id=buffer_id, **entry)
 
 
 class StoppableWSGIServerAdapter(ServerAdapter):
