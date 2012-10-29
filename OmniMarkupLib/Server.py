@@ -22,6 +22,7 @@ SOFTWARE.
 
 import threading
 import os.path
+import base64
 import log
 import sublime
 from RendererManager import RendererManager
@@ -35,7 +36,6 @@ TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
 
 
 import sys
-import os.path
 import LibraryPathManager
 
 LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
@@ -62,6 +62,15 @@ def handler_public(filepath):
     """ Serving static files """
     global STATIC_FILES_DIR
     return static_file(filepath, root=STATIC_FILES_DIR)
+
+
+@app.route('/local/<base64_encoded_path>')
+def handler_local(base64_encoded_path):
+    """ Serving local files """
+    fullpath = base64.urlsafe_b64decode(base64_encoded_path)
+    basename = os.path.basename(fullpath)
+    dirname = os.path.dirname(fullpath)
+    return static_file(basename, root=dirname)
 
 
 @app.post('/api/query')

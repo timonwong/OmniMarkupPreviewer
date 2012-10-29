@@ -74,6 +74,10 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
+v1.5 (TBD)
+
+* Images on local machine can now be displayed corectlly.
+
 v1.4 (10/28/2012)
 
 * Code blocks from [GitHub flavored markdown](http://github.github.com/github-flavored-markdown/) is supported now,

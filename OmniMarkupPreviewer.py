@@ -205,7 +205,7 @@ class PluginEventListener(sublime_plugin.EventListener):
 
 
 def unload_handler():
-    print 'Unloading'
+    log.info('Unloading...')
     # Cleaning up resources...
     # Stopping server
     global g_server

@@ -24,6 +24,8 @@ import sys
 import os
 import os.path
 import re
+import base64
+from urlparse import urlparse
 import log
 import threading
 import inspect
@@ -67,7 +69,7 @@ class RendererWorker(threading.Thread):
             # Render text and save to cache
             filename = os.path.basename(item.fullpath)
             dirname = os.path.dirname(item.fullpath)
-            html_part = RendererManager.render_text(filename, item.lang, item.text)
+            html_part = RendererManager.render_text(item.fullpath, item.lang, item.text)
             entry = RenderedMarkupCacheEntry(filename=filename, dirname=dirname, html_part=html_part)
             RenderedMarkupCache.instance().set_entry(buffer_id, entry)
         except NotImplementedError:
@@ -128,14 +130,34 @@ class RendererManager(object):
         return cls.has_any_valid_renderer(filename, lang)
 
     @classmethod
-    def render_text(cls, filename, lang, text):
+    def render_text(cls, fullpath, lang, text):
+        filename = os.path.basename(fullpath)
         for renderer in cls.RENDERERS:
             try:
                 if renderer.is_enabled(filename, lang):
-                    return renderer.render(text, filename=filename)
+                    rendered_text = renderer.render(text, filename=filename)
+                    return cls.render_text_postprocess(rendered_text, fullpath)
             except:
                 log.exception('Exception occured while rendering using %s', renderer.__class__.__name__)
         raise NotImplementedError()
+
+    IMG_TAG_RE = re.compile('(<img [^>]*src=")([^"]+)("[^>]*>)', re.DOTALL | re.IGNORECASE | re.MULTILINE)
+
+    @classmethod
+    def render_text_postprocess(cls, rendered_text, filename):
+        dirname = os.path.dirname(filename)
+
+        def encode_image_path(m):
+            url = m.group(2)
+            o = urlparse(url)
+            if len(o.scheme) > 0:
+                # Is a valid url, returns original text
+                return m.group(0)
+            # or local file (maybe?)
+            local_path = os.path.normpath(os.path.join(dirname, url))
+            return m.group(1) + '/local/' + base64.urlsafe_b64encode(local_path) + m.group(3)
+
+        return cls.IMG_TAG_RE.sub(encode_image_path, rendered_text)
 
     @classmethod
     def queue_view(cls, view, only_exists=False, immediate=False):
