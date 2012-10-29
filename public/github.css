@@ -86,28 +86,9 @@ kbd {
 }
 #markup {
     padding: 3px;
-    background: #eee;
-    border-radius: 3px;
 }
-#markup .name {
-    font-size: 16px;
-    line-height: 20px;
-    font-weight: bold;
-    padding: 10px 10px;
-    color: #555;
-    text-shadow: 0 1px 0 white;
-    display: block;
-    border: 1px solid #CACACA;
-    border-bottom: 0 none;
-    background: #FAFAFA;
-    background: -moz-linear-gradient(#FAFAFA, #EAEAEA);
-    background: -webkit-linear-gradient(#FAFAFA, #EAEAEA);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#fafafa', endColorstr='#eaeaea')";
-}
-#markup article, #markup .plain {
-    background-color: white;
-    border: 1px solid #CACACA;
-    padding: 30px;
+#markup article {
+    padding-top: 30px;
 }
 .markdown-body {
     font-size: 14px;
