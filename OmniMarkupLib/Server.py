@@ -21,10 +21,13 @@ SOFTWARE.
 """
 
 import threading
+import sys
+import os
 import os.path
 import base64
 import log
 import sublime
+import LibraryPathManager
 from Setting import Setting
 from RendererManager import RendererManager
 from Common import RenderedMarkupCache, Future
@@ -32,12 +35,23 @@ from Common import RenderedMarkupCache, Future
 __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
 
-STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
-TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
+DEFAULT_STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
+USER_STATIC_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
+                                         'User', 'OmniMarkupPreviewer', 'public'))
+DEFAULT_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
+USER_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
+                                           'User', 'OmniMarkupPreviewer', 'templates'))
 
 
-import sys
-import LibraryPathManager
+def _mk_folders(folders):
+    for folder in folders:
+        if not os.path.exists(folder):
+            try:
+                os.makedirs(folder)
+            except:
+                pass
+
+_mk_folders([USER_STATIC_FILES_DIR, USER_TEMPLATE_FILES_DIR])
 
 LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
 LibraryPathManager.push_search_path(os.path.join(__path__, 'libs'))
@@ -50,8 +64,7 @@ finally:
     LibraryPathManager.pop_search_path()
     LibraryPathManager.pop_search_path()
 
-
-bottle.TEMPLATE_PATH = [TEMPLATE_FILES_DIR]
+bottle.TEMPLATE_PATH = [USER_TEMPLATE_FILES_DIR, DEFAULT_TEMPLATE_FILES_DIR]
 
 
 # Create a new app stack
@@ -61,8 +74,11 @@ app = Bottle()
 @app.route('/public/<filepath:path>')
 def handler_public(filepath):
     """ Serving static files """
-    global STATIC_FILES_DIR
-    return static_file(filepath, root=STATIC_FILES_DIR)
+    global DEFAULT_STATIC_FILES_DIR
+    # User static files have a higher priority
+    if os.path.exists(os.path.join(USER_STATIC_FILES_DIR, filepath)):
+        return static_file(filepath, root=USER_STATIC_FILES_DIR)
+    return static_file(filepath, root=DEFAULT_STATIC_FILES_DIR)
 
 
 @app.route('/local/<base64_encoded_path>')
@@ -135,7 +151,7 @@ def handler_view(buffer_id):
     entry = f.result()
     if entry is None:
         return bottle.HTTPError(404, 'buffer_id(%d) is not valid' % buffer_id)
-    return template('github', buffer_id=buffer_id,
+    return template(Setting.instance().html_template_name, buffer_id=buffer_id,
                     ajax_polling_interval=Setting.instance().ajax_polling_interval,
                     **entry)
 

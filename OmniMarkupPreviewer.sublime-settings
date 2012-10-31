@@ -1,6 +1,6 @@
 /* OmniMarkupPreviewer default setting, DO NOT MODIFY */
 {
-    // Require restart on port change
+    // Requires restart on port change
     "server_port": 51004,
     "refresh_on_modified": true,
     // delay after modified, in milliseconds
@@ -8,10 +8,18 @@
     "refresh_on_saved": true,
     "refresh_on_loaded": true,
 
-    // polling interval for content changes in web browsers, in milliseconds
+    // User public static files should be placed into
+    //   ${packages}/User/OmniMarkupPreviewer/public/
+    // User templates should be placed into:
+    //   ${packages}/User/OmniMarkupPreviewer/templates/
+    // Requires browser reload
+    "html_template_name": "github",
+
+    // Polling interval for content changes in web browsers, in milliseconds
+    // Requires browser reload
     "ajax_polling_interval": 500,
 
-    // A list of renderer to be ignored, case sensitive.
+    // list of renderers to be ignored, case sensitive.
     // Valid renderers are: "CreoleRenderer", "MarkdownRenderer", "PodRenderer",
     //     "RDocRenderer", "RstRenderer", "TextitleRenderer"
     // for example, to disable Textile and Pod renderer:

@@ -1,3 +1,7 @@
+%# ---------------------------------- WARNING ----------------------------------
+%#       Do NOT Modify this template, create a new one for customization
+%#                It will get overwritten upon update
+%# -----------------------------------------------------------------------------
 <!DOCTYPE html>
 <html>
   <head>

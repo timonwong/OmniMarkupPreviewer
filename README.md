@@ -74,10 +74,11 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
-v1.5 (TBD)
+v1.5 (10/31/2012)
 
 * Images on local machine can now be displayed corectlly.
 * New `"ajax_polling_interval"` option.
+* Allow users to use their own templates.
 
 v1.4 (10/28/2012)
 
