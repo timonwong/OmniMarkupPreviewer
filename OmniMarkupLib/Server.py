@@ -25,6 +25,7 @@ import os.path
 import base64
 import log
 import sublime
+from Setting import Setting
 from RendererManager import RendererManager
 from Common import RenderedMarkupCache, Future
 
@@ -134,7 +135,9 @@ def handler_view(buffer_id):
     entry = f.result()
     if entry is None:
         return bottle.HTTPError(404, 'buffer_id(%d) is not valid' % buffer_id)
-    return template('github', buffer_id=buffer_id, **entry)
+    return template('github', buffer_id=buffer_id,
+                    ajax_polling_interval=Setting.instance().ajax_polling_interval,
+                    **entry)
 
 
 class StoppableWSGIServerAdapter(ServerAdapter):

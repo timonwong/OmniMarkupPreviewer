@@ -11,6 +11,7 @@ class Setting(object):
         self.refresh_on_modified_delay = 500
         self.refresh_on_saved = True
         self.refresh_on_loaded = True
+        self.ajax_polling_interval = 500
         self.ignored_renderers = set()
 
     def reload(self):  # Reload settings
@@ -19,6 +20,7 @@ class Setting(object):
         settings.clear_on_change(name)
         settings.add_on_change(name, self._on_settings_changed)
 
+        old_ajax_polling_interval = self.ajax_polling_interval
         old_server_port = self.server_port
 
         self.server_port = settings.get("server_port", 51004)
@@ -26,7 +28,11 @@ class Setting(object):
         self.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
         self.refresh_on_saved = settings.get("refresh_on_saved", True)
         self.refresh_on_loaded = settings.get("refresh_on_loaded", True)
+        self.ajax_polling_interval = settings.get("ajax_polling_interval", 500)
         self.ignored_renderers = set(settings.get("ignored_renderers", []))
+
+        if self.ajax_polling_interval != old_ajax_polling_interval:
+            sublime.status_message(name + ' requires a browser reload to apply changes')
 
         # Show status on server port change
         if self.server_port != old_server_port:

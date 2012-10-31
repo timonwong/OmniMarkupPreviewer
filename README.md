@@ -77,6 +77,7 @@ What's New
 v1.5 (TBD)
 
 * Images on local machine can now be displayed corectlly.
+* New `"ajax_polling_interval"` option.
 
 v1.4 (10/28/2012)
 
@@ -85,7 +86,7 @@ through [Fenced Code Blocks Extension](http://packages.python.org/Markdown/exten
 * [PHP Markdown tables](http://michelf.ca/projects/php-markdown/extra/#table) support is added,
 through [Tables Extension](http://packages.python.org/Markdown/extensions/tables.html).
 * Support strikeout extension syntax (Pandoc and GitHub) for markdown: `This ~~is deleted text.~~`
-* Added `"ignored_renderers"` options to settings, in order to ignore specific markup renderers.
+* Added `"ignored_renderers"` option to settings, in order to ignore specific markup renderers.
 
 
 v1.3 (10/27/2012)

@@ -3,10 +3,13 @@
     // Require restart on port change
     "server_port": 51004,
     "refresh_on_modified": true,
-    // delay after modified, in ms
+    // delay after modified, in milliseconds
     "refresh_on_modified_delay": 500,
     "refresh_on_saved": true,
     "refresh_on_loaded": true,
+
+    // polling interval for content changes in web browsers, in milliseconds
+    "ajax_polling_interval": 500,
 
     // A list of renderer to be ignored, case sensitive.
     // Valid renderers are: "CreoleRenderer", "MarkdownRenderer", "PodRenderer",

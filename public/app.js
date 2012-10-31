@@ -77,5 +77,5 @@ $(function() {
         });
     };
 
-    setInterval(query_update, $('#content').data('polling-interval'));
+    setInterval(query_update, parseInt($('#content').data('polling-interval'), 10));
 });
