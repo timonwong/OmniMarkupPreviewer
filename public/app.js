@@ -1,3 +1,6 @@
+window.App = {};
+window.App.Options = {};
+
 $(function() {
     // From http://www.softcomplex.com/docs/get_window_size_and_scrollbar_position.html
     function f_clientWidth() {
@@ -45,11 +48,23 @@ $(function() {
         return {'height': height, 'slider_height': f_clientHeight(), 'slider_pos': f_scrollTop()};
     }
 
-    var polling_interval = parseInt($('#content').data('polling-interval'), 10);
+    // Run the scipts of type=text/x-omnimarkup-config
+    (function load_config_blocks() {
+        var scripts = $('script');
+        scripts.each(function (_, script) {
+            var type = String(script.type).replace(/ /g,"");
+            if (type.match(/^text\/x-omnimarkup-config(;.*)?$/) && !type.match(/;executed=true/)) {
+                script.type += ";executed=true";
+                eval(script.innerHTML);
+            }
+        });
+    })();
+
+    var buffer_id = window.App.Options.buffer_id;
+    var polling_interval = window.App.Options.ajax_polling_interval;
 
     (function poll() {
         var content$ = $('#content');
-        var buffer_id = content$.data('buffer-id');
         var timestamp = content$.data('timestamp');
         var request = {'buffer_id': buffer_id, 'timestamp': timestamp};
 
