@@ -14,7 +14,7 @@ OmniMarkupPreviewer has builtin support following markups:
 * [Textile](http://www.textism.com/tools/textile/)
 * [Pod](http://search.cpan.org/dist/perl/pod/perlpod.pod)
 (Requires Perl >= 5.10 and can be found in `PATH`, if the perl version < 5.10,
-Pod::Simple should be installed from CPAN.)
+Pod::Simple should be installed from `CPAN`.)
 * [RDoc](http://rdoc.sourceforge.net/) (Requires ruby in your `PATH`)
 
 
@@ -73,6 +73,11 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 
 What's New
 ----------
+
+v1.6 (TBD)
+
+* Add support to custom the behavior of markdown renderer(through option
+`"renderer_options-MarkdownRenderer"`).
 
 v1.5.1 (11/1/2012)
 

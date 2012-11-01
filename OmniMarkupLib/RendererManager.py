@@ -106,8 +106,8 @@ class RendererManager(object):
     def has_any_valid_renderer(cls, filename, lang):
         # filename may be None, so prevent it
         filename = filename or ""
-        for renderer in cls.RENDERERS:
-            if renderer.__class__.__name__ in Setting.instance().ignored_renderers:
+        for renderer_classname, renderer in cls.RENDERERS:
+            if renderer_classname in Setting.instance().ignored_renderers:
                 # Ignore renderer
                 continue
             if renderer.is_enabled(filename, lang):
@@ -132,13 +132,22 @@ class RendererManager(object):
     @classmethod
     def render_text(cls, fullpath, lang, text):
         filename = os.path.basename(fullpath)
-        for renderer in cls.RENDERERS:
+        settings = Setting.instance()
+        for renderer_classname, renderer in cls.RENDERERS:
             try:
                 if renderer.is_enabled(filename, lang):
-                    rendered_text = renderer.render(text, filename=filename)
+                    if renderer_classname in settings.renderer_options_dict:
+                        renderer_options = settings.renderer_options_dict[renderer_classname]
+                    else:
+                        renderer_options = {}
+                    rendered_text = renderer.render(
+                        text,
+                        filename=filename,
+                        renderer_options=renderer_options
+                    )
                     return cls.render_text_postprocess(rendered_text, fullpath)
             except:
-                log.exception('Exception occured while rendering using %s', renderer.__class__.__name__)
+                log.exception('Exception occured while rendering using %s', renderer_classname)
         raise NotImplementedError()
 
     IMG_TAG_RE = re.compile('(<img [^>]*src=")([^"]+)("[^>]*>)', re.DOTALL | re.IGNORECASE | re.MULTILINE)
@@ -185,7 +194,7 @@ class RendererManager(object):
                 if hasattr(classtype, 'IS_VALID_RENDERER__'):
                     try:
                         log.info('Loaded renderer: OmniMarkupLib.Renderers.%s', classname)
-                        cls.RENDERERS.append(classtype())
+                        cls.RENDERERS.append((classname, classtype()))
                     except:
                         log.exception('Failed to load renderer: %s', classname)
         except:
@@ -219,5 +228,3 @@ class RendererManager(object):
             # Restore the current directory
             os.chdir(oldpath)
             LibraryPathManager.pop_search_path()
-
-        #log.info("%d rendere(s) loaded successfully", cls.RENDERERS)

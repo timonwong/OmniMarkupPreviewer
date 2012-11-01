@@ -14,11 +14,12 @@ class MarkdownRenderer(MarkupRenderer):
         return cls.filename_pattern.search(filename)
 
     def render(self, text, **kwargs):
+        renderer_options = kwargs['renderer_options']
+        if 'extensions' in renderer_options:
+            extensions = renderer_options['extensions']
+        else:
+            # Default fallback to GFM style
+            extensions = ['tables', 'strikeout', 'fenced_code', 'codehilite']
         return markdown.markdown(text, tab_length=2, output_format='html5',
-            extensions=[
-                'tables',
-                'strikeout',
-                'fenced_code',
-                'codehilite',
-            ]
+            extensions=extensions
         )

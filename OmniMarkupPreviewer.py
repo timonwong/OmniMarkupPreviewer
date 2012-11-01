@@ -214,7 +214,8 @@ def unload_handler():
     RendererManager.WORKER.stop()
 
 
-Setting.instance().reload()
 RendererManager.load_renderers()
+Setting.instance().set_renderers(RendererManager.RENDERERS)
+Setting.instance().reload()
 RendererManager.WORKER.start()
 g_server = Server(Setting.instance().server_port)

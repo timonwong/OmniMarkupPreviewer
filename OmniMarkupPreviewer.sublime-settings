@@ -24,5 +24,33 @@
     //     "RDocRenderer", "RstRenderer", "TextitleRenderer"
     // for example, to disable Textile and Pod renderer:
     //   "ignored_renderers": ["TextitleRenderer", "PodRenderer"]
-    "ignored_renderers": []
+    "ignored_renderers": [],
+
+    // MarkdownRenderer options
+    "renderer_options-MarkdownRenderer": {
+        // Valid extensions:
+        // - OFFICIAL (Python Markdown) -
+        //   "extra": Combines ["abbr", "attr_list", "def_list", "fenced_code", "footnotes", "tables", "smartstrong"]
+        //            For PHP Markdown Extra(http://michelf.ca/projects/php-markdown/extra/)
+        //   "abbr": http://packages.python.org/Markdown/extensions/abbreviations.html
+        //   "attr_list": http://packages.python.org/Markdown/extensions/attr_list.html
+        //   "def_list": http://packages.python.org/Markdown/extensions/definition_lists.html
+        //   "fenced_code": http://packages.python.org/Markdown/extensions/fenced_code_blocks.html
+        //   "footnotes": http://packages.python.org/Markdown/extensions/footnotes.html
+        //   "tables": http://packages.python.org/Markdown/extensions/tables.html
+        //   "smartstrong": http://packages.python.org/Markdown/extensions/smart_strong.html
+        //   "codehilite": http://packages.python.org/Markdown/extensions/code_hilite.html
+        //   "metadata": http://packages.python.org/Markdown/extensions/meta_data.html
+        //   "toc": http://packages.python.org/Markdown/extensions/toc.html
+        //   "nl2br": http://packages.python.org/Markdown/extensions/nl2br.html
+        // - 3RD PARTY -
+        //   "strikeout": Strikeout extension syntax - `This ~~is deleted text.~~`
+        //   "subscript": Subscript extension syntax - `This is water: H~2~O`
+        //   "superscript": Superscript extension syntax 0 `2^10^ = 1024`
+        //   "smartypants": Python-Markdown extension using smartypants to emit
+        //                   typographically nicer ("curly") quotes, proper
+        //                   ("em" and "en") dashes, etc.
+        //                   See: https://bitbucket.org/jeunice/mdx_smartypants
+        "extensions": ["tables", "strikeout", "fenced_code", "codehilite"]
+    }
 }
