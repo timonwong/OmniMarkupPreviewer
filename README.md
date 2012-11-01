@@ -74,6 +74,10 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
+v1.5.1 (11/1/2012)
+
+* Fixed a bug that all renderers wouldn't work if any renderer raised exception while loading.
+
 v1.5 (10/31/2012)
 
 * Images on local machine can now be displayed corectlly.

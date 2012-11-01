@@ -189,7 +189,7 @@ class RendererManager(object):
                     except:
                         log.exception('Failed to load renderer: %s', classname)
         except:
-            log.exceptions('Failed to load renderer module: OmniMarkupLib/Renderers/%s', module_file)
+            log.exception('Failed to load renderer module: OmniMarkupLib/Renderers/%s', module_file)
 
     @classmethod
     def load_renderers(cls):
