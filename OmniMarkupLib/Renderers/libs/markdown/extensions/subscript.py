@@ -16,27 +16,18 @@ within paragraphs will not.
 """
 
 import markdown
+from markdown.inlinepatterns import SimpleTagPattern
 
 # Global Vars
 SUBSCRIPT_RE = r'(\~)([^\~]*)\2'  # the number is subscript~2~
 
-class SubscriptPattern(markdown.inlinepatterns.Pattern):
-    """ Return a subscript Element: `C~6~H~12~O~6~' """
-    def handleMatch(self, m):
-        subsc = m.group(3)
-        
-        text = subsc
-        
-        el = markdown.etree.Element("sub")
-        el.text = markdown.AtomicString(text)
-        return el
 
 class SubscriptExtension(markdown.Extension):
     """ Subscript Extension for Python-Markdown. """
 
     def extendMarkdown(self, md, md_globals):
         """ Replace subscript with SubscriptPattern """
-        md.inlinePatterns['subscript'] = SubscriptPattern(SUBSCRIPT_RE, md)
+        md.inlinePatterns.add('subscript', SimpleTagPattern(SUBSCRIPT_RE, 'sub'), '<not_strong')
 
 def makeExtension(configs=None):
     return SubscriptExtension(configs=configs)

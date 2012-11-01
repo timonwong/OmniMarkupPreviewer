@@ -26,27 +26,18 @@ within paragraphs will not.
 """
 
 import markdown
+from markdown.inlinepatterns import SimpleTagPattern
 
 # Global Vars
 SUPERSCRIPT_RE = r'(\^)([^\^]*)\2'  # the number is a superscript^2^
 
-class SuperscriptPattern(markdown.inlinepatterns.Pattern):
-    """ Return a superscript Element (`word^2^`). """
-    def handleMatch(self, m):
-        supr = m.group(3)
-        
-        text = supr
-        
-        el = markdown.etree.Element("sup")
-        el.text = markdown.AtomicString(text)
-        return el
 
 class SuperscriptExtension(markdown.Extension):
     """ Superscript Extension for Python-Markdown. """
 
     def extendMarkdown(self, md, md_globals):
         """ Replace superscript with SuperscriptPattern """
-        md.inlinePatterns['superscript'] = SuperscriptPattern(SUPERSCRIPT_RE, md)
+        md.inlinePatterns.add('superscript', SimpleTagPattern(SUPERSCRIPT_RE, 'sup'), '<not_strong')
 
 def makeExtension(configs=None):
     return SuperscriptExtension(configs=configs)
