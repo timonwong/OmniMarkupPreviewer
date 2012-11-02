@@ -1,0 +1,10 @@
+OmniMarkupPreviewer 1.6 Changelog:
+
+
+NOTE:
+1. You may need to restart Sublime Text 2, if anything goes wrong after upgrade.
+2. Templates should get updated if they got cutomized.
+
+
+* Add support to custom the behavior of markdown renderer(through the `"renderer_options-MarkdownRenderer"` option).
+* Much better server performance (Thanks to the [`CherryPy`](http://www.cherrypy.org/) server).

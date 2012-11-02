@@ -21,7 +21,6 @@ SOFTWARE.
 """
 
 import sys
-import subprocess
 import types
 import webbrowser
 import threading

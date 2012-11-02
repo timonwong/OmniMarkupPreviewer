@@ -98,7 +98,6 @@ through [Tables Extension](http://packages.python.org/Markdown/extensions/tables
 * Support strikeout extension syntax (Pandoc and GitHub) for markdown: `This ~~is deleted text.~~`
 * Added `"ignored_renderers"` option to settings, in order to ignore specific markup renderers.
 
-
 v1.3 (10/27/2012)
 
 * Added syntax highlight support for Markdown, through [CodeHilite Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).

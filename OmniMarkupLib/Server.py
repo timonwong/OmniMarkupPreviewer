@@ -163,7 +163,9 @@ class StoppableCherryPyServer(ServerAdapter):
         self.srv = None
 
     def run(self, handler):
-        self.srv = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
+        self.srv = wsgiserver.CherryPyWSGIServer(
+            (self.host, self.port), handler, numthreads=2, timeout=2, shutdown_timeout=2
+        )
         self.srv.start()
 
     def shutdown(self):

@@ -1523,6 +1523,10 @@ class ThreadPool(object):
     def stop(self, timeout=5):
         # Must shut down threads here so the code that calls
         # this method can know when all threads are stopped.
+        while self._get_qsize() > 0:
+            conn = self.get()
+            if conn is not _SHUTDOWNREQUEST:
+                conn.close()
         for worker in self._threads:
             self._queue.put(_SHUTDOWNREQUEST)
         
