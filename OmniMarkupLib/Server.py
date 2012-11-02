@@ -56,7 +56,7 @@ _mk_folders([USER_STATIC_FILES_DIR, USER_TEMPLATE_FILES_DIR])
 LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
 LibraryPathManager.push_search_path(os.path.join(__path__, 'libs'))
 try:
-    import wsgiref.simple_server
+    from cherrypy import wsgiserver
     import bottle
     from bottle import Bottle, ServerAdapter
     from bottle import static_file, request, template
@@ -156,30 +156,22 @@ def handler_view(buffer_id):
                     **entry)
 
 
-class StoppableWSGIServerAdapter(ServerAdapter):
+class StoppableCherryPyServer(ServerAdapter):
     """ HACK for making a stoppable server """
-    def __int__(self, *args, **kargs):
-        ServerAdapter.__init__(self, *args, **kargs)
+    def __int__(self, *args, **kwargs):
+        super(ServerAdapter, self).__init__(*args, **kwargs)
         self.srv = None
 
-    def __del__(self):
-        if self.srv is not None:
-            self.stop()
-
     def run(self, handler):
-        class QuietHandler(wsgiref.simple_server.WSGIRequestHandler):
-            def log_request(*args, **kw):
-                pass
-        self.srv = wsgiref.simple_server.make_server(
-            self.host, self.port, handler,
-            server_class=wsgiref.simple_server.WSGIServer,
-            handler_class=QuietHandler
-        )
-        self.srv.serve_forever()
+        self.srv = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
+        try:
+            self.srv.start()
+        finally:
+            self.shutdown()
 
-    def stop(self):
-        if self.srv:
-            self.srv.shutdown()
+    def shutdown(self):
+        if self.srv is not None:
+            self.srv.stop()
         self.srv = None
 
 
@@ -203,11 +195,12 @@ class Server(object):
             bottle_run(server=self.server)
 
     def __init__(self, port):
-        self.server = StoppableWSGIServerAdapter(port=port)
-        t = Server.ServerThread(self.server)
-        t.daemon = True
-        t.start()
+        self.server = StoppableCherryPyServer(port=port)
+        self.runner = Server.ServerThread(self.server)
+        self.runner.daemon = True
+        self.runner.start()
 
     def stop(self):
         log.info('Bottle server shuting down...')
-        self.server.stop()
+        self.server.shutdown()
+        #self.runner.join()
