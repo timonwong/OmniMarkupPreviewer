@@ -50,12 +50,12 @@ $(function() {
 
     // Run the scipts of type=text/x-omnimarkup-config
     (function load_config_blocks() {
-        var scripts = $('script');
-        scripts.each(function (_, script) {
-            var type = String(script.type).replace(/ /g,"");
+        var scripts$ = $('script');
+        scripts$.each(function () {
+            var type = String(this.type).replace(/ /g,"");
             if (type.match(/^text\/x-omnimarkup-config(;.*)?$/) && !type.match(/;executed=true/)) {
-                script.type += ";executed=true";
-                eval(script.innerHTML);
+                this.type += ";executed=true";
+                eval(this.innerHTML);
             }
         });
     })();

@@ -73,7 +73,7 @@ kbd {
   background-position: 0 -26px;
 }
 .container {
-    width: 920px;
+    max-width: 920px;
     margin: 0 auto 20px auto;
 }
 #header {
