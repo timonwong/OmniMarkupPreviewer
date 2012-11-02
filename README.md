@@ -76,9 +76,8 @@ What's New
 
 v1.6 (TBD)
 
-* Add support to custom the behavior of markdown renderer(through the
-`"renderer_options-MarkdownRenderer"` option).
-* Much better server performance (using [`CherryPy`](http://www.cherrypy.org/) server).
+* Add support to custom the behavior of markdown renderer(through the `"renderer_options-MarkdownRenderer"` option).
+* Much better server performance (Thanks to the [`CherryPy`](http://www.cherrypy.org/) server).
 
 v1.5.1 (11/1/2012)
 

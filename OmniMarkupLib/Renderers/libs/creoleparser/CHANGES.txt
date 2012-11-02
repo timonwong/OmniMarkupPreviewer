@@ -1,0 +1,187 @@
+Version 0.7.4 (Sept 11 2011)
+----------------------------
+
+* optimized macro regular expression (thanks to Jim Garrison)
+* added MacroError class
+* added support for fragment identifiers in wiki links
+* added option for automatic creation of id attributes in headings
+  (see ``add_heading_ids`` parameters of the ``create_dialect`` function)
+
+
+Version 0.7.3 (Oct 19 2010)
+---------------------------
+
+* added higher level support for macros for those that don't need a
+  specialized ``macro_func`` (see the ``bodied_macros`` and
+  ``non_bodied_macros`` parameters of the ``create_dialect`` function)
+* renamed ``interwiki_links_funcs`` to ``interwiki_links_path_funcs``, added
+  depreciation warning
+* added a bunch of other new parameters to ``create_dialect``:
+
+  * ``disable_external_content``
+  * ``external_links_class``
+  * ``interwiki_links_class_funcs``
+  * ``simple_markup``, markup for inline HTML tags like `strong` and `em`
+    now lives here
+  * ``custom_markup``, provides easy support for markup like emoticons
+    and WikiWords
+  * ``argument_parser``, the default parser for macro argument strings
+    
+* depreciated unused classes  
+* added support for custom base urls and functions for images
+* fix bug with ``blog_style_endings`` option
+
+
+Version 0.7.2 (May 8 2010)
+--------------------------
+
+* fixed bad import in setup.py 
+* images now support wiki links and interwiki links
+
+
+Version 0.7.1 (March 29 2010)
+-----------------------------
+
+* added ``indent_class`` and ``indent_style`` parameter to
+  ``create_dialect`` function
+
+Version 0.7.0 (March 20 2010)
+-----------------------------
+
+* added syntax for indented regions
+* added Parser.parse() method to expose the parse tree (a Genshi Fragment object)
+* improved output of passed through macros to better support post-processing
+* removed depreciated Creole10 class support
+
+
+Version 0.6.1 (March 31 2009)
+-----------------------------
+
+* fixed recursion issue with long lists and tables (>400 rows)
+* added ``parse_args`` function for macro arg_string parsing
+
+
+Version 0.6 (March 1 2009)
+--------------------------
+
+* refactored dialects.py to make extending easier
+
+  * added ``creole10_base`` class factory function
+  * added ``creole11_base`` class factory function
+  * added ``create_dialect`` factory function
+  * The old ``Creole10`` class is now a factory function and
+    it is depreciated. 
+
+* ``macro_func`` now takes a fifth positional argument, ``environ`` 
+* creole2html and text2html convenience functions now return html, not xhtml
+
+  * ``no_wiki_monospace`` is now True for text2html
+
+* creole_to_xmtml convenience function removed
+* explicit url links (e.g., [[http://example.com/]]) can be multiline
+* added support for easy inline markup customization (SimpleElement)
+* changed <tt> to <code>
+* added support for blog-style line endings (blog_style_endings=True)
+* macros of the same name can nest (previously this was possible
+  only for macros with unique names)
+* macros can now return Markup objects directly (Stream, Fragment,
+  Element, and string (preferably unicode) objects were always okay)
+* made creoleparser smarter about adding <p> tags
+* improved rawlink detection regex
+
+Version 0.5.1 (Dec 8 2008)
+--------------------------
+
+* converted docs to Sphinx
+* improved rendering of unknown macros 
+* added title attribute to images
+* fixed bug with markup in raw links
+* fixed bug with unicode characters in wiki links
+* fixed bug preventing plain-text rendering
+* tests.py was refactored to use unittest (thanks duncan.mcgreggor!)
+* special characters in wiki links get quoted for urls
+* links refactored to support mailto:
+* wiki links can no longer have adjacent spaces
+* creoleparser now works on Goggle App Engine
+
+Version 0.5.0 (May 31 2008)
+---------------------------
+
+* special syntax introduced for macros spanning block level markup 
+* macros returning Creole can contain other macros (issue 6)
+* macros refactored, pre-processing no longer used, more robust
+* fixed bug with macros that output unicode strings (issue 4)
+* macro names can now include capitals and periods (issue 5)
+* added support for custom space characters for interwiki
+  links (interwiki_links_space_chars) 
+* api changed for default interwiki links space character, the
+  wiki_links_space_char is used instead of an underscore. (issue 3)
+
+Version 0.4.0 (March 24 2008)
+-----------------------------
+
+* added support for custom urls for interwiki links (interwiki_links_funcs)
+* user supplied uri sanitation added
+* a macro on a line by itself will no longer be <p>aragraphed 
+
+Version 0.3.3 (Dec 16 2007)
+---------------------------
+
+* changed api slightly for wiki_links_class_func (see source)
+* added suport for custom urls for wiki links (wiki_links_path_func)
+* added support for macros with bodies (<<macro arg_string>>the body<</macro>>)
+* removed use of global element_store and thread.local()
+
+Version 0.3.2 (Nov 28 2007)
+---------------------------
+
+* line breaks (\\) can now be escaped with a tilde
+* added macro support (<<macro arg_sring>>)
+* added support for adding a class attribute to
+  wiki links (e.g., if the page doesn't exist).
+
+Version 0.3.1 (Nov 16 2007)
+---------------------------
+
+* super (^^), subscript (,,), and underline (__) support added
+* definition lists supported (;)
+* ftp://xxx no longer cause italics
+* links refactored
+* removed store_id_seq in favor of id()
+* made element_store thread.local()
+
+Version 0.3 (Nov 10 2007)
+-------------------------
+
+* text2xhtml has no_wiki_monospace=True and use_additions=True
+* creole_to_xhtml is now pure Creole 1.0 (use_additions=False)
+* removed need for any pre_escaping, much more robust now
+* big refactoring of inline wiki markup processing
+
+Version 0.2.1 (Nov 6 2007)
+--------------------------
+
+* links can include mark-up
+* creole_to_xhtml has no_wiki_monospace=True and use_additions=True
+* fixed bug with bad links
+* removed lone line break as an element (it wasn't valid xhtml)
+* stopped inserting \n's after <br />'s
+* wiki_links_space_char option added to dialects.Creole10
+* added inline_no_wiki_monospace option to dialects.Creole10 
+* refactored core.pre_escape()
+* CHANGES.txt, LISCENCE.txt, and INSTALL.txt added to distribution
+* added use_additions option to dialects.Creole10
+* implemented monospace (##) (for use_additions option only) 
+
+
+Version 0.2 (Oct 26 2007)
+-------------------------
+
+* module split into separate files to create the creoleparser package
+* other refactoring
+
+
+Version 0.1, 0.1.1, 0.1.2 (Oct 2007)
+------------------------------------
+
+* First public releases
