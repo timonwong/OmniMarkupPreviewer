@@ -21,6 +21,7 @@ SOFTWARE.
 """
 
 import sys
+import subprocess
 import types
 import webbrowser
 import threading
@@ -54,11 +55,10 @@ g_server = None
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, immediate=True):
-        # Open default browser
-        try:
-            webbrowser.open('http://localhost:%d/view/%d' % (Setting.instance().server_port, self.view.buffer_id()))
-        except:
-            log.exception("Error on opening web browser")
+        url = 'http://localhost:%d/view/%d' % \
+            (Setting.instance().server_port, self.view.buffer_id())
+        # Open with the default browser
+        webbrowser.open(url, new=2)
 
     def is_enabled(self):
         return RendererManager.has_renderer_enabled_in_view(self.view)

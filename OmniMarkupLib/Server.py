@@ -164,14 +164,14 @@ class StoppableCherryPyServer(ServerAdapter):
 
     def run(self, handler):
         self.srv = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
-        try:
-            self.srv.start()
-        finally:
-            self.shutdown()
+        self.srv.start()
 
     def shutdown(self):
-        if self.srv is not None:
-            self.srv.stop()
+        try:
+            if self.srv is not None:
+                self.srv.stop()
+        except:
+            log.exception('Error on shutting down cherrypy server')
         self.srv = None
 
 
@@ -203,4 +203,4 @@ class Server(object):
     def stop(self):
         log.info('Bottle server shuting down...')
         self.server.shutdown()
-        #self.runner.join()
+        self.runner.join()
