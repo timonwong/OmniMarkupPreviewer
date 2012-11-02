@@ -151,8 +151,10 @@ def handler_view(buffer_id):
     entry = f.result()
     if entry is None:
         return bottle.HTTPError(404, 'buffer_id(%d) is not valid' % buffer_id)
-    return template(Setting.instance().html_template_name, buffer_id=buffer_id,
+    return template(Setting.instance().html_template_name,
+                    buffer_id=buffer_id,
                     ajax_polling_interval=Setting.instance().ajax_polling_interval,
+                    mathjax_enabled=Setting.instance().mathjax_enabled,
                     **entry)
 
 

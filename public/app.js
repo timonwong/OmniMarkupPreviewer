@@ -84,6 +84,10 @@ $(function() {
                         content$.data('timestamp', data.timestamp);
                         // Replace content with latest one
                         content$.html(data.html_part);
+                        // typeset for MathJax
+                        if (window.App.Options.mathjax_enabled) {
+                            MathJax.Hub.Queue(['Typeset', MathJax.Hub, content$[0]]);
+                        }
                         // 'auto' scroll, if necessary
                         var new_scroll_props = get_vertical_scrollbar_props();
                         var increment = new_scroll_props.height - old_scroll_props.height;

@@ -21,9 +21,29 @@
   <script type="text/x-omnimarkup-config">
     window.App.Options = {
       "buffer_id": {{buffer_id}},
-      "ajax_polling_interval": {{ajax_polling_interval}}
+      "ajax_polling_interval": {{ajax_polling_interval}},
+      "mathjax_enabled": {{'true' if mathjax_enabled else 'false'}}
     };
   </script>
   <script type="text/javascript" src="/public/jquery-1.8.2.min.js"></script>
   <script type="text/javascript" src="/public/app.min.js"></script>
+  %if mathjax_enabled:
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          processEscapes: true
+        },
+        TeX: {
+          equationNumbers: {
+            autoNumber: 'AMS'
+          }
+        },
+        "HTML-CSS": {
+          imageFont: null
+        }
+      });
+  </script>
+  <script type="text/javascript" src="/public/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  %end
 </html>

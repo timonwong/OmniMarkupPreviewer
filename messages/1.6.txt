@@ -6,5 +6,10 @@ NOTE:
 2. Templates should get updated if they got cutomized.
 
 
+* [`MathJax`](http://www.mathjax.org/) support is now added (through the `"mathjax_enabled"`
+option), you can use `$..$` and `\(..\)` for inline math, `$$..$$` for display math.
+MathJax libraries will get downloaded on demand.
 * Add support to custom the behavior of markdown renderer(through the `"renderer_options-MarkdownRenderer"` option).
+* Much better server performance (Thanks to the [`CherryPy`](http://www.cherrypy.org/) server).
+* Add support to custom the behavior of markdown renderer (through the `"renderer_options-MarkdownRenderer"` option).
 * Much better server performance (Thanks to the [`CherryPy`](http://www.cherrypy.org/) server).

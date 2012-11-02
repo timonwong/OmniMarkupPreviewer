@@ -15,11 +15,17 @@ class MarkdownRenderer(MarkupRenderer):
 
     def render(self, text, **kwargs):
         renderer_options = kwargs['renderer_options']
+        settings = kwargs['settings']
         if 'extensions' in renderer_options:
             extensions = renderer_options['extensions']
         else:
             # Default fallback to GFM style
             extensions = ['tables', 'strikeout', 'fenced_code', 'codehilite']
+
+        if settings.mathjax_enabled:
+            if not 'mathjax' in extensions:
+                extensions.append('mathjax')
+
         return markdown.markdown(text, tab_length=2, output_format='html5',
             extensions=extensions
         )

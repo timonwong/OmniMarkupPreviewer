@@ -143,7 +143,8 @@ class RendererManager(object):
                     rendered_text = renderer.render(
                         text,
                         filename=filename,
-                        renderer_options=renderer_options
+                        renderer_options=renderer_options,
+                        settings=settings,
                     )
                     return cls.render_text_postprocess(rendered_text, fullpath)
             except:

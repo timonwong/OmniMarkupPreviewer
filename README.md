@@ -74,12 +74,16 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
-v1.6 (TBD)
+v1.6 (11/03/2012)
 
-* Add support to custom the behavior of markdown renderer(through the `"renderer_options-MarkdownRenderer"` option).
+* [`MathJax`](http://www.mathjax.org/) support is now added (through the `"mathjax_enabled"`
+option), you can use `$..$` and `\(..\)` for inline math, `$$..$$` for display math.
+MathJax libraries will get downloaded on demand.
+* Add support to custom the behavior of markdown renderer (through the
+`"renderer_options-MarkdownRenderer"` option).
 * Much better server performance (Thanks to the [`CherryPy`](http://www.cherrypy.org/) server).
 
-v1.5.1 (11/1/2012)
+v1.5.1 (11/01/2012)
 
 * Fixed a bug that all renderers wouldn't work if any renderer raised exception while loading.
 

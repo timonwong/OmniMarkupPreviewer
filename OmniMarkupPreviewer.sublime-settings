@@ -26,6 +26,12 @@
     //   "ignored_renderers": ["TextitleRenderer", "PodRenderer"]
     "ignored_renderers": [],
 
+    // Enable MathJax (http://www.mathjax.org/)
+    // MathJax javascript libraries will downloaded automatically, it may take some while.
+    // When MathJax is properly installed into OmniMarkupPreviewer/public/mathjax, you
+    //   have to reload your browser to get mathjax work.
+    "mathjax_enabled": false,
+
     // MarkdownRenderer options
     "renderer_options-MarkdownRenderer": {
         // Valid extensions:

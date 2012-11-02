@@ -1,5 +1,6 @@
 import sublime
 import log
+import OnDemandDownloader
 from Common import Singleton
 
 
@@ -15,6 +16,7 @@ class Setting(object):
         self.html_template_name = 'github'
         self.ajax_polling_interval = 500
         self.ignored_renderers = set()
+        self.mathjax_enabled = False
         self.renderer_options_dict = {}
         self.renderers = []
 
@@ -40,6 +42,7 @@ class Setting(object):
         self.html_template_name = settings.get("html_template_name", 'github')
         self.ajax_polling_interval = settings.get("ajax_polling_interval", 500)
         self.ignored_renderers = set(settings.get("ignored_renderers", []))
+        self.mathjax_enabled = settings.get("mathjax_enabled", False)
 
         self._reload_renderer_options()
 
@@ -50,6 +53,9 @@ class Setting(object):
             # Show status on server port change
             if (self.server_port != old_server_port):
                 sublime.status_message(PLUGIN_NAME + ' requires restart to take effect')
+
+        if self.mathjax_enabled:
+            OnDemandDownloader.on_demand_download_mathjax()
 
     def _reload_renderer_options(self):
         self.renderer_options_dict.clear()
