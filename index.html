@@ -53,9 +53,9 @@ them in realtime.</p>
 <li><a href="http://wikicreole.org/">WikiCreole</a></li>
 <li><a href="http://www.textism.com/tools/textile/">Textile</a></li>
 <li>
-<a href="http://search.cpan.org/dist/perl/pod/perlpod.pod">Pod</a>
-(Requires Perl &gt;= 5.10 and can be found in <code>PATH</code>, if the perl version &lt; 5.10,
-Pod::Simple should be installed from CPAN.)</li>
+<a href="http://search.cpan.org/dist/perl/pod/perlpod.pod">Pod</a> (Requires Perl &gt;= 5.10
+and can be found in <code>PATH</code>, if the perl version &lt; 5.10, <code>Pod::Simple</code> should be
+installed from <code>CPAN</code>.)</li>
 <li>
 <a href="http://rdoc.sourceforge.net/">RDoc</a> (Requires ruby in your <code>PATH</code>)</li>
 </ul><h2>Installation</h2>
@@ -67,16 +67,18 @@ Pod::Simple should be installed from CPAN.)</li>
 <p>Once you have Package Control installed, restart Sublime Text 2.</p>
 
 <ol>
-<li>Bring up the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on Windows and Linux.
-<kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> on OS X).</li>
+<li>Bring up the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
+on Windows and Linux. <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> on OS X).</li>
 <li>Type "Install" and select "Package Control: Install Package".</li>
 <li>Select "OmniMarkupPreviewer" from list.</li>
-</ol><p>The advantage of using Package Control is that it will keep OmniMarkupPreviewer up to date automatically.</p>
+</ol><p>The advantage of using Package Control is that it will keep OmniMarkupPreviewer
+up to date automatically.</p>
 
 <h3>Manual Install</h3>
 
 <p><strong>Without Git:</strong>
-<a href="https://github.com/timonwong/OmniMarkupPreviewer">Download</a> the latest source code, and extract to the Packages directory.</p>
+<a href="https://github.com/timonwong/OmniMarkupPreviewer">Download</a> the latest source
+code, and extract to the Packages directory.</p>
 
 <p><strong>With Git:</strong>
 Type the following command in your Sublime Text 2 Packages directory:</p>
@@ -117,7 +119,24 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 
 <h2>What's New</h2>
 
-<p>v1.5 (10/31/2012)</p>
+<p>v1.6 (11/03/2012)</p>
+
+<ul>
+<li>
+<a href="http://www.mathjax.org">MathJax</a> support is now added (through the <code>"mathjax_enabled"</code> option), you can
+use <code>$..$</code> and <code>\(..\)</code> delimiters for inline math, <code>$$..$$</code> and <code>\[..\]</code> delimiters
+for display math. <a href="http://www.mathjax.org">MathJax</a> libraries will be downloaded on demand. for more
+information, visit <a href="http://theo.im/blog/2012/11/03/latex-support-in-omnimarkuppreviewer/">my blog</a>.</li>
+<li>Add support to custom the behavior of markdown renderer (through the
+<code>"renderer_options-MarkdownRenderer"</code> option).</li>
+<li>Responsive width on browser width change.</li>
+<li>Much better http server performance (Thanks to the <a href="http://www.cherrypy.org">CherryPy</a> project).</li>
+</ul><p>v1.5.1 (11/01/2012)</p>
+
+<ul>
+<li>Fixed a bug that all renderers wouldn't work if any renderer raised exception
+while loading.</li>
+</ul><p>v1.5 (10/31/2012)</p>
 
 <ul>
 <li>Images on local machine can now be displayed corectlly.</li>
@@ -126,18 +145,18 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 </ul><p>v1.4 (10/28/2012)</p>
 
 <ul>
-<li>Code blocks from <a href="http://github.github.com/github-flavored-markdown/">GitHub flavored markdown</a> is supported now,
-through <a href="http://packages.python.org/Markdown/extensions/fenced_code_blocks.html">Fenced Code Blocks Extension</a>.</li>
+<li>Code blocks from <a href="http://github.github.com/github-flavored-markdown/">GitHub flavored markdown</a> is supported now, through the
+<a href="http://packages.python.org/Markdown/extensions/fenced_code_blocks.html">Fenced Code Blocks Extension</a>.</li>
 <li>
-<a href="http://michelf.ca/projects/php-markdown/extra/#table">PHP Markdown tables</a> support is added,
-through <a href="http://packages.python.org/Markdown/extensions/tables.html">Tables Extension</a>.</li>
+<a href="http://michelf.ca/projects/php-markdown/extra/#table">PHP Markdown Tables</a> support is added, through the <a href="http://packages.python.org/Markdown/extensions/tables.html">Tables Extension</a>.</li>
 <li>Support strikeout extension syntax (Pandoc and GitHub) for markdown: <code>This ~~is deleted text.~~</code>
 </li>
-<li>Added <code>"ignored_renderers"</code> option to settings, in order to ignore specific markup renderers.</li>
+<li>Added <code>"ignored_renderers"</code> option to settings, in order to ignore specific
+markup renderers.</li>
 </ul><p>v1.3 (10/27/2012)</p>
 
 <ul>
-<li>Added syntax highlight support for Markdown, through <a href="http://packages.python.org/Markdown/extensions/code_hilite.html">CodeHilite Extension</a>.</li>
+<li>Added syntax highlight support for Markdown, through the <a href="http://packages.python.org/Markdown/extensions/code_hilite.html">CodeHilite Extension</a>.</li>
 <li>Unsaved buffer can now be previewed without error.</li>
 <li>Updated github template.</li>
 </ul><p>v1.2 (10/16/2012)</p>
