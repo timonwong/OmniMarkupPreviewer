@@ -12,9 +12,9 @@ OmniMarkupPreviewer has builtin support following markups:
 * [reStructuredText](http://docutils.sourceforge.net/rst.html)
 * [WikiCreole](http://wikicreole.org/)
 * [Textile](http://www.textism.com/tools/textile/)
-* [Pod](http://search.cpan.org/dist/perl/pod/perlpod.pod)
-(Requires Perl >= 5.10 and can be found in `PATH`, if the perl version < 5.10,
-Pod::Simple should be installed from `CPAN`.)
+* [Pod](http://search.cpan.org/dist/perl/pod/perlpod.pod) (Requires Perl >= 5.10
+  and can be found in `PATH`, if the perl version < 5.10, `Pod::Simple` should be
+  installed from `CPAN`.)
 * [RDoc](http://rdoc.sourceforge.net/) (Requires ruby in your `PATH`)
 
 
@@ -22,21 +22,25 @@ Installation
 ------------
 
 ### With the Package Control plugin
-The easiest way to install OmniMarkupPreviewer is through [Package Control](http://wbond.net/sublime_packages/package_control).
+The easiest way to install OmniMarkupPreviewer is through [Package Control].
+
+[Package Control]: http://wbond.net/sublime_packages/package_control
 
 Once you have Package Control installed, restart Sublime Text 2.
 
-1. Bring up the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on Windows and Linux.
-<kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> on OS X).
+1. Bring up the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
+   on Windows and Linux. <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> on OS X).
 2. Type "Install" and select "Package Control: Install Package".
 3. Select "OmniMarkupPreviewer" from list.
 
-The advantage of using Package Control is that it will keep OmniMarkupPreviewer up to date automatically.
+The advantage of using Package Control is that it will keep OmniMarkupPreviewer
+up to date automatically.
 
 
 ### Manual Install
 **Without Git:**
-[Download](https://github.com/timonwong/OmniMarkupPreviewer) the latest source code, and extract to the Packages directory.
+[Download](https://github.com/timonwong/OmniMarkupPreviewer) the latest source
+code, and extract to the Packages directory.
 
 **With Git:**
 Type the following command in your Sublime Text 2 Packages directory:
@@ -76,16 +80,20 @@ What's New
 
 v1.6 (11/03/2012)
 
-* [`MathJax`](http://www.mathjax.org/) support is now added (through the `"mathjax_enabled"`
-option), you can use `$..$` and `\(..\)` for inline math, `$$..$$` for display math.
-MathJax libraries will get downloaded on demand.
+* [MathJax] support is now added (through the `"mathjax_enabled"` option), you can
+  use `$..$` and `\(..\)` delimiters for inline math, `$$..$$` and `\[..\]` delimiters
+  for display math. [MathJax] libraries will be downloaded on demand.
 * Add support to custom the behavior of markdown renderer (through the
-`"renderer_options-MarkdownRenderer"` option).
-* Much better server performance (Thanks to the [`CherryPy`](http://www.cherrypy.org/) server).
+  `"renderer_options-MarkdownRenderer"` option).
+* Much better http server performance (Thanks to the [CherryPy] project).
+
+[MathJax]: http://www.mathjax.org
+[CherryPy]: http://www.cherrypy.org
 
 v1.5.1 (11/01/2012)
 
-* Fixed a bug that all renderers wouldn't work if any renderer raised exception while loading.
+* Fixed a bug that all renderers wouldn't work if any renderer raised exception
+  while loading.
 
 v1.5 (10/31/2012)
 
@@ -95,18 +103,25 @@ v1.5 (10/31/2012)
 
 v1.4 (10/28/2012)
 
-* Code blocks from [GitHub flavored markdown](http://github.github.com/github-flavored-markdown/) is supported now,
-through [Fenced Code Blocks Extension](http://packages.python.org/Markdown/extensions/fenced_code_blocks.html).
-* [PHP Markdown tables](http://michelf.ca/projects/php-markdown/extra/#table) support is added,
-through [Tables Extension](http://packages.python.org/Markdown/extensions/tables.html).
+* Code blocks from [GitHub flavored markdown] is supported now, through the
+  [Fenced Code Blocks Extension].
+* [PHP Markdown Tables] support is added, through the [Tables Extension].
 * Support strikeout extension syntax (Pandoc and GitHub) for markdown: `This ~~is deleted text.~~`
-* Added `"ignored_renderers"` option to settings, in order to ignore specific markup renderers.
+* Added `"ignored_renderers"` option to settings, in order to ignore specific
+  markup renderers.
+
+[GitHub flavored markdown]: http://github.github.com/github-flavored-markdown/
+[Fenced Code Blocks Extension]: http://packages.python.org/Markdown/extensions/fenced_code_blocks.html
+[PHP Markdown Tables]: http://michelf.ca/projects/php-markdown/extra/#table
+[Tables Extension]: http://packages.python.org/Markdown/extensions/tables.html
 
 v1.3 (10/27/2012)
 
-* Added syntax highlight support for Markdown, through [CodeHilite Extension](http://packages.python.org/Markdown/extensions/code_hilite.html).
+* Added syntax highlight support for Markdown, through the [CodeHilite Extension].
 * Unsaved buffer can now be previewed without error.
 * Updated github template.
+
+[CodeHilite Extension]: http://packages.python.org/Markdown/extensions/code_hilite.html
 
 v1.2 (10/16/2012)
 

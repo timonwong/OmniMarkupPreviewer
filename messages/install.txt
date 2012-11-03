@@ -8,12 +8,14 @@ to web brwosers in the backgound, in order to preview them in realtime.
 
 OmniMarkupPreviewer has builtin support following markups:
 
-* Markdown
-* reStructuredText
-* WikiCreole
-* Textile
-* Pod
-* RDoc
+* [Markdown](http://daringfireball.net/projects/markdown/)
+* [reStructuredText](http://docutils.sourceforge.net/rst.html)
+* [WikiCreole](http://wikicreole.org/)
+* [Textile](http://www.textism.com/tools/textile/)
+* [Pod](http://search.cpan.org/dist/perl/pod/perlpod.pod) (Requires Perl >= 5.10
+  and can be found in `PATH`, if the perl version < 5.10, `Pod::Simple` should be
+  installed from `CPAN`.)
+* [RDoc](http://rdoc.sourceforge.net/) (Requires ruby in your `PATH`)
 
 
 Usage

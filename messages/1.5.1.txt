@@ -1,0 +1,5 @@
+OmniMarkupPreviewer v1.5.1 Changelog:
+
+
+* Fixed a bug that all renderers wouldn't work if any renderer raised exception
+  while loading.

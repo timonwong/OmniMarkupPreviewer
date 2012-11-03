@@ -1,8 +1,9 @@
-OmniMarkupPreviewer 1.4 Changelog:
+OmniMarkupPreviewer v1.4 Changelog:
 
-* Code blocks from [GitHub flavored markdown](http://github.github.com/github-flavored-markdown/) is supported now,
-through [Fenced Code Blocks Extension](http://packages.python.org/Markdown/extensions/fenced_code_blocks.html).
-* [PHP Markdown tables](http://michelf.ca/projects/php-markdown/extra/#table) support is added,
-through [Tables Extension](http://packages.python.org/Markdown/extensions/tables.html).
+
+* Code blocks from [GitHub flavored markdown] is supported now, through the
+  [Fenced Code Blocks Extension].
+* [PHP Markdown Tables] support is added, through the [Tables Extension].
 * Support strikeout extension syntax (Pandoc and GitHub) for markdown: `This ~~is deleted text.~~`
-* Added `"ignored_renderers"` options to settings, in order to ignore specific markup renderers.
+* Added `"ignored_renderers"` option to settings, in order to ignore specific
+  markup renderers.

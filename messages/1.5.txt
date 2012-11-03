@@ -1,4 +1,5 @@
-OmniMarkupPreviewer 1.5 Changelog:
+OmniMarkupPreviewer v1.5 Changelog:
+
 
 * Images on local machine can now be displayed corectlly.
 * New `"ajax_polling_interval"` option.
