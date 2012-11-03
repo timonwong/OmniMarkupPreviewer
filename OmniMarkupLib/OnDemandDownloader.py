@@ -35,9 +35,9 @@ __g_mathjax_thread = None
 
 def on_demand_download_mathjax():
     def background_worker(plugin_folder):
+        public_folder = os.path.join(plugin_folder, 'public')
+        archive_url = 'https://github.com/downloads/timonwong/OmniMarkupPreviewer/mathjax.zip'
         try:
-            archive_url = 'https://github.com/downloads/timonwong/OmniMarkupPreviewer/mathjax.zip'
-
             urllib2.install_opener(urllib2.build_opener(urllib2.ProxyHandler()))
             log.info('Downloading MathJax from "%s"', archive_url)
 
@@ -52,7 +52,6 @@ def on_demand_download_mathjax():
                             log.error('"%s" contains invalid files', archive_url)
                             return
                     # Install
-                    public_folder = os.path.join(plugin_folder, 'public')
                     if not os.path.exists(public_folder):
                         os.makedirs(public_folder)
                     for path in zip_file.namelist():
@@ -71,6 +70,15 @@ def on_demand_download_mathjax():
                     log.info('MathJax succesfully extracted into "%s"', public_folder)
         except:
             log.exception("Error on downloading MathJax")
+            message = (
+                'MathJax download failed, you have to download and extract it manually.\n'
+                'After extracting, you have to create a file named "%s".\n'
+                'Download Url:\n "%s"\n'
+                'Target folder: "%s"' % (
+                    os.path.join(plugin_folder, '.MATHJAX.DOWNLOADED'), archive_url, public_folder
+                )
+            )
+            sublime.set_timeout(lambda: sublime.message_dialog(message), 0)
         finally:
             global __g_mathjax_thread
             __g_mathjax_thread = None

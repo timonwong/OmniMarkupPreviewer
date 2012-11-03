@@ -30,6 +30,15 @@
     // MathJax javascript libraries will downloaded automatically, it may take some while.
     // When MathJax is properly installed into OmniMarkupPreviewer/public/mathjax, you
     //   have to reload your browser to get mathjax work.
+    // KNOWN ISSUES: 
+    //   * If you are using Linux version of Sublime Text 2, MathJax would not download automatically
+    //     due to the lack of `ssl` module of python. you have to download it manually:
+    //         wget -c https://github.com/downloads/timonwong/OmniMarkupPreviewer/mathjax.zip
+    //     and extract it to the:
+    //         ${packages}/OmniMarkupPreviewer/public/
+    //     then, you have to create a file named '.MATHJAX.DOWNLOADED' int the plugin folder:
+    //          touch ${packages}/OmniMarkupPreviewer/.MATHJAX.DOWNLOADED
+    //
     "mathjax_enabled": false,
 
     // MarkdownRenderer options
