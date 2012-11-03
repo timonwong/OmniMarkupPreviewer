@@ -86,7 +86,10 @@ $(function() {
                         content$.html(data.html_part);
                         // typeset for MathJax
                         if (window.App.Options.mathjax_enabled) {
-                            MathJax.Hub.Queue(['Typeset', MathJax.Hub, content$[0]]);
+                            MathJax.Hub.Queue(
+                                ["resetEquationNumbers",MathJax.InputJax.TeX],
+                                ['Typeset', MathJax.Hub, content$[0]]
+                            );
                         }
                         // 'auto' scroll, if necessary
                         var new_scroll_props = get_vertical_scrollbar_props();
