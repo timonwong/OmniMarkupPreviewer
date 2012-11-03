@@ -82,9 +82,11 @@ v1.6 (11/03/2012)
 
 * [MathJax] support is now added (through the `"mathjax_enabled"` option), you can
   use `$..$` and `\(..\)` delimiters for inline math, `$$..$$` and `\[..\]` delimiters
-  for display math. [MathJax] libraries will be downloaded on demand.
+  for display math. [MathJax] libraries will be downloaded on demand. for more
+  information, visit [my blog](http://theo.im/blog/2012/11/03/latex-support-in-omnimarkuppreviewer/).
 * Add support to custom the behavior of markdown renderer (through the
   `"renderer_options-MarkdownRenderer"` option).
+* Responsive width on browser width change.
 * Much better http server performance (Thanks to the [CherryPy] project).
 
 [MathJax]: http://www.mathjax.org
