@@ -6,6 +6,8 @@ import textile
 class TextileRenderer(MarkupRenderer):
     @classmethod
     def is_enabled(cls, filename, syntax):
+        if syntax == 'text.html.textile':
+            return True
         return filename.endswith(".textile")
 
     def render(self, text, **kwargs):

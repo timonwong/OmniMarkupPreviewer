@@ -74,6 +74,11 @@ The default key bindings for this plugin:
 
 Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current File`.
 
+Known Issues
+------------
+
+1. RDoc and Pod documents cannot be previewed utils they are saved to disk.
+
 
 What's New
 ----------
