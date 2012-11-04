@@ -1,14 +1,18 @@
 import markdown
 
 
+def _mathjax_handleMatch(obj, m):
+    node = markdown.util.etree.Element('mathjax')
+    node.text = markdown.util.AtomicString(m.group(2) + m.group(3) + m.group(4))
+    return node
+
+
 class MathJaxPattern(markdown.inlinepatterns.Pattern):
     def __init__(self):
-        markdown.inlinepatterns.Pattern.__init__(self, r'(?<!\\)(\$\$?)(.+?)\2')
+        markdown.inlinepatterns.Pattern.__init__(self, r'(?<!\\)(\$\$?)(.+?)(\2)')
 
     def handleMatch(self, m):
-        node = markdown.util.etree.Element('mathjax')
-        node.text = markdown.util.AtomicString(m.group(2) + m.group(3) + m.group(2))
-        return node
+        return _mathjax_handleMatch(self, m)
 
 
 class MathJaxNativeInlinePattern(markdown.inlinepatterns.Pattern):
@@ -16,9 +20,7 @@ class MathJaxNativeInlinePattern(markdown.inlinepatterns.Pattern):
         markdown.inlinepatterns.Pattern.__init__(self, r'(\\\()(.+?)(\\\))')
 
     def handleMatch(self, m):
-        node = markdown.util.etree.Element('mathjax')
-        node.text = markdown.util.AtomicString(m.group(2) + m.group(3) + m.group(4))
-        return node
+        return _mathjax_handleMatch(self, m)
 
 
 class MathJaxNativeDisplayPattern(markdown.inlinepatterns.Pattern):
@@ -26,9 +28,7 @@ class MathJaxNativeDisplayPattern(markdown.inlinepatterns.Pattern):
         markdown.inlinepatterns.Pattern.__init__(self, r'(\\\[)(.+?)(\\\])')
 
     def handleMatch(self, m):
-        node = markdown.util.etree.Element('mathjax')
-        node.text = markdown.util.AtomicString(m.group(2) + m.group(3) + m.group(4))
-        return node
+        return _mathjax_handleMatch(self, m)
 
 
 class MathJaxExtension(markdown.Extension):
