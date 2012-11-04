@@ -42,7 +42,6 @@ class Setting(SettingEventSource):
         self.ajax_polling_interval = 500
         self.ignored_renderers = set()
         self.mathjax_enabled = False
-        self.renderer_options_dict = {}
 
     def init(self, clear_subscribers=True):  # Reload settings
         if clear_subscribers:

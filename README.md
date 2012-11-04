@@ -78,6 +78,11 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 What's New
 ----------
 
+v1.7 (TBD)
+
+* Add option `"server_host"` for server listening address.
+* Won't require Sublime Text 2 restart anymore on `"server_port"` change.
+
 v1.6 (11/03/2012)
 
 * [MathJax] support is now added (through the `"mathjax_enabled"` option), you can

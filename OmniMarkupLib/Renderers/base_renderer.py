@@ -6,6 +6,12 @@ import tempfile
 
 
 class MarkupRenderer(object):
+    def __init__(self):
+        self.renderer_options = {}
+
+    def load_settings(self, global_setting, renderer_options):
+        self.renderer_options = renderer_options
+
     @classmethod
     def is_enabled(cls, filename, lang):
         return False
@@ -22,6 +28,7 @@ class InputMethod(object):
 
 class CommandlineRenderer(MarkupRenderer):
     def __init__(self, input_method=InputMethod.STDIN, executable=None, args=[]):
+        super(CommandlineRenderer, self).__init__()
         self.input_method = input_method
         self.executable = executable
         self.args = args

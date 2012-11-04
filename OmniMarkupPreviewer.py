@@ -210,6 +210,7 @@ class PluginManager(object):
 
     def on_setting_changing(self, setting):
         self.old_server_host = setting.server_host
+        self.old_server_port = setting.server_port
         self.old_ajax_polling_interval = setting.ajax_polling_interval
         self.old_html_template_name = setting.html_template_name
 
@@ -249,13 +250,14 @@ class PluginManager(object):
 
 
 def unload_handler():
-    log.info('Unloading...')
+    log.info('Unloading plugin...')
     # Cleaning up resources...
     PluginManager.instance().stop_server()
     # Stopping renderer worker
     RendererManager.WORKER.stop()
 
 
+# Setting must be the first to initialize.
 Setting.instance().init()
 PluginManager.instance().subscribe_setting_events()
 RendererManager.init()

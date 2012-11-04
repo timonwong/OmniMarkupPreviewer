@@ -17,13 +17,13 @@ class GitHubHTMLTranslator(HTMLTranslator):
 
 @renderer
 class RstRenderer(MarkupRenderer):
-    filename_pattern = re.compile(r'\.re?st$')
+    FILENAME_PATTERN_RE = re.compile(r'\.re?st$')
 
     @classmethod
     def is_enabled(cls, filename, syntax):
         if syntax == "text.restructuredtext":
             return True
-        return cls.filename_pattern.search(filename)
+        return cls.FILENAME_PATTERN_RE.search(filename)
 
     def render(self, text, **kwargs):
         settings_overrides = {

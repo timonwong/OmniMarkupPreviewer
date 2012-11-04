@@ -132,20 +132,10 @@ class RendererManager(object):
     @classmethod
     def render_text(cls, fullpath, lang, text):
         filename = os.path.basename(fullpath)
-        settings = Setting.instance()
         for renderer_classname, renderer in cls.RENDERERS:
             try:
                 if renderer.is_enabled(filename, lang):
-                    if renderer_classname in settings.renderer_options_dict:
-                        renderer_options = settings.renderer_options_dict[renderer_classname]
-                    else:
-                        renderer_options = {}
-                    rendered_text = renderer.render(
-                        text,
-                        filename=filename,
-                        renderer_options=renderer_options,
-                        settings=settings,
-                    )
+                    rendered_text = renderer.render(text, filename=filename)
                     return cls.render_text_postprocess(rendered_text, fullpath)
             except:
                 log.exception('Exception occured while rendering using %s', renderer_classname)
@@ -195,6 +185,7 @@ class RendererManager(object):
                 if hasattr(classtype, 'IS_VALID_RENDERER__'):
                     try:
                         log.info('Loaded renderer: OmniMarkupLib.Renderers.%s', classname)
+                        # Add both classname and its instance
                         cls.RENDERERS.append((classname, classtype()))
                     except:
                         log.exception('Failed to load renderer: %s', classname)
@@ -231,15 +222,17 @@ class RendererManager(object):
             LibraryPathManager.pop_search_path()
 
     @classmethod
-    def _on_setting_changed(cls, setting):
-        setting = Setting.instance()
-        setting.renderer_options_dict.clear()
-        for renderer_classname, _ in cls.RENDERERS:
+    def load_renderer_settings(cls, setting):
+        for renderer_classname, renderer in cls.RENDERERS:
             key = 'renderer_options-' + renderer_classname
-            renderer_specific_options = setting._sublime_settings.get(key, {})
-            setting.renderer_options_dict[renderer_classname] = renderer_specific_options
+            try:
+                renderer_options = setting._sublime_settings.get(key, {})
+                renderer.load_settings(renderer_options, setting)
+            except:
+                log.exception('Error on setting renderer options for %s', renderer_classname)
 
     @classmethod
     def init(cls):
         cls.load_renderers()
-        Setting.instance().subscribe('changed', cls._on_setting_changed)
+        cls.load_renderer_settings(Setting.instance())
+        Setting.instance().subscribe('changed', cls.load_renderer_settings)
