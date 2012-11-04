@@ -1,13 +1,37 @@
 import sublime
 import log
-import OnDemandDownloader
 from Common import Singleton
 
 
-@Singleton
-class Setting(object):
+class SettingEventSource(object):
     def __init__(self):
-        self.__sublime_settings = None
+        self._subscribers = {}
+
+    def notify(self, evt_type, *evt_args, **evt_kwargs):
+        if evt_type not in self._subscribers:
+            return
+
+        for subscriber in self._subscribers[evt_type]:
+            try:
+                subscriber(*evt_args, **evt_kwargs)
+            except:
+                log.exception("Error on calling event subscriber for setting: %s", str(subscriber))
+
+    def subscribe(self, evt_type, subscriber):
+        if evt_type not in self._subscribers:
+            self._subscribers[evt_type] = set()
+        self._subscribers[evt_type].add(subscriber)
+
+    def clear_subscribers(self):
+        self._subscribers.clear()
+
+
+@Singleton
+class Setting(SettingEventSource):
+    def __init__(self):
+        SettingEventSource.__init__(self)
+        self._sublime_settings = None
+
         self.server_port = 51004
         self.refresh_on_modified = True
         self.refresh_on_modified_delay = 500
@@ -18,22 +42,17 @@ class Setting(object):
         self.ignored_renderers = set()
         self.mathjax_enabled = False
         self.renderer_options_dict = {}
-        self.renderers = []
 
-    def set_renderers(self, renderers):
-        self.renderers = renderers
+    def init(self, clear_subscribers=True):  # Reload settings
+        if clear_subscribers:
+            self.clear_subscribers()
 
-    def reload(self):  # Reload settings
         PLUGIN_NAME = 'OmniMarkupPreviewer'
         settings = sublime.load_settings(PLUGIN_NAME + '.sublime-settings')
         settings.clear_on_change(PLUGIN_NAME)
-        settings.add_on_change(PLUGIN_NAME, self._on_settings_changed)
+        settings.add_on_change(PLUGIN_NAME, self._settings_changed_handler)
 
-        old_html_template_name = self.html_template_name
-        old_ajax_polling_interval = self.ajax_polling_interval
-        old_server_port = self.server_port
-
-        self.__sublime_settings = settings
+        self._sublime_settings = settings
         self.server_port = settings.get("server_port", 51004)
         self.refresh_on_modified = settings.get("refresh_on_modified", True)
         self.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
@@ -44,26 +63,8 @@ class Setting(object):
         self.ignored_renderers = set(settings.get("ignored_renderers", []))
         self.mathjax_enabled = settings.get("mathjax_enabled", False)
 
-        self._reload_renderer_options()
-
-        if (self.ajax_polling_interval != old_ajax_polling_interval or
-        self.html_template_name != old_html_template_name):
-            sublime.status_message(PLUGIN_NAME + ' requires browser reload to apply changes')
-        else:
-            # Show status on server port change
-            if (self.server_port != old_server_port):
-                sublime.status_message(PLUGIN_NAME + ' requires restart to take effect')
-
-        if self.mathjax_enabled:
-            OnDemandDownloader.on_demand_download_mathjax()
-
-    def _reload_renderer_options(self):
-        self.renderer_options_dict.clear()
-        for renderer_classname, _ in self.renderers:
-            key = 'renderer_options-' + renderer_classname
-            renderer_specific_options = self.__sublime_settings.get(key, {})
-            self.renderer_options_dict[renderer_classname] = renderer_specific_options
-
-    def _on_settings_changed(self):
+    def _settings_changed_handler(self):
         log.info('Reload settings...')
-        self.reload()
+        self.notify('changing', setting=self)
+        self.init(False)
+        self.notify('changed', setting=self)

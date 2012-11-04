@@ -42,14 +42,11 @@ for key in sys.modules.keys():
 import OmniMarkupLib.LinuxModuleChecker
 OmniMarkupLib.LinuxModuleChecker.check()
 
-from OmniMarkupLib import log
+from OmniMarkupLib import OnDemandDownloader, log
 from OmniMarkupLib.Setting import Setting
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
-from OmniMarkupLib.Common import RenderedMarkupCache
-
-
-g_server = None
+from OmniMarkupLib.Common import Singleton, RenderedMarkupCache
 
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
@@ -202,19 +199,65 @@ class PluginEventListener(sublime_plugin.EventListener):
             return RendererManager.has_renderer_enabled_in_view(view)
         return None
 
+g_server = None
+
+
+@Singleton
+class PluginManager(object):
+    def __init__(self):
+        setting = Setting.instance()
+        self.old_server_port = setting.server_port
+        self.old_ajax_polling_interval = setting.ajax_polling_interval
+        self.old_html_template_name = setting.html_template_name
+
+    def on_setting_changing(self, setting):
+        self.old_server_port = setting.server_port
+        self.old_ajax_polling_interval = setting.ajax_polling_interval
+        self.old_html_template_name = setting.html_template_name
+
+    def on_setting_changed(self, setting):
+        PLUGIN_NAME = __name__
+        if (setting.ajax_polling_interval != self.old_ajax_polling_interval or
+            setting.html_template_name != self.old_html_template_name):
+            sublime.status_message(PLUGIN_NAME + ' requires browser reload to apply changes')
+
+        need_server_restart = False
+        if (setting.server_port != self.old_server_port):
+            need_server_restart = True
+
+        if need_server_restart:
+            self.restart_server()
+
+        if setting.mathjax_enabled:
+            OnDemandDownloader.on_demand_download_mathjax()
+
+    def subscribe_setting_events(self):
+        Setting.instance().subscribe('changing', self.on_setting_changing)
+        Setting.instance().subscribe('changed', self.on_setting_changed)
+
+    def restart_server(self):
+        global g_server
+        if g_server is not None:
+            self.stop_server()
+        g_server = Server(Setting.instance().server_port)
+
+    def stop_server(self):
+        global g_server
+        if g_server is not None:
+            g_server.stop()
+            g_server = None
+
 
 def unload_handler():
     log.info('Unloading...')
     # Cleaning up resources...
-    # Stopping server
-    global g_server
-    g_server.stop()
+    PluginManager.instance().stop_server()
     # Stopping renderer worker
     RendererManager.WORKER.stop()
 
 
-RendererManager.load_renderers()
-Setting.instance().set_renderers(RendererManager.RENDERERS)
-Setting.instance().reload()
+Setting.instance().init()
+PluginManager.instance().subscribe_setting_events()
+RendererManager.init()
 RendererManager.WORKER.start()
-g_server = Server(Setting.instance().server_port)
+PluginManager.instance().restart_server()

@@ -229,3 +229,17 @@ class RendererManager(object):
             # Restore the current directory
             os.chdir(oldpath)
             LibraryPathManager.pop_search_path()
+
+    @classmethod
+    def _on_setting_changed(cls, setting):
+        setting = Setting.instance()
+        setting.renderer_options_dict.clear()
+        for renderer_classname, _ in cls.RENDERERS:
+            key = 'renderer_options-' + renderer_classname
+            renderer_specific_options = setting._sublime_settings.get(key, {})
+            setting.renderer_options_dict[renderer_classname] = renderer_specific_options
+
+    @classmethod
+    def init(cls):
+        cls.load_renderers()
+        Setting.instance().subscribe('changed', cls._on_setting_changed)
