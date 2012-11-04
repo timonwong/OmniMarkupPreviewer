@@ -206,12 +206,10 @@ g_server = None
 class PluginManager(object):
     def __init__(self):
         setting = Setting.instance()
-        self.old_server_port = setting.server_port
-        self.old_ajax_polling_interval = setting.ajax_polling_interval
-        self.old_html_template_name = setting.html_template_name
+        self.on_setting_changing(setting)
 
     def on_setting_changing(self, setting):
-        self.old_server_port = setting.server_port
+        self.old_server_host = setting.server_host
         self.old_ajax_polling_interval = setting.ajax_polling_interval
         self.old_html_template_name = setting.html_template_name
 
@@ -221,9 +219,10 @@ class PluginManager(object):
             setting.html_template_name != self.old_html_template_name):
             sublime.status_message(PLUGIN_NAME + ' requires browser reload to apply changes')
 
-        need_server_restart = False
-        if (setting.server_port != self.old_server_port):
-            need_server_restart = True
+        need_server_restart = (
+            (setting.server_host != self.old_server_host) or
+            (setting.server_port != self.old_server_port)
+        )
 
         if need_server_restart:
             self.restart_server()
@@ -239,7 +238,8 @@ class PluginManager(object):
         global g_server
         if g_server is not None:
             self.stop_server()
-        g_server = Server(Setting.instance().server_port)
+        setting = Setting.instance()
+        g_server = Server(host=setting.server_host, port=setting.server_port)
 
     def stop_server(self):
         global g_server

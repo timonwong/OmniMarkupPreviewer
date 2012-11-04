@@ -198,8 +198,8 @@ class Server(object):
         def run(self):
             bottle_run(server=self.server)
 
-    def __init__(self, port):
-        self.server = StoppableCherryPyServer(port=port)
+    def __init__(self, host='127.0.0.1', port='51004'):
+        self.server = StoppableCherryPyServer(host=host, port=port)
         self.runner = Server.ServerThread(self.server)
         self.runner.daemon = True
         self.runner.start()

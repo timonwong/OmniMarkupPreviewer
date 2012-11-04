@@ -32,6 +32,7 @@ class Setting(SettingEventSource):
         SettingEventSource.__init__(self)
         self._sublime_settings = None
 
+        self.server_host = '127.0.0.1'
         self.server_port = 51004
         self.refresh_on_modified = True
         self.refresh_on_modified_delay = 500
@@ -53,6 +54,7 @@ class Setting(SettingEventSource):
         settings.add_on_change(PLUGIN_NAME, self._settings_changed_handler)
 
         self._sublime_settings = settings
+        self.server_host = settings.get("server_host", '127.0.0.1')
         self.server_port = settings.get("server_port", 51004)
         self.refresh_on_modified = settings.get("refresh_on_modified", True)
         self.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
