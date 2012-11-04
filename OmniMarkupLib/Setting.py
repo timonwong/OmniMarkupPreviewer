@@ -30,27 +30,12 @@ class SettingEventSource(object):
 class Setting(SettingEventSource):
     def __init__(self):
         SettingEventSource.__init__(self)
-        self._sublime_settings = None
 
-        self.server_host = '127.0.0.1'
-        self.server_port = 51004
-        self.refresh_on_modified = True
-        self.refresh_on_modified_delay = 500
-        self.refresh_on_saved = True
-        self.refresh_on_loaded = True
-        self.html_template_name = 'github'
-        self.ajax_polling_interval = 500
-        self.ignored_renderers = set()
-        self.mathjax_enabled = False
-
-    def init(self, clear_subscribers=True):  # Reload settings
-        if clear_subscribers:
-            self.clear_subscribers()
-
+    def load_setting(self):
         PLUGIN_NAME = 'OmniMarkupPreviewer'
         settings = sublime.load_settings(PLUGIN_NAME + '.sublime-settings')
         settings.clear_on_change(PLUGIN_NAME)
-        settings.add_on_change(PLUGIN_NAME, self._settings_changed_handler)
+        settings.add_on_change(PLUGIN_NAME, self.sublime_settings_on_change)
 
         self._sublime_settings = settings
         self.server_host = settings.get("server_host", '127.0.0.1')
@@ -64,8 +49,12 @@ class Setting(SettingEventSource):
         self.ignored_renderers = set(settings.get("ignored_renderers", []))
         self.mathjax_enabled = settings.get("mathjax_enabled", False)
 
-    def _settings_changed_handler(self):
-        log.info('Reload settings...')
+    def init(self):
+        self.clear_subscribers()
+        self.load_setting()
+
+    def sublime_settings_on_change(self):
+        log.info('Reloading settings...')
         self.notify('changing', setting=self)
-        self.init(False)
+        self.load_setting()
         self.notify('changed', setting=self)
