@@ -21,13 +21,18 @@ SOFTWARE.
 """
 
 import os
-import io
 import threading
 import contextlib
 import zipfile
 import log
 import urllib2
 import sublime
+
+try:
+    import cStringIO
+    StringIO = cStringIO
+except ImportError:
+    import StringIO
 
 
 __g_mathjax_thread = None
@@ -42,8 +47,9 @@ def on_demand_download_mathjax():
             log.info('Downloading MathJax from "%s"', archive_url)
 
             with contextlib.closing(urllib2.urlopen(archive_url)) as archive_file:
-                archive_stream = io.BytesIO(archive_file.read())
+                archive_stream = StringIO.StringIO(archive_file.read())
                 archive_stream.seek(0)
+                log.info('Extrating contents from mathjax.zip ...')
                 with contextlib.closing(zipfile.ZipFile(archive_stream)) as zip_file:
                     # Check archive first
                     for path in zip_file.namelist():
@@ -84,7 +90,8 @@ def on_demand_download_mathjax():
             __g_mathjax_thread = None
 
     plugin_folder = os.path.join(sublime.packages_path(), 'OmniMarkupPreviewer')
-    if os.path.exists(os.path.join(plugin_folder, '.MATHJAX.DOWNLOADED')):
+    if (os.path.exists(os.path.join(plugin_folder, '.MATHJAX.DOWNLOADED')) and
+    os.path.exists(os.path.join(plugin_folder, 'public', 'mathjax'))):
         # No need to re-download
         return
     global __g_mathjax_thread

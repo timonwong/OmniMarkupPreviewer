@@ -42,11 +42,16 @@ for key in sys.modules.keys():
 import OmniMarkupLib.LinuxModuleChecker
 OmniMarkupLib.LinuxModuleChecker.check()
 
-from OmniMarkupLib import OnDemandDownloader, log
+from OmniMarkupLib import log
 from OmniMarkupLib.Setting import Setting
 from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
 from OmniMarkupLib.Common import Singleton, RenderedMarkupCache
+
+try:
+    from OmniMarkupLib import OnDemandDownloader
+except:
+    log.exception("Error on loading OnDemandDownloader")
 
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
