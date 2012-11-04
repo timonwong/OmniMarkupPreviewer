@@ -48,10 +48,9 @@ class WorkerQueueItem(object):
 
 
 class RendererWorker(threading.Thread):
-    def __init__(self):
+    def __init__(self, mutex):
         threading.Thread.__init__(self)
-        self.mutex = threading.Lock()
-        self.cond = threading.Condition(self.mutex)
+        self.cond = threading.Condition(mutex)
         self.que = {}
         self.stopping = False
 
@@ -98,16 +97,18 @@ class RendererWorker(threading.Thread):
 
 
 class RendererManager(object):
-    WORKER = RendererWorker()
+    MUTEX = threading.Lock()
+    RW_LOCK = RWLock(MUTEX)
+
+    WORKER = RendererWorker(MUTEX)
     LANG_RE = re.compile(r"^[^\s]+(?=\s+)")
     RENDERERS = []
-    LOCK = RWLock()
 
     @classmethod
     def has_any_valid_renderer(cls, filename, lang):
         # filename may be None, so prevent it
         filename = filename or ""
-        with cls.LOCK.readlock:
+        with cls.RW_LOCK.readlock:
             for renderer_classname, renderer in cls.RENDERERS:
                 if renderer.is_enabled(filename, lang):
                     return True
@@ -131,7 +132,7 @@ class RendererManager(object):
     @classmethod
     def render_text(cls, fullpath, lang, text):
         filename = os.path.basename(fullpath)
-        with cls.LOCK.readlock:
+        with cls.RW_LOCK.readlock:
             for renderer_classname, renderer in cls.RENDERERS:
                 try:
                     if renderer.is_enabled(filename, lang):
@@ -219,7 +220,7 @@ class RendererManager(object):
             os.chdir(oldpath)
             LibraryPathManager.pop_search_path()
 
-        with cls.LOCK.writelock:
+        with cls.RW_LOCK.writelock:
             cls.RENDERERS = renderers
 
     OLD_IGNORED_RENDERERS = set()
@@ -236,7 +237,7 @@ class RendererManager(object):
             log.info('Reloading renderers...')
             cls.load_renderers()
 
-        with cls.LOCK.readlock:
+        with cls.RW_LOCK.readlock:
             for renderer_classname, renderer in cls.RENDERERS:
                 key = 'renderer_options-' + renderer_classname
                 try:

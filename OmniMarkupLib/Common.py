@@ -51,12 +51,15 @@ class Singleton(object):
 ## {{{ http://code.activestate.com/recipes/502283/ (r1)
 # Read write lock
 class RWLock(object):
-    def __init__(self):
+    def __init__(self, lock=None):
         """Initialize this read-write lock."""
 
         # Condition variable, used to signal waiters of a change in object
         # state.
-        self.__condition = Condition(Lock())
+        if lock is None:
+            self.__condition = Condition(Lock())
+        else:
+            self.__condition = Condition(lock)
 
         # Initialize with no writers.
         self.__writer = None
