@@ -69,7 +69,6 @@ def build_inlinepatterns(md_instance, **kwargs):
             ReferencePattern(SHORT_REF_RE, md_instance)
     inlinePatterns["autolink"] = AutolinkPattern(AUTOLINK_RE, md_instance)
     inlinePatterns["automail"] = AutomailPattern(AUTOMAIL_RE, md_instance)
-    inlinePatterns["linebreak2"] = SubstituteTagPattern(LINE_BREAK_2_RE, 'br')
     inlinePatterns["linebreak"] = SubstituteTagPattern(LINE_BREAK_RE, 'br')
     if md_instance.safeMode != 'escape':
         inlinePatterns["html"] = HtmlPattern(HTML_RE, md_instance)
@@ -119,7 +118,6 @@ AUTOMAIL_RE = r'<([^> \!]*@[^> ]*)>'               # <me@example.com>
 HTML_RE = r'(\<([a-zA-Z/][^\>]*?|\!--.*?--)\>)'               # <...>
 ENTITY_RE = r'(&[\#a-zA-Z0-9]*;)'               # &amp;
 LINE_BREAK_RE = r'  \n'                     # two spaces at end of line
-LINE_BREAK_2_RE = r'  $'                    # two spaces at end of text
 
 
 def dequote(string):
@@ -191,10 +189,27 @@ class Pattern:
             stash = self.markdown.treeprocessors['inline'].stashed_nodes
         except KeyError:
             return text
+        def itertext(el):
+            ' Reimplement Element.itertext for older python versions '
+            tag = el.tag
+            if not isinstance(tag, basestring) and tag is not None:
+                return
+            if el.text:
+                yield el.text
+            for e in el:
+                for s in itertext(e):
+                    yield s
+                if e.tail:
+                    yield e.tail
         def get_stash(m):
             id = m.group(1)
             if id in stash:
-                return stash.get(id)
+                value = stash.get(id)
+                if isinstance(value, basestring):
+                    return value
+                else:
+                    # An etree Element - return text content only
+                    return ''.join(itertext(value)) 
         return util.INLINE_PLACEHOLDER_RE.sub(get_stash, text)
 
 
@@ -235,7 +250,7 @@ class SimpleTagPattern(Pattern):
 
 
 class SubstituteTagPattern(SimpleTagPattern):
-    """ Return a eLement of type `tag` with no children. """
+    """ Return an element of type `tag` with no children. """
     def handleMatch (self, m):
         return util.etree.Element(self.tag)
 
@@ -328,6 +343,7 @@ class LinkPattern(Pattern):
         `username:password@host:port`.
 
         """
+        url = url.replace(' ', '%20')
         if not self.markdown.safeMode:
             # Return immediately bipassing parsing.
             return url
@@ -372,7 +388,7 @@ class ImagePattern(LinkPattern):
         else:
             truealt = m.group(2)
 
-        el.set('alt', truealt)
+        el.set('alt', self.unescape(truealt))
         return el
 
 class ReferencePattern(LinkPattern):
@@ -417,7 +433,7 @@ class ImageReferencePattern(ReferencePattern):
         el.set("src", self.sanitize_url(href))
         if title:
             el.set("title", title)
-        el.set("alt", text)
+        el.set("alt", self.unescape(text))
         return el
 
 

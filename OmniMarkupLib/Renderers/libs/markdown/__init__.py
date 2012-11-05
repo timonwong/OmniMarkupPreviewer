@@ -30,13 +30,14 @@ Copyright 2004 Manfred Stienstra (the original version)
 License: BSD (see LICENSE for details).
 """
 
-version = "2.2.0"
-version_info = (2,2,0, "final")
+version = "2.2.1"
+version_info = (2,2,1, "final")
 
 import re
 import codecs
 import sys
 import logging
+import warnings
 import util
 from preprocessors import build_preprocessors
 from blockprocessors import build_block_parser
@@ -106,7 +107,7 @@ class Markdown:
 
         """
 
-        # For backward compatability, loop through old positional args
+        # For backward compatibility, loop through old positional args
         pos = ['extensions', 'extension_configs', 'safe_mode', 'output_format']
         c = 0
         for arg in args:
@@ -163,10 +164,10 @@ class Markdown:
             if isinstance(ext, basestring):
                 ext = self.build_extension(ext, configs.get(ext, []))
             if isinstance(ext, Extension):
-                # might raise NotImplementedError, but that's the extension author's problem
                 ext.extendMarkdown(self, globals())
             elif ext is not None:
-                raise ValueError('Extension "%s.%s" must be of type: "markdown.Extension".' \
+                raise TypeError(
+                    'Extension "%s.%s" must be of type: "markdown.Extension"'
                     % (ext.__class__.__module__, ext.__class__.__name__))
 
         return self
@@ -200,19 +201,22 @@ class Markdown:
             module_name_old_style = '_'.join(['mdx', ext_name])
             try: # Old style (mdx_<extension>)
                 module = __import__(module_name_old_style)
-            except ImportError:
-                logger.warn("Failed loading extension '%s' from '%s' or '%s'"
-                    % (ext_name, module_name, module_name_old_style))
-                # Return None so we don't try to initiate none-existant extension
-                return None
+            except ImportError, e:
+                message = "Failed loading extension '%s' from '%s' or '%s'" \
+                    % (ext_name, module_name, module_name_old_style)
+                e.args = (message,) + e.args[1:]
+                raise
 
         # If the module is loaded successfully, we expect it to define a
         # function called makeExtension()
         try:
             return module.makeExtension(configs.items())
         except AttributeError, e:
-            logger.warn("Failed to initiate extension '%s': %s" % (ext_name, e))
-            return None
+            message = e.args[0]
+            message = "Failed to initiate extension " \
+                      "'%s': %s" % (ext_name, message)
+            e.args = (message,) + e.args[1:]
+            raise
 
     def registerExtension(self, extension):
         """ This gets called by the extension """
@@ -234,11 +238,17 @@ class Markdown:
 
     def set_output_format(self, format):
         """ Set the output format for the class instance. """
+        self.output_format = format.lower()
         try:
-            self.serializer = self.output_formats[format.lower()]
-        except KeyError:
-            raise KeyError('Invalid Output Format: "%s". Use one of %s.' \
-                               % (format, self.output_formats.keys()))
+            self.serializer = self.output_formats[self.output_format]
+        except KeyError, e:
+            valid_formats = self.output_formats.keys()
+            valid_formats.sort()
+            message = 'Invalid Output Format: "%s". Use one of %s.' \
+                       % (self.output_format, 
+                          '"' + '", "'.join(valid_formats) + '"')
+            e.args = (message,) + e.args[1:]
+            raise
         return self
 
     def convert(self, source):
@@ -369,7 +379,15 @@ class Markdown:
                 output_file.write(html)
                 # Don't close here. User may want to write more.
         else:
-            sys.stdout.write(html)
+            if sys.stdout.encoding:
+                # If we are in Python 3 or if we are not piping output:
+                sys.stdout.write(html)
+            else:
+                # In python 2.x if you pipe output on command line,
+                # sys.stdout.encoding is None. So lets set it:
+                writer = codecs.getwriter(encoding)
+                stdout = writer(sys.stdout, errors="xmlcharrefreplace")
+                stdout.write(html)
 
         return self
 

@@ -40,9 +40,9 @@ class CodeHilite:
 
     * src: Source string or any object with a .readline attribute.
 
-    * linenos: (Boolen) Turn line numbering 'on' or 'off' (off by default).
+    * linenos: (Boolean) Turn line numbering 'on' or 'off' (off by default).
 
-    * guess_lang: (Boolen) Turn language auto-detection 'on' or 'off' (on by default).
+    * guess_lang: (Boolean) Turn language auto-detection 'on' or 'off' (on by default).
 
     * css_class: Set class name of wrapper div ('codehilite' by default).
 
@@ -111,7 +111,7 @@ class CodeHilite:
                 classes.append('linenums')
             class_str = ''
             if classes:
-                class_str = ' class="%s"' % ' '.join(classes)
+                class_str = ' class="%s"' % ' '.join(classes) 
             return '<pre class="%s"><code%s>%s</code></pre>\n'% \
                         (self.css_class, class_str, txt)
 
