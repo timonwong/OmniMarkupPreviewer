@@ -78,6 +78,7 @@ Known Issues
 ------------
 
 1. RDoc and Pod documents cannot be previewed utils they are saved to disk.
+2. On demand downloader for MathJax library doesn't work under Linux.
 
 
 What's New

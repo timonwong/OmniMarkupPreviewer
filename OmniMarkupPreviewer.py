@@ -229,12 +229,10 @@ class PluginManager(object):
             (setting.server_host != self.old_server_host) or
             (setting.server_port != self.old_server_port)
         )
-
         if need_server_restart:
             self.restart_server()
 
-        if setting.mathjax_enabled:
-            OnDemandDownloader.on_demand_download_mathjax()
+        self.try_download_mathjax()
 
     def subscribe_setting_events(self):
         Setting.instance().subscribe('changing', self.on_setting_changing)
@@ -253,6 +251,12 @@ class PluginManager(object):
             g_server.stop()
             g_server = None
 
+    def try_download_mathjax(self, setting=None):
+        if setting is None:
+            setting = Setting.instance()
+        if setting.mathjax_enabled:
+            OnDemandDownloader.on_demand_download_mathjax()
+
 
 def unload_handler():
     log.info('Unloading plugin...')
@@ -268,3 +272,4 @@ PluginManager.instance().subscribe_setting_events()
 RendererManager.init()
 RendererManager.WORKER.start()
 PluginManager.instance().restart_server()
+PluginManager.instance().try_download_mathjax()
