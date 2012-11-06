@@ -83,11 +83,12 @@ Known Issues
 What's New
 ----------
 
-v1.7 (TBD)
+v1.7 (11/07/2012)
 
 * Add option `"server_host"` for server listening address.
 * Now OmniMarkupPreviewer doesn't require restart on some settings change anymore.
 * On demand downloader for mathjax should work under Linux now (using `wget` or `curl`).
+* Unsaved textile documents can now be previewed as well.
 
 v1.6 (11/03/2012)
 

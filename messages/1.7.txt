@@ -10,3 +10,4 @@ NOTE:
 * Add option `"server_host"` for server listening address.
 * Now OmniMarkupPreviewer doesn't require restart on some settings change anymore.
 * On demand downloader for mathjax should work under Linux now (using `wget` or `curl`).
+* Unsaved textile documents can now be previewed as well.
