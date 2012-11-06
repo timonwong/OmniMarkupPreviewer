@@ -21,12 +21,13 @@ SOFTWARE.
 """
 
 import os
+import sys
 import threading
 import contextlib
-import zipfile
-import log
 import urllib2
 import sublime
+import zipfile
+from Downloader import *
 
 try:
     import cStringIO
@@ -35,76 +36,82 @@ except ImportError:
     import StringIO
 
 
+MATHJAX_LIB_URL = 'https://github.com/downloads/timonwong/OmniMarkupPreviewer/mathjax.zip'
+
+
+class MathJaxOnDemandDownloader(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.user_folder = os.path.join(sublime.packages_path(), 'User', 'OmniMarkupPreviewer')
+        self.settings = {}
+
+    def download_url(self, url, error_message):
+        has_ssl = 'ssl' in sys.modules and hasattr(urllib2, 'HTTPSHandler')
+        is_ssl = url.startswith('https://')
+
+        if (is_ssl and has_ssl) or not is_ssl:
+            downloader = UrlLib2Downloader(self.settings)
+        else:
+            for downloader_class in [CurlDownloader, WgetDownloader]:
+                try:
+                    downloader = downloader_class(self.settings)
+                    break
+                except BinaryNotFoundError:
+                    pass
+
+        if not downloader:
+            self.log('Unable to download MathJax library due to invalid downloader')
+            return False
+
+        timeout = 60
+        return downloader.download(url.replace(' ', '%20'), error_message, timeout, 3)
+
+    def run(self):
+        target_folder = os.path.join(self.user_folder, 'public')
+        mathjax_folder = os.path.join(target_folder, 'mathjax')
+        mark_file = os.path.join(self.user_folder, '.MATHJAX.DOWNLOADED')
+        if os.path.exists(mark_file) and os.path.exists(mathjax_folder):
+            # Already downloaded
+            return
+
+        log.info('Downloading MathJax from "%s"', MATHJAX_LIB_URL)
+        archive = self.download_url(MATHJAX_LIB_URL, 'Unable to download mathjax library from %s' % MATHJAX_LIB_URL)
+        if not archive:
+            # Download failed
+            return
+
+        with contextlib.closing(StringIO.StringIO(archive)) as archive_stream:
+            archive_stream.seek(0)
+            log.info('Extrating contents from mathjax.zip ...')
+            with contextlib.closing(zipfile.ZipFile(archive_stream)) as zip_file:
+                # Check archive first
+                for path in zip_file.namelist():
+                    if path[0] == '/' or path.find('../') != -1 or path.find('..\\') != -1:
+                        # Not a safe zip file
+                        log.error('"%s" contains invalid files', archive_url)
+                        return
+                # Install
+                if not os.path.exists(target_folder):
+                    os.makedirs(target_folder)
+                for path in zip_file.namelist():
+                    if path.endswith('/'):
+                        # Create directory
+                        folder = os.path.join(target_folder, path)
+                        if not os.path.exists(folder):
+                            os.makedirs(folder)
+                    else:
+                        # Write file
+                        with open(os.path.join(target_folder, path), 'wb') as f:
+                            f.write(zip_file.read(path))
+                # Complete
+                with open(mark_file, 'w') as f:
+                    f.write('')
+                log.info('MathJax succesfully extracted into "%s"', target_folder)
+
+
 __g_mathjax_thread_started = False
 
 
 def on_demand_download_mathjax():
-    def background_worker(target_folder, mark_file):
-        global __g_mathjax_thread_started
-        __g_mathjax_thread_started = True
-        archive_url = 'https://github.com/downloads/timonwong/OmniMarkupPreviewer/mathjax.zip'
-        try:
-            urllib2.install_opener(urllib2.build_opener(urllib2.ProxyHandler()))
-            log.info('Downloading MathJax from "%s"', archive_url)
-
-            with contextlib.closing(urllib2.urlopen(archive_url)) as archive_file:
-                archive_stream = StringIO.StringIO(archive_file.read())
-                archive_stream.seek(0)
-                log.info('Extrating contents from mathjax.zip ...')
-                with contextlib.closing(zipfile.ZipFile(archive_stream)) as zip_file:
-                    # Check archive first
-                    for path in zip_file.namelist():
-                        if path[0] == '/' or path.find('../') != -1 or path.find('..\\') != -1:
-                            # Not a safe zip file
-                            log.error('"%s" contains invalid files', archive_url)
-                            return
-                    # Install
-                    if not os.path.exists(target_folder):
-                        os.makedirs(target_folder)
-                    for path in zip_file.namelist():
-                        if path.endswith('/'):
-                            # Create directory
-                            folder = os.path.join(target_folder, path)
-                            if not os.path.exists(folder):
-                                os.makedirs(folder)
-                        else:
-                            # Write file
-                            with open(os.path.join(target_folder, path), 'wb') as f:
-                                f.write(zip_file.read(path))
-                    # Complete
-                    with open(mark_file, 'w') as f:
-                        f.write('')
-                    log.info('MathJax succesfully extracted into "%s"', target_folder)
-        except:
-            log.exception("Error on downloading MathJax")
-            message = (
-                'MathJax download failed, you have to download and extract it manually.\n'
-                'After extracting, you have to create a file named "%s".\n'
-                'Download Url:\n "%s"\n'
-                'Target folder: "%s"' % (
-                    os.path.join(user_folder, '.MATHJAX.DOWNLOADED'), archive_url, target_folder
-                )
-            )
-            sublime.set_timeout(lambda: sublime.message_dialog(message), 0)
-        finally:
-            global __g_mathjax_thread_started
-            __g_mathjax_thread_started = False
-
-    global __g_mathjax_thread_started
-    if __g_mathjax_thread_started:
-        # In progress
-        return
-
-    user_folder = os.path.join(sublime.packages_path(), 'User', 'OmniMarkupPreviewer')
-    target_folder = os.path.join(user_folder, 'public')
-    mathjax_folder = os.path.join(target_folder, 'mathjax')
-    mark_file = os.path.join(user_folder, '.MATHJAX.DOWNLOADED')
-    if os.path.exists(mark_file) and os.path.exists(mathjax_folder):
-        # Already downloaded
-        return
-
-    thread = threading.Thread(
-        name='Thread-on_demand_download_mathjax', target=background_worker,
-        args=[target_folder, mark_file]
-    )
+    thread = MathJaxOnDemandDownloader()
     thread.start()

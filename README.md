@@ -77,8 +77,7 @@ Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current Fi
 Known Issues
 ------------
 
-1. RDoc and Pod documents cannot be previewed utils they are saved to disk.
-2. On demand downloader for MathJax library doesn't work under Linux.
+* RDoc and Pod documents cannot be previewed utils they are saved to disk.
 
 
 What's New
@@ -88,6 +87,7 @@ v1.7 (TBD)
 
 * Add option `"server_host"` for server listening address.
 * Now OmniMarkupPreviewer doesn't require restart on some settings change anymore.
+* On demand downloader for mathjax should work under Linux now (using `wget` or `curl`).
 
 v1.6 (11/03/2012)
 
