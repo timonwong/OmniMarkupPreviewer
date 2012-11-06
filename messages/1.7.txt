@@ -1,0 +1,12 @@
+OmniMarkupPreviewer v1.7 Changelog:
+
+
+NOTE:
+1. MathJax library was removed during upgrade, because it's located in wrong
+   directory so Package Control just remove it. Please hold on until mathjax library
+   is installed automatically, if you have set `"mathjax_enabled"` to `true` before.
+
+
+* Add option `"server_host"` for server listening address.
+* Now OmniMarkupPreviewer doesn't require restart on some settings change anymore.
+* On demand downloader for mathjax should work under Linux now (using `wget` or `curl`).
