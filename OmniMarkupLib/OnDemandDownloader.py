@@ -36,7 +36,7 @@ except ImportError:
     import StringIO
 
 
-MATHJAX_LIB_URL = 'https://github.com/downloads/timonwong/OmniMarkupPreviewer/mathjax.zip'
+MATHJAX_LIB_URL = 'http://cloud.github.com/downloads/timonwong/OmniMarkupPreviewer/mathjax.zip'
 
 
 class MathJaxOnDemandDownloader(threading.Thread):
