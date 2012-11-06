@@ -74,7 +74,9 @@ class MathJaxOnDemandDownloader(threading.Thread):
             # Already downloaded
             return
 
-        log.info('Downloading MathJax from "%s"', MATHJAX_LIB_URL)
+        downloading_message = 'Downloading MathJax from "%s"' % MATHJAX_LIB_URL
+        log.info(downloading_message)
+        sublime.set_timeout(lambda: sublime.status_message(downloading_message), 0)
         archive = self.download_url(MATHJAX_LIB_URL, 'Unable to download mathjax library from %s' % MATHJAX_LIB_URL)
         if not archive:
             # Download failed
@@ -106,7 +108,9 @@ class MathJaxOnDemandDownloader(threading.Thread):
                 # Complete
                 with open(mark_file, 'w') as f:
                     f.write('')
-                log.info('MathJax succesfully extracted into "%s"', target_folder)
+                success_message = 'MathJax succesfully installed into "%s"' % target_folder
+                log.info(success_message)
+                sublime.set_timeout(lambda: sublime.status_message(success_message), 0)
 
 
 __g_mathjax_thread_started = False
