@@ -8,6 +8,12 @@
     "refresh_on_saved": true,
     "refresh_on_loaded": true,
 
+    // User defined command for launching preview in web browser
+    // For example:
+    //   Launching preview using chrome in OS X:
+    //      ["open", "-a", "chrome", "{url}"]
+    "browser_command": [],
+
     // User public static files should be placed into
     //   ${packages}/User/OmniMarkupPreviewer/public/
     // User templates should be placed into:

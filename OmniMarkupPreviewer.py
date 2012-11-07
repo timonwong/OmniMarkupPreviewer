@@ -20,9 +20,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import os
 import sys
 import types
 import desktop
+import locale
+import subprocess
 import threading
 import time
 import sublime
@@ -59,8 +62,31 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
         url = 'http://localhost:%d/view/%d' % \
             (Setting.instance().server_port, self.view.buffer_id())
         # Open with the default browser
-        log.info('Starting web browser for %s', url)
-        desktop.open(url)
+        log.info('Launching web browser for %s', url)
+        setting = Setting.instance()
+        try:
+            if setting.browser_command:
+                browser_command = [
+                    os.path.expandvars(arg).format(url=url)
+                    for arg in setting.browser_command
+                ]
+
+                if os.name == 'nt':
+                    # unicode arguments broken under windows
+                    encoding = locale.getpreferredencoding()
+                    browser_command = [arg.encode(encoding) for arg in browser_command]
+
+                subprocess.Popen(browser_command)
+                sublime.status_message('Preview launched in user defined web browser')
+            else:
+                # Default web browser
+                desktop.open(url)
+                sublime.status_message('Preview launched in default web browser')
+        except:
+            if setting.browser_command:
+                log.exception('Error while launching user defined web browser')
+            else:
+                log.exception('Error while launching default web browser')
 
     def is_enabled(self):
         return RendererManager.has_renderer_enabled_in_view(self.view)

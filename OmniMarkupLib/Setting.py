@@ -44,6 +44,7 @@ class Setting(SettingEventSource):
         self.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
         self.refresh_on_saved = settings.get("refresh_on_saved", True)
         self.refresh_on_loaded = settings.get("refresh_on_loaded", True)
+        self.browser_command = settings.get("browser_command", [])
         self.html_template_name = settings.get("html_template_name", 'github')
         self.ajax_polling_interval = settings.get("ajax_polling_interval", 500)
         self.ignored_renderers = set(settings.get("ignored_renderers", []))
