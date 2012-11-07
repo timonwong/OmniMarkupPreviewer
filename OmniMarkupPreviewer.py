@@ -59,6 +59,7 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
         url = 'http://localhost:%d/view/%d' % \
             (Setting.instance().server_port, self.view.buffer_id())
         # Open with the default browser
+        log.info('Starting web browser for %s', url)
         webbrowser.open(url, new=2)
 
     def is_enabled(self):
@@ -232,7 +233,7 @@ class PluginManager(object):
         if need_server_restart:
             self.restart_server()
 
-        self.try_download_mathjax()
+        self.try_download_mathjax(setting)
 
     def subscribe_setting_events(self):
         Setting.instance().subscribe('changing', self.on_setting_changing)

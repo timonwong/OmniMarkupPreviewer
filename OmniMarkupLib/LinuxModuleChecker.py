@@ -21,19 +21,10 @@ SOFTWARE.
 """
 
 import os
+import sublime
 
 
 def cannot_import_some_modules_in_linux():
-    import sublime
-    import os.path
-
-    settings = sublime.load_settings('OmniMarkupPreviewer.sublime-settings')
-    reported = settings.get('missing_module_reported', False)
-    if reported:  # Only once
-        return
-    settings.set('missing_module_reported', True)
-    sublime.save_settings('OmniMarkupPreviewer.sublime-settings')
-
     if not sublime.ok_cancel_dialog("OmniMarkupPreviewer cannot work "
         "because some modules is missing from Sublime Text 2 Linux version.\n"
         "Click \"OK\" to see how to fix it"):
@@ -54,7 +45,7 @@ ln -s "$HOME/.pythonbrew/pythons/Python-2.6/lib/python2.6/" "${SUBLIME_TEXT2_FOL
     # Open this script in a new view
     window = sublime.active_window()
     view = window.new_file()
-    view.set_name('Fix missing modules.sh')
+    view.set_name('Fix-missing-modules.sh')
     view.set_scratch(True)
     edit = view.begin_edit()
     view.set_syntax_file('Packages/ShellScript/Shell-Unix-Generic.tmLanguage')
@@ -66,11 +57,17 @@ ln -s "$HOME/.pythonbrew/pythons/Python-2.6/lib/python2.6/" "${SUBLIME_TEXT2_FOL
         view.end_edit(edit)
 
 
-def check():
+def check(force_check=False):
     if os.name == 'posix':  # For Linux only
+        settings = sublime.load_settings('OmniMarkupPreviewer.sublime-settings')
+        reported = settings.get('missing_module_reported', False)
+        if reported and not force_check:
+            # Check only once
+            return
+        settings.set('missing_module_reported', True)
+        sublime.save_settings('OmniMarkupPreviewer.sublime-settings')
         try:
             import pyexpat
             import ctypes
         except ImportError:
-            import sublime
             sublime.set_timeout(cannot_import_some_modules_in_linux, 500)

@@ -76,7 +76,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
             __g_mathjax_thread_started = False
 
     def do_work(self):
-        downloading_message = 'Downloading MathJax from "%s"' % MATHJAX_LIB_URL
+        downloading_message = 'Downloading MathJax from %s' % MATHJAX_LIB_URL
         log.info(downloading_message)
         sublime.set_timeout(lambda: sublime.status_message(downloading_message), 0)
         archive = self.download_url(MATHJAX_LIB_URL, 'Unable to download mathjax library from %s' % MATHJAX_LIB_URL)
@@ -92,7 +92,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
                 for path in zip_file.namelist():
                     if path[0] == '/' or path.find('../') != -1 or path.find('..\\') != -1:
                         # Not a safe zip file
-                        log.error('"%s" contains invalid files', archive_url)
+                        log.error('mathjax.zip contains invalid files')
                         return
                 # Install
                 if not os.path.exists(self.target_folder):
@@ -110,7 +110,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
                 # Complete
                 with open(self.mark_file, 'w') as f:
                     f.write('')
-                success_message = 'MathJax succesfully installed into "%s"' % self.target_folder
+                success_message = 'MathJax succesfully installed into %s' % self.target_folder
                 log.info(success_message)
                 sublime.set_timeout(lambda: sublime.status_message(success_message), 0)
 
