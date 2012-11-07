@@ -40,9 +40,11 @@ MATHJAX_LIB_URL = 'http://cloud.github.com/downloads/timonwong/OmniMarkupPreview
 
 
 class MathJaxOnDemandDownloader(threading.Thread):
-    def __init__(self):
+    def __init__(self, target_folder, mark_file):
         threading.Thread.__init__(self)
-        self.user_folder = os.path.join(sublime.packages_path(), 'User', 'OmniMarkupPreviewer')
+        #
+        self.target_folder = target_folder
+        self.mark_file = mark_file
         self.settings = {}
 
     def download_url(self, url, error_message):
@@ -67,13 +69,13 @@ class MathJaxOnDemandDownloader(threading.Thread):
         return downloader.download(url.replace(' ', '%20'), error_message, timeout, 3)
 
     def run(self):
-        target_folder = os.path.join(self.user_folder, 'public')
-        mathjax_folder = os.path.join(target_folder, 'mathjax')
-        mark_file = os.path.join(self.user_folder, '.MATHJAX.DOWNLOADED')
-        if os.path.exists(mark_file) and os.path.exists(mathjax_folder):
-            # Already downloaded
-            return
+        try:
+            self.do_work()
+        finally:
+            global __g_mathjax_thread_started
+            __g_mathjax_thread_started = False
 
+    def do_work(self):
         downloading_message = 'Downloading MathJax from "%s"' % MATHJAX_LIB_URL
         log.info(downloading_message)
         sublime.set_timeout(lambda: sublime.status_message(downloading_message), 0)
@@ -93,22 +95,22 @@ class MathJaxOnDemandDownloader(threading.Thread):
                         log.error('"%s" contains invalid files', archive_url)
                         return
                 # Install
-                if not os.path.exists(target_folder):
-                    os.makedirs(target_folder)
+                if not os.path.exists(self.target_folder):
+                    os.makedirs(self.target_folder)
                 for path in zip_file.namelist():
                     if path.endswith('/'):
                         # Create directory
-                        folder = os.path.join(target_folder, path)
+                        folder = os.path.join(self.target_folder, path)
                         if not os.path.exists(folder):
                             os.makedirs(folder)
                     else:
                         # Write file
-                        with open(os.path.join(target_folder, path), 'wb') as f:
+                        with open(os.path.join(self.target_folder, path), 'wb') as f:
                             f.write(zip_file.read(path))
                 # Complete
-                with open(mark_file, 'w') as f:
+                with open(self.mark_file, 'w') as f:
                     f.write('')
-                success_message = 'MathJax succesfully installed into "%s"' % target_folder
+                success_message = 'MathJax succesfully installed into "%s"' % self.target_folder
                 log.info(success_message)
                 sublime.set_timeout(lambda: sublime.status_message(success_message), 0)
 
@@ -117,5 +119,19 @@ __g_mathjax_thread_started = False
 
 
 def on_demand_download_mathjax():
-    thread = MathJaxOnDemandDownloader()
+    global __g_mathjax_thread_started
+    if __g_mathjax_thread_started:
+        # Already started
+        return
+
+    user_folder = os.path.join(sublime.packages_path(), 'User', 'OmniMarkupPreviewer')
+    target_folder = os.path.join(user_folder, 'public')
+    mathjax_folder = os.path.join(target_folder, 'mathjax')
+    mark_file = os.path.join(user_folder, '.MATHJAX.DOWNLOADED')
+    if os.path.exists(mark_file) and os.path.exists(mathjax_folder):
+        # Already downloaded
+        return
+
+    thread = MathJaxOnDemandDownloader(target_folder, mark_file)
+    __g_mathjax_thread_started = True
     thread.start()
