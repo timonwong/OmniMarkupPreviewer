@@ -59,8 +59,17 @@ except:
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, immediate=True):
-        url = 'http://localhost:%d/view/%d' % \
-            (Setting.instance().server_port, self.view.buffer_id())
+        buffer_id = self.view.buffer_id()
+        # Is already open?
+        is_open = False
+        for view in self.view.window().views():
+            if view.buffer_id == buffer_id:
+                is_open = True
+                break
+        if not is_open:
+            RendererManager.queue_view(self.view, immediate=True)
+
+        url = 'http://localhost:%d/view/%d' % (Setting.instance().server_port, buffer_id)
         # Open with the default browser
         log.info('Launching web browser for %s', url)
         setting = Setting.instance()

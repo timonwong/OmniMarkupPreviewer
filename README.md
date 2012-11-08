@@ -87,6 +87,8 @@ v1.8 (TBD)
 
 * OmniMarkupPreview is now able to use user defined browser command for launching
   web browser, through the `"browser_command"` option.
+* File which is previewing (not already open) can now be previewed correctly in
+  browser without returning "404" error.
 
 v1.7 (11/07/2012)
 
