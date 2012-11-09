@@ -3,7 +3,7 @@ import re
 import urllib2
 import subprocess
 import tempfile
-import log
+from OmniMarkupLib import log
 
 
 class BinaryNotFoundError(Exception):

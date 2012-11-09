@@ -26,13 +26,13 @@ import os.path
 import re
 import base64
 from urlparse import urlparse
-import log
 import threading
 import inspect
 import sublime
-from Setting import Setting
-from Common import RWLock, RenderedMarkupCache, RenderedMarkupCacheEntry
-import LibraryPathManager
+from OmniMarkupLib.Setting import Setting
+from OmniMarkupLib.Common import RWLock, RenderedMarkupCache, RenderedMarkupCacheEntry
+from OmniMarkupLib import LibraryPathManager
+from OmniMarkupLib import log
 
 
 __file__ = os.path.normpath(os.path.abspath(__file__))

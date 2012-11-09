@@ -25,15 +25,17 @@ import sys
 import os
 import os.path
 import base64
-import log
 import sublime
-import LibraryPathManager
-from Setting import Setting
-from RendererManager import RendererManager
-from Common import RenderedMarkupCache, Future
+from OmniMarkupLib import log
+from OmniMarkupLib import LibraryPathManager
+from OmniMarkupLib.Setting import Setting
+from OmniMarkupLib.RendererManager import RendererManager
+from OmniMarkupLib.Common import RenderedMarkupCache, Future
+
 
 __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
+
 
 DEFAULT_STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
 USER_STATIC_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),

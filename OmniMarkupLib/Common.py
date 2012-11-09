@@ -26,7 +26,7 @@ import thread
 from threading import Condition, Lock, current_thread
 from contextlib import contextmanager
 from time import time
-import log
+from OmniMarkupLib import log
 
 
 class Singleton(object):

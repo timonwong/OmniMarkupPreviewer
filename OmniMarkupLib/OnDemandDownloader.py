@@ -27,7 +27,7 @@ import contextlib
 import urllib2
 import sublime
 import zipfile
-from Downloader import *
+from OmniMarkupLib.Downloader import *
 
 try:
     import cStringIO
