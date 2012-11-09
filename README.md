@@ -83,7 +83,7 @@ Known Issues
 What's New
 ----------
 
-v1.8 (TBD)
+v1.8 (11/10/2012)
 
 * OmniMarkupPreview is now able to use user defined browser command for launching
   web browser, through the `"browser_command"` option.
