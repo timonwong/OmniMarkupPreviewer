@@ -89,6 +89,10 @@ v1.8 (TBD)
   web browser, through the `"browser_command"` option.
 * File which is previewing (not already open) can now be previewed correctly in
   browser without returning "404" error.
+* Update cherrypy module in order to fix a random server crash on startup in
+  Windows (Refer to [CherrPy #1016])
+
+[CherrPy #1016]: https://bitbucket.org/cherrypy/cherrypy/issue/1016/windowserror-error-6-the-handle-is-invalid
 
 v1.7 (11/07/2012)
 
