@@ -157,10 +157,11 @@ def handler_view(buffer_id):
             404,
             'buffer_id(%d) is not valid (not open or unsupported file format)' % buffer_id
         )
-    return template(Setting.instance().html_template_name,
+    setting = Setting.instance()
+    return template(setting.html_template_name,
                     buffer_id=buffer_id,
-                    ajax_polling_interval=Setting.instance().ajax_polling_interval,
-                    mathjax_enabled=Setting.instance().mathjax_enabled,
+                    ajax_polling_interval=setting.ajax_polling_interval,
+                    mathjax_enabled=setting.mathjax_enabled,
                     **entry)
 
 

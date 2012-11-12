@@ -42,6 +42,16 @@
     //         "ajax_polling_interval", "refresh_on_modified" and "refresh_on_modified_delay"
     "mathjax_enabled": false,
 
+    // Custom options for exporting
+    "export_options" : {
+        "template_name": "github-export",
+        "target_folder": ".",
+        // format string for filename timestamp
+        "timestamp_format" : "_%y%m%d%H%M%S",
+        "copy_to_clipboard": false,
+        "open_after_exporting": false
+    },
+
     // MarkdownRenderer options
     "renderer_options-MarkdownRenderer": {
         // Valid extensions:

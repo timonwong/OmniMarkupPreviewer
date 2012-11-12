@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import codecs
 import os
 import sys
 import types
@@ -28,6 +29,7 @@ import locale
 import subprocess
 import threading
 import time
+import tempfile
 import sublime
 import sublime_plugin
 from functools import partial
@@ -47,8 +49,8 @@ OmniMarkupLib.LinuxModuleChecker.check()
 
 from OmniMarkupLib import log
 from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.Server import Server
 from OmniMarkupLib.RendererManager import RendererManager
+from OmniMarkupLib.Server import Server
 from OmniMarkupLib.Common import Singleton, RenderedMarkupCache
 
 try:
@@ -57,45 +59,55 @@ except:
     log.exception("Error on loading OnDemandDownloader")
 
 
+def launching_web_browser_for_url(url, success_msg_default=None, success_msg_user=None):
+    try:
+        setting = Setting.instance()
+        if setting.browser_command:
+            browser_command = [
+                os.path.expandvars(arg).format(url=url)
+                for arg in setting.browser_command
+            ]
+
+            if os.name == 'nt':
+                # unicode arguments broken under windows
+                encoding = locale.getpreferredencoding()
+                browser_command = [arg.encode(encoding) for arg in browser_command]
+
+            subprocess.Popen(browser_command)
+            if success_msg_user:
+                sublime.status_message(success_msg_user)
+        else:
+            # Default web browser
+            desktop.open(url)
+            if success_msg_default:
+                sublime.status_message(success_msg_default)
+    except:
+        if setting.browser_command:
+            log.exception('Error while launching user defined web browser')
+        else:
+            log.exception('Error while launching default web browser')
+
+
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, immediate=True):
         buffer_id = self.view.buffer_id()
-        # Is already open?
-        is_open = False
+        # Is opened in a tab?
+        opened = False
         for view in self.view.window().views():
             if view.buffer_id == buffer_id:
-                is_open = True
+                opened = True
                 break
-        if not is_open:
+        if not opened:
             RendererManager.queue_view(self.view, immediate=True)
 
         url = 'http://localhost:%d/view/%d' % (Setting.instance().server_port, buffer_id)
         # Open with the default browser
         log.info('Launching web browser for %s', url)
-        setting = Setting.instance()
-        try:
-            if setting.browser_command:
-                browser_command = [
-                    os.path.expandvars(arg).format(url=url)
-                    for arg in setting.browser_command
-                ]
-
-                if os.name == 'nt':
-                    # unicode arguments broken under windows
-                    encoding = locale.getpreferredencoding()
-                    browser_command = [arg.encode(encoding) for arg in browser_command]
-
-                subprocess.Popen(browser_command)
-                sublime.status_message('Preview launched in user defined web browser')
-            else:
-                # Default web browser
-                desktop.open(url)
-                sublime.status_message('Preview launched in default web browser')
-        except:
-            if setting.browser_command:
-                log.exception('Error while launching user defined web browser')
-            else:
-                log.exception('Error while launching default web browser')
+        launching_web_browser_for_url(
+            url,
+            success_msg_default='Preview launched in default web browser',
+            success_msg_user='Preview launched in user defined web browser'
+        )
 
     def is_enabled(self):
         return RendererManager.has_renderer_enabled_in_view(self.view)
@@ -112,6 +124,58 @@ class OmniMarkupCleanCacheCommand(sublime_plugin.ApplicationCommand):
             for view in window.views():
                 keep_ids_list.append(view.buffer_id())
         storage.clean(keep_ids=set(keep_ids_list))
+
+
+class OmniMarkupExportCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        view = self.view
+        try:
+            html_content = RendererManager.render_view_to_string(view)
+            setting = Setting.instance()
+            target_folder = setting.export_options['target_folder']
+
+            if target_folder is not None:
+                target_folder = os.path.expanduser(target_folder)
+                fullpath = self.view.file_name() or ''
+                timestamp_format = setting.export_options['timestamp_format']
+
+                if (not os.path.exists(fullpath) and target_folder == ".") or \
+                not os.path.isdir(target_folder):
+                    target_folder = None
+                elif target_folder == '.':
+                    fn_base, _ = os.path.splitext(fullpath)
+                    html_fn = '%s%s.html' % (fn_base, time.strftime(timestamp_format,
+                        time.localtime()))
+                elif not os.path.exists(fullpath):
+                    html_fn = os.path.join(target_folder, 'Untitled%s.html' % \
+                        time.strftime(timestamp_format, time.localtime()))
+                else:
+                    fn_base = os.path.basename(fullpath)
+                    html_fn = os.path.join(target_folder, '%s%s.html' % \
+                        (fn_base, time.strftime(timestamp_format, time.localtime())))
+
+            if target_folder is None:
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
+                    html_fn = f.name
+
+            with codecs.open(html_fn, 'w', encoding='utf-8') as html_file:
+                html_file.write(html_content)
+
+            # Copy contents to clipboard
+            if setting.export_options['copy_to_clipboard']:
+                sublime.set_clipboard(html_content)
+                sublime.status_message('Exported result copied to clipboard')
+            # Open output file if necessary
+            if setting.export_options['open_after_exporting']:
+                launching_web_browser_for_url(html_fn)
+
+        except NotImplementedError:
+            pass
+        except:
+            log.exception("Error while exporting")
+
+    def is_enabled(self):
+        return RendererManager.has_renderer_enabled_in_view(self.view)
 
 
 class DelayedViewsWorker(threading.Thread):

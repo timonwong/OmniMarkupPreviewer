@@ -28,6 +28,13 @@ class SettingEventSource(object):
 
 @Singleton
 class Setting(SettingEventSource):
+    DEFAULT_EXPORT_OPTIONS = {
+        "target_folder": ".",
+        "timestamp_format": "_%y%m%d%H%M%S",
+        "copy_to_clipboard": False,
+        "open_after_exporting": False
+    }
+
     def __init__(self):
         SettingEventSource.__init__(self)
 
@@ -49,6 +56,9 @@ class Setting(SettingEventSource):
         self.ajax_polling_interval = settings.get("ajax_polling_interval", 500)
         self.ignored_renderers = set(settings.get("ignored_renderers", []))
         self.mathjax_enabled = settings.get("mathjax_enabled", False)
+        self.export_options = self.DEFAULT_EXPORT_OPTIONS.copy()
+        # Merge with the user defined export options
+        self.export_options.update(settings.get("export_options", {}))
 
     def init(self):
         self.clear_subscribers()

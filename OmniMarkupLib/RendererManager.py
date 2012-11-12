@@ -22,7 +22,6 @@ SOFTWARE.
 
 import sys
 import os
-import os.path
 import re
 import base64
 from urlparse import urlparse
@@ -37,6 +36,15 @@ from OmniMarkupLib import log
 
 __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
+
+
+LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
+LibraryPathManager.push_search_path(os.path.join(__path__, 'libs'))
+try:
+    from bottle import template
+finally:
+    LibraryPathManager.pop_search_path()
+    LibraryPathManager.pop_search_path()
 
 
 class WorkerQueueItem(object):
@@ -159,6 +167,20 @@ class RendererManager(object):
             return m.group(1) + '/local/' + base64.urlsafe_b64encode(local_path) + m.group(3)
 
         return cls.IMG_TAG_RE.sub(encode_image_path, rendered_text)
+
+    @classmethod
+    def render_view_to_string(cls, view):
+        fullpath = view.file_name() or ''
+        lang = RendererManager.get_lang_by_scope_name(view.scope_name(0))
+        text = view.substr(sublime.Region(0, view.size()))
+        html_part = RendererManager.render_text(fullpath, lang, text)
+        setting = Setting.instance()
+        return template(setting.export_options['template_name'],
+                        mathjax_enabled=setting.mathjax_enabled,
+                        filename=os.path.basename(fullpath),
+                        dirname=os.path.dirname(fullpath),
+                        html_part=html_part
+        )
 
     @classmethod
     def queue_view(cls, view, only_exists=False, immediate=False):
