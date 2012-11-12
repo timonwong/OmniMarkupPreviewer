@@ -20,6 +20,10 @@
         "command": "omni_markup_preview"
     },
     {
+        "caption": "OmniMarkupPreviewer: Export to html File",
+        "command": "omni_markup_export"
+    },
+    {
         "caption": "OmniMarkupPreviewer: Sweep Cache (Remove Unused)",
         "command": "omni_markup_clean_cache",
         "args": {"remove_all": false}
