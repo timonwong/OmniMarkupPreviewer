@@ -23,7 +23,7 @@ class RstRenderer(MarkupRenderer):
     def is_enabled(cls, filename, syntax):
         if syntax == "text.restructuredtext":
             return True
-        return cls.FILENAME_PATTERN_RE.search(filename)
+        return cls.FILENAME_PATTERN_RE.search(filename) is not None
 
     def render(self, text, **kwargs):
         settings_overrides = {
