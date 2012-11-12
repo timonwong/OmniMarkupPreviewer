@@ -83,12 +83,16 @@ Known Issues
 What's New
 ----------
 
+v1.9 (TBD)
+
+* Add support for exporting markup to html file.
+* Fix incorrect code block detecting (due to wrong tab length setting) in markdown renderer.
+
 v1.8 (11/10/2012)
 
 * OmniMarkupPreview is now able to use user defined browser command for launching
   web browser, through the `"browser_command"` option.
-* File which is previewing (not already open) can now be previewed correctly in
-  browser without returning "404" error.
+* Unopened file can be previewed correctly in browser without returning "404" error.
 * Update cherrypy module in order to fix a random server crash on startup in
   Windows (Refer to [CherrPy #1016])
 
