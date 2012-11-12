@@ -25,6 +25,6 @@ class MarkdownRenderer(MarkupRenderer):
         return cls.FILENAME_PATTERN_RE.search(filename)
 
     def render(self, text, **kwargs):
-        return markdown.markdown(text, tab_length=2, output_format='html5',
+        return markdown.markdown(text, output_format='html5',
             extensions=self.extensions
         )
