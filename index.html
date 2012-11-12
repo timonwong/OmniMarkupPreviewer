@@ -1,49 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
     <title>OmniMarkupPreviewer by timonwong</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/respond.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <!--[if lt IE 8]>
-    <link rel="stylesheet" href="stylesheets/ie.css">
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
   </head>
+
   <body>
-      <div id="header">
-        <nav>
-          <li class="fork"><a href="https://github.com/timonwong/OmniMarkupPreviewer">View On GitHub</a></li>
-          <li class="downloads"><a href="https://github.com/timonwong/OmniMarkupPreviewer/zipball/master">ZIP</a></li>
-          <li class="downloads"><a href="https://github.com/timonwong/OmniMarkupPreviewer/tarball/master">TAR</a></li>
-          <li class="title">DOWNLOADS</li>
-        </nav>
-      </div><!-- end header -->
 
-    <div class="wrapper">
+    <header>
+      <div class="container">
+        <h1>OmniMarkupPreviewer</h1>
+        <h2>SublimeText2 plugin to live preview markup files, supported (not limited to) markup formats are markdown, reStructuredText, WikiCreole and textile.</h2>
 
-      <section>
-        <div id="title">
-          <h1>OmniMarkupPreviewer</h1>
-          <p>SublimeText2 plugin to live preview markup files, supported (not limited to) markup formats are markdown, reStructuredText, WikiCreole and textile.</p>
-          <hr>
-          <span class="credits left">Project maintained by <a href="https://github.com/timonwong">timonwong</a></span>
-          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
-        </div>
+        <section id="downloads">
+          <a href="https://github.com/timonwong/OmniMarkupPreviewer/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/timonwong/OmniMarkupPreviewer/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/timonwong/OmniMarkupPreviewer" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
 
+    <div class="container">
+      <section id="main_content">
         <h1>OmniMarkupPreviewer</h1>
 
 <p>OmniMarkupPreviewer is a <a href="http://www.sublimetext.com/2">Sublime Text 2</a> plugin
-that preview markup languages in web browsers. OmniMarkupPreviewer renders markup
-files to htmls and send them to web brwosers in the backgound, in order to preview
-them in realtime.</p>
+that preview markups in web browsers. OmniMarkupPreviewer renders markups into
+htmls and send it to web browser in the backgound, which enables a live preview.
+Besides, OmniMarkupPreviewer provide support for exporting result to
+html file as well.</p>
 
 <p>OmniMarkupPreviewer has builtin support following markups:</p>
 
@@ -101,35 +92,50 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 
 <h3>Key Bindings</h3>
 
-<p>The default key bindings for this plugin:</p>
+<p>The default key bindings:</p>
 
 <p><strong>Windows, Linux:</strong></p>
 
 <ul>
 <li>
 <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>: Preview current file.</li>
+<li>
+<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>: Export to html file.</li>
 </ul><p><strong>OSX:</strong></p>
 
 <ul>
 <li>
 <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>: Preview current file.</li>
+<li>
+<kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>X</kbd>: Export to html file.</li>
 </ul><h3>Command Palette</h3>
 
-<p>Open the command palette, it apperas as <code>OmniMarkupPreviewer: Preview Current File</code>.</p>
+<p>Available OmniMarkupPreviewer commands in the command palette:</p>
 
-<h2>Known Issues</h2>
+<ul>
+<li><code>OmniMarkupPreviewer: Preview Current File</code></li>
+<li><code>OmniMarkupPreviewer: Export to html File</code></li>
+<li><code>OmniMarkupPreviewer: Sweep Cache (Remove Unused)</code></li>
+<li><code>OmniMarkupPreviewer: Empty Cache</code></li>
+</ul><h2>Known Issues</h2>
 
 <ul>
 <li>RDoc and Pod documents cannot be previewed utils they are saved to disk.</li>
 </ul><h2>What's New</h2>
 
-<p>v1.8 (11/10/2012)</p>
+<p>v1.9 (11/12/2012)</p>
+
+<ul>
+<li>Provide support for exporting result to html file, images on disk will be inlined.
+You can customize the settings of the exporter through the <code>"export_options"</code> option.</li>
+<li>Fix incorrect code block detecting (due to wrong tab length setting) in
+markdown renderer.</li>
+</ul><p>v1.8 (11/10/2012)</p>
 
 <ul>
 <li>OmniMarkupPreview is now able to use user defined browser command for launching
 web browser, through the <code>"browser_command"</code> option.</li>
-<li>File which is previewing (not already open) can now be previewed correctly in
-browser without returning "404" error.</li>
+<li>Unopened file can be previewed correctly in browser without returning "404" error.</li>
 <li>Update cherrypy module in order to fix a random server crash on startup in
 Windows (Refer to <a href="https://bitbucket.org/cherrypy/cherrypy/issue/1016/windowserror-error-6-the-handle-is-invalid">CherrPy #1016</a>)</li>
 </ul><p>v1.7 (11/07/2012)</p>
@@ -223,9 +229,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 </code></pre>
       </section>
-
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
     
   </body>
 </html>
