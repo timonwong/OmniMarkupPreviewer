@@ -4,7 +4,8 @@ OmniMarkupPreviewer
 OmniMarkupPreviewer is a [Sublime Text 2](http://www.sublimetext.com/2) plugin
 that preview markup languages in web browsers. OmniMarkupPreviewer renders markup
 files to htmls and send them to web brwosers in the backgound, in order to preview
-them in realtime.
+them in realtime. Besides, OmniMarkupPreviewer provide support for exporting result
+to html file as well.
 
 OmniMarkupPreviewer has builtin support following markups:
 
@@ -59,20 +60,26 @@ Usage
 
 ### Key Bindings
 
-The default key bindings for this plugin:
+The default key bindings:
 
 **Windows, Linux:**
 
 * <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>: Preview current file.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>: Export to html file.
 
 **OSX:**
 
 * <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>: Preview current file.
-
+* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>X</kbd>: Export to html file.
 
 ### Command Palette
 
-Open the command palette, it apperas as `OmniMarkupPreviewer: Preview Current File`.
+Available OmniMarkupPreviewer commands in the command palette:
+
+* `OmniMarkupPreviewer: Preview Current File`
+* `OmniMarkupPreviewer: Export to html File`
+* `OmniMarkupPreviewer: Sweep Cache (Remove Unused)`
+* `OmniMarkupPreviewer: Empty Cache`
 
 Known Issues
 ------------
@@ -83,10 +90,12 @@ Known Issues
 What's New
 ----------
 
-v1.9 (TBD)
+v1.9 (11/12/2012)
 
-* Add support for exporting markup to html file.
-* Fix incorrect code block detecting (due to wrong tab length setting) in markdown renderer.
+* Provide support for exporting result to html file, images on disk will be inlined.
+  You can customize the settings of the exporter through the `"export_options"` option.
+* Fix incorrect code block detecting (due to wrong tab length setting) in
+  markdown renderer.
 
 v1.8 (11/10/2012)
 

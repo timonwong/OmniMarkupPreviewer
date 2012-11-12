@@ -44,11 +44,16 @@
 
     // Custom options for exporting
     "export_options" : {
+        // follow "html_template_name" rules
         "template_name": "github-export",
+        // ".":  export to the same folder as markup file.
+        // null: export to system temp folder.
+        // NOTE: folder shall exist, or it will fallback to system temp folder.
         "target_folder": ".",
         // format string for filename timestamp
         "timestamp_format" : "_%y%m%d%H%M%S",
         "copy_to_clipboard": false,
+        // Open with default browser or whatever customized in "browser_command".
         "open_after_exporting": false
     },
 

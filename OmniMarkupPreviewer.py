@@ -135,7 +135,6 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
             target_folder = setting.export_options['target_folder']
 
             if target_folder is not None:
-                target_folder = os.path.expanduser(target_folder)
                 fullpath = self.view.file_name() or ''
                 timestamp_format = setting.export_options['timestamp_format']
 
@@ -167,6 +166,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
                 sublime.status_message('Exported result copied to clipboard')
             # Open output file if necessary
             if setting.export_options['open_after_exporting']:
+                log.info('Launching web browser for %s', html_fn)
                 launching_web_browser_for_url(html_fn)
 
         except NotImplementedError:
