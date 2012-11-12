@@ -3,4 +3,8 @@
         "keys": ["super+alt+o"], "command": "omni_markup_preview",
         "context": [{"key": "omnimarkup_is_enabled", "operator": "equal", "operand": ""}]
     }
+    {
+        "keys": ["super+alt+x"], "command": "omni_markup_export",
+        "context": [{"key": "omnimarkup_is_enabled", "operator": "equal", "operand": ""}]
+    }
 ]
