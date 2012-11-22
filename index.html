@@ -123,10 +123,15 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 <li>RDoc and Pod documents cannot be previewed utils they are saved to disk.</li>
 </ul><h2>What's New</h2>
 
-<p>v1.9 (11/12/2012)</p>
+<p>v1.10 (11/22/2012)</p>
 
 <ul>
-<li>Provide support for exporting result to html file, images on disk will be inlined.
+<li>Fix <code>UnicodeEncodeError</code> exception while image file path conatins non-ascii characters.</li>
+<li>Fix missing background image for <code>hr</code> element from exported htmls.</li>
+</ul><p>v1.9 (11/12/2012)</p>
+
+<ul>
+<li>Provide support for exporting result to html file, images on disk will be inlined (data-url).
 You can customize the settings of the exporter through the <code>"export_options"</code> option.</li>
 <li>Fix incorrect code block detecting (due to wrong tab length setting) in
 markdown renderer.</li>
