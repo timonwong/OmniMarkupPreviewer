@@ -86,7 +86,7 @@ def handler_public(filepath):
 @app.route('/local/<base64_encoded_path>')
 def handler_local(base64_encoded_path):
     """ Serving local files """
-    fullpath = base64.urlsafe_b64decode(base64_encoded_path)
+    fullpath = unicode(base64.urlsafe_b64decode(base64_encoded_path), 'utf-8')
     basename = os.path.basename(fullpath)
     dirname = os.path.dirname(fullpath)
     return static_file(basename, root=dirname)

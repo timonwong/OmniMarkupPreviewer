@@ -167,7 +167,7 @@ class RendererManager(object):
                 return m.group(0)
             # or local file (maybe?)
             local_path = os.path.normpath(os.path.join(dirname, url))
-            return m.group(1) + '/local/' + base64.urlsafe_b64encode(local_path) + m.group(3)
+            return m.group(1) + '/local/' + base64.urlsafe_b64encode(local_path.encode('utf-8')) + m.group(3)
 
         return cls.IMG_TAG_RE.sub(encode_image_path, rendered_text)
 
