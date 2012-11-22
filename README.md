@@ -90,9 +90,14 @@ Known Issues
 What's New
 ----------
 
+v1.10 (11/22/2012)
+
+* Fix `UnicodeEncodeError` exception while image file path conatins non-ascii characters.
+* Fix missing background image for `hr` element from exported htmls.
+
 v1.9 (11/12/2012)
 
-* Provide support for exporting result to html file, images on disk will be inlined.
+* Provide support for exporting result to html file, images on disk will be inlined (data-url).
   You can customize the settings of the exporter through the `"export_options"` option.
 * Fix incorrect code block detecting (due to wrong tab length setting) in
   markdown renderer.

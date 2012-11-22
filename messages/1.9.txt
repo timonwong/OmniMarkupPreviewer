@@ -1,7 +1,7 @@
 OmniMarkupPreviewer v1.9 Changelog:
 
 
-* Add support for exporting result to html file, images on disk will be inlined.
+* Provide support for exporting result to html file, images on disk will be inlined (data-url).
   You can customize the settings of the exporter through the `"export_options"` option.
 * Fix incorrect code block detecting (due to wrong tab length setting) in
   markdown renderer.

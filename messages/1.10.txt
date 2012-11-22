@@ -1,0 +1,5 @@
+OmniMarkupPreviewer v1.10 Changelog:
+
+
+* Fix `UnicodeEncodeError` exception while image file path conatins non-ascii characters.
+* Fix missing background image for `hr` element from exported htmls.
