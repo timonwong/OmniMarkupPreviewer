@@ -63,6 +63,15 @@ $(function() {
     var buffer_id = window.App.Options.buffer_id;
     var polling_interval = window.App.Options.ajax_polling_interval;
 
+    function auto_scroll(old_scroll_props) {
+        var new_scroll_props = get_vertical_scrollbar_props();
+        var increment = new_scroll_props.height - old_scroll_props.height;
+        $('html, body').animate(
+            { scrollTop: old_scroll_props.slider_pos + increment},
+            'fast'
+        );
+    }
+
     (function poll() {
         var content$ = $('#content');
         var timestamp = content$.data('timestamp');
@@ -83,21 +92,21 @@ $(function() {
                         $('#filename').text(data.filename);
                         content$.data('timestamp', data.timestamp);
                         // Replace content with latest one
-                        content$.html(data.html_part);
+                        content$.empty().html(data.html_part);
+
                         // typeset for MathJax
                         if (window.App.Options.mathjax_enabled) {
                             MathJax.Hub.Queue(
                                 ["resetEquationNumbers",MathJax.InputJax.TeX],
-                                ['Typeset', MathJax.Hub, content$[0]]
+                                ['Typeset', MathJax.Hub, content$[0]],
+                                function() {
+                                    // Scroll after mathjax equations typeset
+                                    auto_scroll(old_scroll_props);
+                                }
                             );
+                        } else {
+                            auto_scroll(old_scroll_props);
                         }
-                        // 'auto' scroll, if necessary
-                        var new_scroll_props = get_vertical_scrollbar_props();
-                        var increment = new_scroll_props.height - old_scroll_props.height;
-                        $('html, body').animate(
-                            { scrollTop: old_scroll_props.slider_pos + increment},
-                            'fast'
-                        );
                     }
                 },
                 complete: poll
