@@ -1,0 +1,4 @@
+OmniMarkupPreviewer v1.11 Changelog:
+
+
+* Fix incorrect auto-scrolling behavior while pages contain images or mathjax equations.
