@@ -1,3 +1,4 @@
 [
+    { "caption": "-", "id": "file" },
     { "command": "omni_markup_preview", "caption": "Preview Current File in Browser" }
 ]

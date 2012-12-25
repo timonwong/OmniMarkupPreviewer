@@ -29,8 +29,8 @@ import sublime
 from OmniMarkupLib import log
 from OmniMarkupLib import LibraryPathManager
 from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.RendererManager import RendererManager
-from OmniMarkupLib.Common import RenderedMarkupCache, Future
+from OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
+from OmniMarkupLib.Common import Future
 
 
 __file__ = os.path.normpath(os.path.abspath(__file__))
@@ -141,7 +141,7 @@ def render_text_by_buffer_id(buffer_id):
                 break
     if valid_view is None:
         return None
-    RendererManager.queue_view(valid_view, immediate=True)
+    RendererManager.enqueue_view(valid_view, immediate=True)
     return RenderedMarkupCache.instance().get_entry(buffer_id)
 
 

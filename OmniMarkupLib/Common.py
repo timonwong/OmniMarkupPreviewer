@@ -26,7 +26,6 @@ import thread
 from threading import Condition, Lock, current_thread
 from contextlib import contextmanager
 from time import time
-from OmniMarkupLib import log
 
 
 class Singleton(object):
@@ -287,55 +286,3 @@ class Future(object):
             raise self.__except[0], self.__except[1], self.__except[2]
         result = copy.deepcopy(self.__result)
         return result
-
-
-def generate_timestamp():
-    return str(time())
-
-
-class RenderedMarkupCacheEntry(dict):
-    __getattr__ = dict.__getitem__
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
-    def __init__(self, timestamp=None, filename='', dirname='', html_part=''):
-        timestamp = timestamp or generate_timestamp()
-        for name, val in locals().iteritems():
-            if name == 'self':
-                continue
-            self[name] = val
-        self['__deepcopy__'] = self.__deepcopy__
-
-    def __deepcopy__(self, memo={}):
-        return self.copy()
-
-
-@Singleton
-class RenderedMarkupCache(object):
-    def __init__(self):
-        self.rwlock = RWLock()
-        self.cache = {}
-
-    def exists(self, buffer_id):
-        with self.rwlock.readlock:
-            return buffer_id in self.cache
-
-    def get_entry(self, buffer_id):
-        with self.rwlock.readlock:
-            if buffer_id in self.cache:
-                return self.cache[buffer_id]
-        return None
-
-    def set_entry(self, buffer_id, entry):
-        with self.rwlock.writelock:
-            self.cache[buffer_id] = entry
-
-    def clean(self, keep_ids=set()):
-        with self.rwlock.writelock:
-            remove_ids = set(self.cache.keys())
-            remove_ids -= keep_ids
-            if len(remove_ids) == 0:
-                return
-            for buffer_id in remove_ids:
-                del self.cache[buffer_id]
-            log.info("Clean buffer ids in: %s" % list(remove_ids))

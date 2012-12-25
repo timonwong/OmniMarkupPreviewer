@@ -6,7 +6,6 @@
     // delay after modified, in milliseconds
     "refresh_on_modified_delay": 500,
     "refresh_on_saved": true,
-    "refresh_on_loaded": true,
 
     // User defined command for launching preview in web browser
     // For example:

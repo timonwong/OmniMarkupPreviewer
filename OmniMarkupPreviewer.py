@@ -49,9 +49,9 @@ OmniMarkupLib.LinuxModuleChecker.check()
 
 from OmniMarkupLib import log
 from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.RendererManager import RendererManager
+from OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
 from OmniMarkupLib.Server import Server
-from OmniMarkupLib.Common import Singleton, RenderedMarkupCache
+from OmniMarkupLib.Common import Singleton
 
 try:
     from OmniMarkupLib import OnDemandDownloader
@@ -98,7 +98,7 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
                 opened = True
                 break
         if not opened:
-            RendererManager.queue_view(self.view, immediate=True)
+            RendererManager.enqueue_view(self.view, immediate=True)
 
         url = 'http://localhost:%d/view/%d' % (Setting.instance().server_port, buffer_id)
         # Open with the default browser
@@ -178,7 +178,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
         return RendererManager.has_renderer_enabled_in_view(self.view)
 
 
-class DelayedViewsWorker(threading.Thread):
+class DelayedQueue(threading.Thread):
     WAIT_TIMEOUT = 0.02
 
     class Entry(object):
@@ -195,7 +195,7 @@ class DelayedViewsWorker(threading.Thread):
         self.last_signaled = time.time()
         self.delayed_views = {}
 
-    def queue(self, view, preemptive=True, timeout=0.5):
+    def enqueue(self, view, preemptive=True, timeout=0.5):
         if not RendererManager.has_renderer_enabled_in_view(view):
             return
 
@@ -213,7 +213,7 @@ class DelayedViewsWorker(threading.Thread):
                 if view_id in self.delayed_views:
                     del self.delayed_views[view_id]
                     self.cond.notify()
-            RendererManager.queue_view(view, only_exists=True)
+            RendererManager.enqueue_view(view, only_exists=True)
             self.last_signaled = now
         else:
             with self.cond:
@@ -227,7 +227,7 @@ class DelayedViewsWorker(threading.Thread):
                     entry.timeout = timeout
                 self.cond.notify()
 
-    def queue_to_renderer_manager(self, view, filename):
+    def enqueue_view_to_renderer_manager(self, view, filename):
         view_id = view.id()
         valid_view = False
         for window in sublime.windows():
@@ -241,7 +241,7 @@ class DelayedViewsWorker(threading.Thread):
         if not valid_view or view.is_loading() or view.file_name() != filename:
             return
         if RendererManager.has_renderer_enabled_in_view(view):
-            RendererManager.queue_view(view, only_exists=True)
+            RendererManager.enqueue_view(view, only_exists=True)
             self.last_signaled = time.time()
 
     def run(self):
@@ -261,7 +261,7 @@ class DelayedViewsWorker(threading.Thread):
                         o.timeout -= min(diff_time, self.WAIT_TIMEOUT)
                         if o.timeout <= 0:
                             del self.delayed_views[view_id]
-                            sublime.set_timeout(partial(self.queue_to_renderer_manager,
+                            sublime.set_timeout(partial(self.enqueue_view_to_renderer_manager,
                                                         o.view, o.filename), 0)
                 else:
                     # No more items, sleep
@@ -276,27 +276,31 @@ class DelayedViewsWorker(threading.Thread):
 
 class PluginEventListener(sublime_plugin.EventListener):
     def __init__(self):
-        self.delayed_views_worker = DelayedViewsWorker()
-        self.delayed_views_worker.start()
+        self.delayed_queue = DelayedQueue()
+        self.delayed_queue.start()
 
     def __del__(self):
-        self.delayed_views_worker.stop()
+        self.delayed_queue.stop()
+
+    def on_close(self, view):
+        pass
+
+    def on_new(self, view):
+        pass
 
     def on_load(self, view):
-        if view.is_scratch() or not Setting.instance().refresh_on_loaded:
-            return
-        self.delayed_views_worker.queue(view, preemptive=True)
+        pass
 
     def on_modified(self, view):
-        if view.is_scratch() or not Setting.instance().refresh_on_modified:
+        if not Setting.instance().refresh_on_modified:
             return
-        self.delayed_views_worker.queue(view, preemptive=False,
+        self.delayed_queue.enqueue(view, preemptive=False,
                                         timeout=float(Setting.instance().refresh_on_modified_delay) / 1000)
 
     def on_post_save(self, view):
-        if view.is_scratch() or not Setting.instance().refresh_on_saved:
+        if not Setting.instance().refresh_on_saved:
             return
-        self.delayed_views_worker.queue(view, preemptive=True)
+        self.delayed_queue.enqueue(view, preemptive=True)
 
     def on_query_context(self, view, key, operator, operand, match_all):
         # omp_is_enabled is here for backwards compatibility
@@ -363,13 +367,12 @@ def unload_handler():
     # Cleaning up resources...
     PluginManager.instance().stop_server()
     # Stopping renderer worker
-    RendererManager.WORKER.stop()
+    RendererManager.stop()
 
 
 # Setting must be the first to initialize.
 Setting.instance().init()
 PluginManager.instance().subscribe_setting_events()
-RendererManager.init()
-RendererManager.WORKER.start()
+RendererManager.start()
 PluginManager.instance().restart_server()
 PluginManager.instance().try_download_mathjax()

@@ -24,13 +24,14 @@ import sys
 import os
 import re
 import base64
-from urlparse import urlparse
 import threading
 import inspect
 import mimetypes
 import sublime
+from urlparse import urlparse
+from time import time
 from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.Common import RWLock, RenderedMarkupCache, RenderedMarkupCacheEntry
+from OmniMarkupLib.Common import Singleton, RWLock
 from OmniMarkupLib import LibraryPathManager
 from OmniMarkupLib import log
 
@@ -48,6 +49,54 @@ finally:
     LibraryPathManager.pop_search_path()
 
 
+class RenderedMarkupCacheEntry(dict):
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
+    def __init__(self, timestamp=None, filename='', dirname='', html_part=''):
+        timestamp = timestamp or str(time())
+        for name, val in locals().iteritems():
+            if name == 'self':
+                continue
+            self[name] = val
+        self['__deepcopy__'] = self.__deepcopy__
+
+    def __deepcopy__(self, memo={}):
+        return self.copy()
+
+
+@Singleton
+class RenderedMarkupCache(object):
+    def __init__(self):
+        self.rwlock = RWLock()
+        self.cache = {}
+
+    def exists(self, buffer_id):
+        with self.rwlock.readlock:
+            return buffer_id in self.cache
+
+    def get_entry(self, buffer_id):
+        with self.rwlock.readlock:
+            if buffer_id in self.cache:
+                return self.cache[buffer_id]
+        return None
+
+    def set_entry(self, buffer_id, entry):
+        with self.rwlock.writelock:
+            self.cache[buffer_id] = entry
+
+    def clean(self, keep_ids=set()):
+        with self.rwlock.writelock:
+            remove_ids = set(self.cache.keys())
+            remove_ids -= keep_ids
+            if len(remove_ids) == 0:
+                return
+            for buffer_id in remove_ids:
+                del self.cache[buffer_id]
+            log.info("Clean buffer ids in: %s" % list(remove_ids))
+
+
 class WorkerQueueItem(object):
     def __init__(self, timestamp=0, fullpath='untitled', lang='', text=''):
         self.timestamp = timestamp
@@ -63,7 +112,7 @@ class RendererWorker(threading.Thread):
         self.que = {}
         self.stopping = False
 
-    def queue(self, buffer_id, fullpath, lang, text, immediate=False):
+    def enqueue(self, buffer_id, fullpath, lang, text, immediate=False):
         item = WorkerQueueItem(fullpath=fullpath, lang=lang, text=text)
         if immediate:  # Render in the main thread
             self._run_queued_item(buffer_id, item)
@@ -212,7 +261,7 @@ class RendererManager(object):
         )
 
     @classmethod
-    def queue_view(cls, view, only_exists=False, immediate=False):
+    def enqueue_view(cls, view, only_exists=False, immediate=False):
         buffer_id = view.buffer_id()
         settings = view.settings()
         if only_exists and not RenderedMarkupCache.instance().exists(buffer_id):
@@ -223,7 +272,7 @@ class RendererManager(object):
         region = sublime.Region(0, view.size())
         text = view.substr(region)
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
-        cls.WORKER.queue(buffer_id, view.file_name(), lang, text, immediate=immediate)
+        cls.WORKER.enqueue(buffer_id, view.file_name(), lang, text, immediate=immediate)
 
     @classmethod
     def _load_renderer(cls, renderers, module_file, module_name):
@@ -298,7 +347,7 @@ class RendererManager(object):
                     log.exception('Error on setting renderer options for %s', renderer_classname)
 
     @classmethod
-    def init(cls):
+    def start(cls):
         setting = Setting.instance()
         setting.subscribe('changing', cls.on_setting_changing)
         setting.subscribe('changed', cls.on_setting_changed)
@@ -306,3 +355,8 @@ class RendererManager(object):
         cls.on_setting_changing(setting)
         cls.load_renderers()
         cls.on_setting_changed(setting)
+        cls.WORKER.start()
+
+    @classmethod
+    def stop(cls):
+        cls.WORKER.stop()
