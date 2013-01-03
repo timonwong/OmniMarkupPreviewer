@@ -31,7 +31,7 @@ import sublime
 from urlparse import urlparse
 from time import time
 from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.Common import Singleton, RWLock
+from OmniMarkupLib.Common import entities_unescape, Singleton, RWLock
 from OmniMarkupLib import LibraryPathManager
 from OmniMarkupLib import log
 
@@ -47,6 +47,41 @@ try:
 finally:
     LibraryPathManager.pop_search_path()
     LibraryPathManager.pop_search_path()
+
+
+# Test filesystem case sensitivity
+# http://stackoverflow.com/questions/7870041/check-if-file-system-is-case-insensitive-in-python
+g_fs_case_sensitive = True
+
+
+def check_filesystem_case_sensitivity():
+    import tempfile
+    global g_fs_case_sensitive
+    fd, path = tempfile.mkstemp()
+    if os.path.exists(path.upper()):
+        g_fs_case_sensitive = False
+    else:
+        g_fs_case_sensitive = True
+    os.close(fd)
+    os.remove(path)
+check_filesystem_case_sensitivity()
+
+
+# @Singleton
+# class OpenedBufferManager(object):
+#     def __init__(self):
+#         self.rwlock = RWLock()
+#         self.buffers = {}
+
+#     def add_or_update(self, view):
+#         if not g_fs_case_sensitive:
+#             fn = view.file_name().lower()
+#         pass
+
+#     def remove(self, view):
+#         del self.buffers[buffer_id]
+#         is_closed = True
+#         pass
 
 
 class RenderedMarkupCacheEntry(dict):
@@ -215,7 +250,7 @@ class RendererManager(object):
                 # Is a valid url, returns original text
                 return m.group(0)
             # or local file (maybe?)
-            local_path = os.path.normpath(os.path.join(dirname, url))
+            local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
             return m.group(1) + '/local/' + base64.urlsafe_b64encode(local_path.encode('utf-8')) + m.group(3)
 
         return cls.IMG_TAG_RE.sub(encode_image_path, rendered_text)
