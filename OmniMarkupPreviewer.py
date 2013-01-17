@@ -295,7 +295,7 @@ class PluginEventListener(sublime_plugin.EventListener):
         if not Setting.instance().refresh_on_modified:
             return
         self.delayed_queue.enqueue(view, preemptive=False,
-                                        timeout=float(Setting.instance().refresh_on_modified_delay) / 1000)
+                                        timeout=Setting.instance().refresh_on_modified_delay / 1000.0)
 
     def on_post_save(self, view):
         if not Setting.instance().refresh_on_saved:

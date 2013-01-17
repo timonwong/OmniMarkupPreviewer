@@ -267,7 +267,7 @@ class RendererManager(object):
                 # Is a valid url, returns original text
                 return m.group(0)
             # or local file (maybe?)
-            local_path = os.path.normpath(os.path.join(dirname, url))
+            local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
             mime_type, _ = mimetypes.guess_type(os.path.basename(local_path))
             if mime_type is not None:
                 data_uri = open(local_path, 'rb').read().encode('base64').replace('\n', '')
