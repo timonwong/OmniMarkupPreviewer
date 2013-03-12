@@ -31,8 +31,10 @@ class CliDownloader(object):
         raise BinaryNotFoundError('The binary %s could not be located' % name)
 
     def execute(self, args):
-        proc = subprocess.Popen(args, stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(args,
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
 
         output = proc.stdout.read()
         self.stderr = proc.stderr.read()
@@ -57,8 +59,10 @@ class WgetDownloader(CliDownloader):
             return False
 
         self.tmp_file = tempfile.NamedTemporaryFile().name
-        command = [self.wget, '--connect-timeout=' + str(int(timeout)),
-            '-o', self.tmp_file, '-O', '-', '-U', 'OmniMarkup Downloader']
+        command = [self.wget,
+                   '--connect-timeout=' + str(int(timeout)),
+                   '-o', self.tmp_file,
+                   '-O', '-', '-U', 'OmniMarkup Downloader']
 
         command.append(url)
 
@@ -89,8 +93,7 @@ class WgetDownloader(CliDownloader):
                         # GitHub and BitBucket seem to rate limit via 503
                         log.info('Downloading %s was rate limited, trying again', url)
                         continue
-                    error_string = 'HTTP error ' + re.sub('^.*? ERROR ', '',
-                        error_line)
+                    error_string = 'HTTP error ' + re.sub('^.*? ERROR ', '', error_line)
 
                 elif e.returncode == 4:
                     error_string = re.sub('^.*?failed: ', '', error_line)
@@ -100,8 +103,7 @@ class WgetDownloader(CliDownloader):
                         continue
 
                 else:
-                    error_string = re.sub('^.*?(ERROR[: ]|failed: )', '\\1',
-                        error_line)
+                    error_string = re.sub('^.*?(ERROR[: ]|failed: )', '\\1', error_line)
 
                 error_string = re.sub('\\.?\s*\n\s*$', '', error_string)
                 log.info('%s %s downloading %s.', error_message, error_string, url)
@@ -118,8 +120,9 @@ class CurlDownloader(CliDownloader):
     def download(self, url, error_message, timeout, tries):
         if not self.curl:
             return False
-        command = [self.curl, '-f', '--user-agent', 'OmniMarkup Downloader',
-            '--connect-timeout', str(int(timeout)), '-sS']
+        command = [self.curl,
+                   '-f', '--user-agent', 'OmniMarkup Downloader',
+                   '--connect-timeout', str(int(timeout)), '-sS']
 
         command.append(url)
 
@@ -188,9 +191,7 @@ class UrlLib2Downloader(object):
         while tries > 0:
             tries -= 1
             try:
-                request = urllib2.Request(url,
-                    headers={"User-Agent": "OmniMarkup Downloader"}
-                )
+                request = urllib2.Request(url, headers={"User-Agent": "OmniMarkup Downloader"})
                 http_file = urllib2.urlopen(request, timeout=timeout)
                 return http_file.read()
 

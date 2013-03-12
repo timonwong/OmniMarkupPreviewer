@@ -48,9 +48,7 @@ def error(fmtstr, *args):
 
 def exception(fmtstr, *args):
     exc_type, exc_value, exc_traceback = sys.exc_info()
-    exception_message = traceback.format_exception(
-        exc_type, exc_value, exc_traceback
-    )
+    exception_message = traceback.format_exception(exc_type, exc_value, exc_traceback)
     write_log('ERROR', fmtstr, *args)
     with g_lock:
         print ''.join(['  ' + line for line in exception_message])
