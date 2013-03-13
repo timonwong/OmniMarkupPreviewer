@@ -64,10 +64,8 @@ def launching_web_browser_for_url(url, success_msg_default=None, success_msg_use
     try:
         setting = Setting.instance()
         if setting.browser_command:
-            browser_command = [
-                os.path.expandvars(arg).format(url=url)
-                for arg in setting.browser_command
-            ]
+            browser_command = [os.path.expandvars(arg).format(url=url)
+                               for arg in setting.browser_command]
 
             if os.name == 'nt':
                 # unicode arguments broken under windows
@@ -91,6 +89,11 @@ def launching_web_browser_for_url(url, success_msg_default=None, success_msg_use
 
 class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
     def run(self, edit, immediate=True):
+        # Whether RendererManager is finished loading?
+        if not RendererManager.ensure_started():
+            sublime.status_message('OmniMarkupPreviewer have not yet started')
+            return
+
         buffer_id = self.view.buffer_id()
         # Is opened in a tab?
         opened = False
@@ -107,8 +110,7 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
         launching_web_browser_for_url(
             url,
             success_msg_default='Preview launched in default web browser',
-            success_msg_user='Preview launched in user defined web browser'
-        )
+            success_msg_user='Preview launched in user defined web browser')
 
     def is_enabled(self):
         return RendererManager.has_renderer_enabled_in_view(self.view)

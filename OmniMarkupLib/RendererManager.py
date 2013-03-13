@@ -205,9 +205,6 @@ class RendererManager(object):
     MUTEX = threading.Lock()
     WORKER = RendererWorker(MUTEX)
 
-    WAIT_TIMEOUT = 1.0
-    RENDERERS_LOADING_THREAD = None
-
     LANG_RE = re.compile(r"^[^\s]+(?=\s+)")
     RENDERERS = []
 
@@ -352,8 +349,8 @@ class RendererManager(object):
 
     @classmethod
     def load_renderers(cls):
+        renderers = []
         with cls.MUTEX:
-            renderers = []
             # Add library path to sys.path
             LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
             LibraryPathManager.add_search_path_if_not_exists(os.path.join(__path__, './Renderers/libs/'))
@@ -375,7 +372,6 @@ class RendererManager(object):
                 # Restore the current directory
                 os.chdir(oldpath)
                 LibraryPathManager.pop_search_path()
-
         cls.RENDERERS = renderers
 
     OLD_IGNORED_RENDERERS = set()
@@ -400,8 +396,23 @@ class RendererManager(object):
             except:
                 log.exception('Error on setting renderer options for %s', renderer_classname)
 
+    WAIT_TIMEOUT = 1.0
+    STARTED = True
+    RENDERERS_LOADING_THREAD = None
+
+    @classmethod
+    def ensure_started(cls):
+        if cls.RENDERERS_LOADING_THREAD is not None:
+            try:
+                cls.RENDERERS_LOADING_THREAD.join(cls.WAIT_TIMEOUT)
+            except:
+                pass
+        return cls.STARTED
+
     @classmethod
     def start(cls):
+        cls.STARTED = True
+
         setting = Setting.instance()
         setting.subscribe('changing', cls.on_setting_changing)
         setting.subscribe('changed', cls.on_setting_changed)
@@ -416,6 +427,8 @@ class RendererManager(object):
             log.info("Loading renderers...")
             cls.load_renderers()
             sublime.set_timeout(lambda: cls.on_setting_changed(setting), 0)
+            cls.STARTED = True
+            cls.RENDERERS_LOADING_THREAD = None
         cls.RENDERERS_LOADING_THREAD = threading.Thread(target=f)
         sublime.set_timeout(lambda: cls.RENDERERS_LOADING_THREAD.start(), 0)
 
@@ -427,3 +440,4 @@ class RendererManager(object):
                 cls.RENDERERS_LOADING_THREAD.join()
             except:
                 pass
+        cls.STARTED = False
