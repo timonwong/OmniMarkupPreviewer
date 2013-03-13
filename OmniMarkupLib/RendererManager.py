@@ -133,37 +133,44 @@ class RenderedMarkupCache(object):
 
 
 class WorkerQueueItem(object):
-    def __init__(self, timestamp=0, fullpath='untitled', lang='', text=''):
+    def __init__(self, buffer_id, timestamp=0, fullpath='untitled', lang='', text=''):
+        self.buffer_id = buffer_id
         self.timestamp = timestamp
         self.fullpath = fullpath or 'untitled'
         self.lang = lang
         self.text = text
+
+    def __cmp__(self, other):
+        return self.buffer_id == other.buffer_id
+
+    def __hash__(self):
+        return hash(self.buffer_id)
 
 
 class RendererWorker(threading.Thread):
     def __init__(self, mutex):
         threading.Thread.__init__(self)
         self.cond = threading.Condition(mutex)
-        self.que = {}
+        self.que = set()
         self.stopping = False
 
     def enqueue(self, buffer_id, fullpath, lang, text, immediate=False):
-        item = WorkerQueueItem(fullpath=fullpath, lang=lang, text=text)
+        item = WorkerQueueItem(buffer_id, fullpath=fullpath, lang=lang, text=text)
         if immediate:  # Render in the main thread
-            self._run_queued_item(buffer_id, item)
+            self._run_queued_item(item)
         else:
             with self.cond:
-                self.que[buffer_id] = item
+                self.que.add(item)
                 self.cond.notify()
 
-    def _run_queued_item(self, buffer_id, item):
+    def _run_queued_item(self, item):
         try:
             # Render text and save to cache
             filename = os.path.basename(item.fullpath)
             dirname = os.path.dirname(item.fullpath)
             html_part = RendererManager.render_text(item.fullpath, item.lang, item.text)
             entry = RenderedMarkupCacheEntry(filename=filename, dirname=dirname, html_part=html_part)
-            RenderedMarkupCache.instance().set_entry(buffer_id, entry)
+            RenderedMarkupCache.instance().set_entry(item.buffer_id, entry)
         except NotImplementedError:
             pass
         except:
@@ -177,10 +184,9 @@ class RendererWorker(threading.Thread):
                     break
                 if len(self.que) == 0:
                     continue
-                items = self.que.items()
-                self.que.clear()
-            for buffer_id, item in items:
-                self._run_queued_item(buffer_id, item)
+            for item in list(self.que):
+                self._run_queued_item(item)
+            self.que.clear()
 
     def stop(self):
         self.stopping = True
@@ -191,8 +197,6 @@ class RendererWorker(threading.Thread):
 
 class RendererManager(object):
     MUTEX = threading.Lock()
-    RW_LOCK = RWLock(MUTEX)
-
     WORKER = RendererWorker(MUTEX)
     LANG_RE = re.compile(r"^[^\s]+(?=\s+)")
     RENDERERS = []
@@ -201,10 +205,9 @@ class RendererManager(object):
     def has_any_valid_renderer(cls, filename, lang):
         # filename may be None, so prevent it
         filename = filename or ""
-        with cls.RW_LOCK.readlock:
-            for renderer_classname, renderer in cls.RENDERERS:
-                if renderer.is_enabled(filename, lang):
-                    return True
+        for renderer_classname, renderer in cls.RENDERERS:
+            if renderer.is_enabled(filename, lang):
+                return True
         return False
 
     @classmethod
@@ -227,14 +230,13 @@ class RendererManager(object):
         if post_process_func is None:
             post_process_func = cls.render_text_postprocess
         filename = os.path.basename(fullpath)
-        with cls.RW_LOCK.readlock:
-            for renderer_classname, renderer in cls.RENDERERS:
-                try:
-                    if renderer.is_enabled(filename, lang):
-                        rendered_text = renderer.render(text, filename=filename)
-                        return post_process_func(rendered_text, fullpath)
-                except:
-                    log.exception('Exception occured while rendering using %s', renderer_classname)
+        for renderer_classname, renderer in cls.RENDERERS:
+            try:
+                if renderer.is_enabled(filename, lang):
+                    rendered_text = renderer.render(text, filename=filename)
+                    return post_process_func(rendered_text, fullpath)
+            except:
+                log.exception('Exception occured while rendering using %s', renderer_classname)
         raise NotImplementedError()
 
     IMG_TAG_RE = re.compile('(<img [^>]*src=")([^"]+)("[^>]*>)', re.DOTALL | re.IGNORECASE | re.MULTILINE)
@@ -292,8 +294,7 @@ class RendererManager(object):
                         mathjax_enabled=setting.mathjax_enabled,
                         filename=os.path.basename(fullpath),
                         dirname=os.path.dirname(fullpath),
-                        html_part=html_part
-        )
+                        html_part=html_part)
 
     @classmethod
     def enqueue_view(cls, view, only_exists=False, immediate=False):
@@ -342,9 +343,7 @@ class RendererManager(object):
         oldpath = os.getcwdu()
         os.chdir(os.path.join(__path__, '..'))
         try:
-            module_list = [f
-                for f in os.listdir(renderers_path) if f.endswith('Renderer.py')
-            ]
+            module_list = [f for f in os.listdir(renderers_path) if f.endswith('Renderer.py')]
             # Load each renderer
             for module_file in module_list:
                 module_name = 'OmniMarkupLib.Renderers.' + module_file[:-3]
@@ -355,8 +354,7 @@ class RendererManager(object):
             os.chdir(oldpath)
             LibraryPathManager.pop_search_path()
 
-        with cls.RW_LOCK.writelock:
-            cls.RENDERERS = renderers
+        cls.RENDERERS = renderers
 
     OLD_IGNORED_RENDERERS = set()
 
@@ -372,14 +370,13 @@ class RendererManager(object):
             log.info('Reloading renderers...')
             cls.load_renderers()
 
-        with cls.RW_LOCK.readlock:
-            for renderer_classname, renderer in cls.RENDERERS:
-                key = 'renderer_options-' + renderer_classname
-                try:
-                    renderer_options = setting._sublime_settings.get(key, {})
-                    renderer.load_settings(renderer_options, setting)
-                except:
-                    log.exception('Error on setting renderer options for %s', renderer_classname)
+        for renderer_classname, renderer in cls.RENDERERS:
+            key = 'renderer_options-' + renderer_classname
+            try:
+                renderer_options = setting._sublime_settings.get(key, {})
+                renderer.load_settings(renderer_options, setting)
+            except:
+                log.exception('Error on setting renderer options for %s', renderer_classname)
 
     @classmethod
     def start(cls):

@@ -36,10 +36,10 @@ from functools import partial
 
 # Reloading modules
 for key in sys.modules.keys():
-    if key.startswith('OmniMarkupLib'):
+    if key.find('OmniMarkupLib') >= 0:
         try:
             mod = sys.modules[key]
-            if type(mod) is types.ModuleType:
+            if isinstance(mod, types.ModuleType):
                 reload(mod)
         except:
             pass
@@ -137,21 +137,19 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
             if target_folder is not None:
                 fullpath = self.view.file_name() or ''
                 timestamp_format = setting.export_options['timestamp_format']
+                timestr = time.strftime(timestamp_format, time.localtime())
 
                 if (not os.path.exists(fullpath) and target_folder == ".") or \
-                not os.path.isdir(target_folder):
+                        not os.path.isdir(target_folder):
                     target_folder = None
                 elif target_folder == '.':
                     fn_base, _ = os.path.splitext(fullpath)
-                    html_fn = '%s%s.html' % (fn_base, time.strftime(timestamp_format,
-                        time.localtime()))
+                    html_fn = '%s%s.html' % (fn_base, timestr)
                 elif not os.path.exists(fullpath):
-                    html_fn = os.path.join(target_folder, 'Untitled%s.html' % \
-                        time.strftime(timestamp_format, time.localtime()))
+                    html_fn = os.path.join(target_folder, 'Untitled%s.html' % timestr)
                 else:
                     fn_base = os.path.basename(fullpath)
-                    html_fn = os.path.join(target_folder, '%s%s.html' % \
-                        (fn_base, time.strftime(timestamp_format, time.localtime())))
+                    html_fn = os.path.join(target_folder, '%s%s.html' % (fn_base, timestr))
 
             if target_folder is None:
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
@@ -178,14 +176,21 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
         return RendererManager.has_renderer_enabled_in_view(self.view)
 
 
-class DelayedQueue(threading.Thread):
+class ThrottleQueue(threading.Thread):
     WAIT_TIMEOUT = 0.02
 
     class Entry(object):
-        def __init__(self, view, filename, timeout):
+        def __init__(self, view, filename='', timeout=0):
+            self.id = view.id()
             self.view = view
             self.filename = filename
             self.timeout = timeout
+
+        def __cmp__(self, other):
+            return self.id == other.id
+
+        def __hash__(self):
+            return hash(self.id)
 
     def __init__(self):
         threading.Thread.__init__(self)
@@ -193,38 +198,29 @@ class DelayedQueue(threading.Thread):
         self.cond = threading.Condition(self.mutex)
         self.stopping = False
         self.last_signaled = time.time()
-        self.delayed_views = {}
+        self.entries = set()
 
-    def enqueue(self, view, preemptive=True, timeout=0.5):
+    def put(self, view, preemptive=True, timeout=0.5):
         if not RendererManager.has_renderer_enabled_in_view(view):
             return
 
-        view_id = view.id()
         now = time.time()
+        entry = ThrottleQueue.Entry(view)
 
-        with self.mutex:
-            if view_id in self.delayed_views:
-                if now - self.last_signaled <= 0.01:  # Too fast, cancel this operation
-                    return
+        if entry in self.entries:
+            if now - self.last_signaled <= 0.01:  # Too fast, cancel this operation
+                return
 
         if preemptive:
             # Cancel pending actions
-            with self.cond:
-                if view_id in self.delayed_views:
-                    del self.delayed_views[view_id]
-                    self.cond.notify()
+            self.entries.discard(entry)
             RendererManager.enqueue_view(view, only_exists=True)
             self.last_signaled = now
         else:
             with self.cond:
-                filename = view.file_name()
-                if view_id not in self.delayed_views:
-                    self.delayed_views[view_id] = self.Entry(view, filename, timeout)
-                else:
-                    entry = self.delayed_views[view_id]
-                    entry.view = view
-                    entry.filename = filename
-                    entry.timeout = timeout
+                entry.filename = view.file_name()
+                entry.timeout = timeout
+                self.entries.add(entry)
                 self.cond.notify()
 
     def enqueue_view_to_renderer_manager(self, view, filename):
@@ -252,17 +248,17 @@ class DelayedQueue(threading.Thread):
                     break
                 self.cond.wait(self.WAIT_TIMEOUT)
                 if self.stopping:
-                        break
-                if len(self.delayed_views) > 0:
+                    break
+                if len(self.entries) > 0:
                     now = time.time()
                     diff_time = now - prev_time
-                    for view_id in self.delayed_views.keys():
-                        o = self.delayed_views[view_id]
-                        o.timeout -= min(diff_time, self.WAIT_TIMEOUT)
-                        if o.timeout <= 0:
-                            del self.delayed_views[view_id]
-                            sublime.set_timeout(partial(self.enqueue_view_to_renderer_manager,
-                                                        o.view, o.filename), 0)
+                    for entry in list(self.entries):
+                        entry.timeout -= min(diff_time, self.WAIT_TIMEOUT)
+                        if entry.timeout <= 0:
+                            self.entries.discard(entry)
+                            sublime.set_timeout(
+                                partial(self.enqueue_view_to_renderer_manager,
+                                        entry.view, entry.filename), 0)
                 else:
                     # No more items, sleep
                     self.cond.wait()
@@ -276,11 +272,11 @@ class DelayedQueue(threading.Thread):
 
 class PluginEventListener(sublime_plugin.EventListener):
     def __init__(self):
-        self.delayed_queue = DelayedQueue()
-        self.delayed_queue.start()
+        self.throttle = ThrottleQueue()
+        self.throttle.start()
 
     def __del__(self):
-        self.delayed_queue.stop()
+        self.throttle.stop()
 
     def on_close(self, view):
         pass
@@ -292,15 +288,18 @@ class PluginEventListener(sublime_plugin.EventListener):
         pass
 
     def on_modified(self, view):
-        if not Setting.instance().refresh_on_modified:
-            return
-        self.delayed_queue.enqueue(view, preemptive=False,
-                                        timeout=Setting.instance().refresh_on_modified_delay / 1000.0)
+        def callback():
+            setting = Setting.instance()
+            if not setting.refresh_on_modified:
+                return
+            timeout = setting.refresh_on_modified_delay / 1000.0
+            self.throttle.put(view, preemptive=False, timeout=timeout)
+        sublime.set_timeout(callback, 0)
 
     def on_post_save(self, view):
         if not Setting.instance().refresh_on_saved:
             return
-        self.delayed_queue.enqueue(view, preemptive=True)
+        self.throttle.put(view, preemptive=True)
 
     def on_query_context(self, view, key, operator, operand, match_all):
         # omp_is_enabled is here for backwards compatibility
@@ -324,15 +323,13 @@ class PluginManager(object):
         self.old_html_template_name = setting.html_template_name
 
     def on_setting_changed(self, setting):
-        PLUGIN_NAME = __name__
         if (setting.ajax_polling_interval != self.old_ajax_polling_interval or
-            setting.html_template_name != self.old_html_template_name):
-            sublime.status_message(PLUGIN_NAME + ' requires browser reload to apply changes')
+                setting.html_template_name != self.old_html_template_name):
+            sublime.status_message(
+                'OmniMarkupPreviewer requires a browser reload to apply changes')
 
-        need_server_restart = (
-            (setting.server_host != self.old_server_host) or
-            (setting.server_port != self.old_server_port)
-        )
+        need_server_restart = (setting.server_host != self.old_server_host or
+                               setting.server_port != self.old_server_port)
         if need_server_restart:
             self.restart_server()
 
