@@ -1,34 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
-
     <title>OmniMarkupPreviewer by timonwong</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
-
-    <header>
-      <div class="container">
+    <div class="wrapper">
+      <header>
         <h1>OmniMarkupPreviewer</h1>
-        <h2>SublimeText2 plugin to live preview markup files, supported (not limited to) markup formats are markdown, reStructuredText, WikiCreole and textile.</h2>
-
-        <section id="downloads">
-          <a href="https://github.com/timonwong/OmniMarkupPreviewer/zipball/master" class="btn">Download as .zip</a>
-          <a href="https://github.com/timonwong/OmniMarkupPreviewer/tarball/master" class="btn">Download as .tar.gz</a>
-          <a href="https://github.com/timonwong/OmniMarkupPreviewer" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
-      </div>
-    </header>
-
-    <div class="container">
-      <section id="main_content">
+        <p>SublimeText2 plugin to live preview markup files, supported (not limited to) markup formats are markdown, reStructuredText, WikiCreole and textile.</p>
+        <p class="view"><a href="https://github.com/timonwong/OmniMarkupPreviewer">View the Project on GitHub <small>timonwong/OmniMarkupPreviewer</small></a></p>
+        <ul>
+          <li><a href="https://github.com/timonwong/OmniMarkupPreviewer/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/timonwong/OmniMarkupPreviewer/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/timonwong/OmniMarkupPreviewer">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
         <h1>OmniMarkupPreviewer</h1>
+
+<h2>Description</h2>
 
 <p>OmniMarkupPreviewer is a <a href="http://www.sublimetext.com/2">Sublime Text 2</a> plugin
 that preview markups in web browsers. OmniMarkupPreviewer renders markups into
@@ -49,7 +50,15 @@ and can be found in <code>PATH</code>, if the perl version &lt; 5.10, <code>Pod:
 installed from <code>CPAN</code>.)</li>
 <li>
 <a href="http://rdoc.sourceforge.net/">RDoc</a> (Requires ruby in your <code>PATH</code>)</li>
-</ul><h2>Installation</h2>
+</ul><h3>Donation</h3>
+
+<p>If you find my work useful, please consider buying me a cup of coffee, all
+donations are much appreciated :)</p>
+
+<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=timon86%2ewang%40gmail%2ecom&amp;lc=US&amp;item_name=Buy%20me%20a%20cup%20of%20coffee&amp;item_number=OmniMarkupPreviewer&amp;no_note=0&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest"><img src="http://dl.dropbox.com/u/2451120/donate-with-alipay.png" alt="Donate via PayPal"></a>
+<a href="https://me.alipay.com/timonwong"><img src="http://dl.dropbox.com/u/2451120/donate-with-paypal.png" alt="使用支付宝捐赠"></a></p>
+
+<h2>Installation</h2>
 
 <h3>With the Package Control plugin</h3>
 
@@ -123,7 +132,12 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 <li>RDoc and Pod documents cannot be previewed until saved.</li>
 </ul><h2>What's New</h2>
 
-<p>v1.11 (12/24/2012)</p>
+<p>v1.12 (03/13/2013)</p>
+
+<ul>
+<li>Renderes are now loaded asynchronously on startup.</li>
+<li>Add litcoffee support.</li>
+</ul><p>v1.11 (12/24/2012)</p>
 
 <ul>
 <li>Fix incorrect auto-scrolling behavior while pages contain images or mathjax equations.</li>
@@ -239,7 +253,11 @@ SOFTWARE.
 </code></pre>
       </section>
     </div>
-
+    <footer>
+      <p>Project maintained by <a href="https://github.com/timonwong">timonwong</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     
   </body>
 </html>
