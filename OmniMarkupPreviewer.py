@@ -180,10 +180,9 @@ class ThrottleQueue(threading.Thread):
     WAIT_TIMEOUT = 0.02
 
     class Entry(object):
-        def __init__(self, view, filename='', timeout=0):
-            self.id = view.id()
+        def __init__(self, view, timeout):
             self.view = view
-            self.filename = filename
+            self.filename = view.file_name()
             self.timeout = timeout
 
         def __cmp__(self, other):
@@ -198,43 +197,42 @@ class ThrottleQueue(threading.Thread):
         self.cond = threading.Condition(self.mutex)
         self.stopping = False
         self.last_signaled = time.time()
-        self.entries = set()
+        self.view_entry_mapping = {}
 
     def put(self, view, preemptive=True, timeout=0.5):
         if not RendererManager.has_renderer_enabled_in_view(view):
             return
 
+        view_id = view.id()
         now = time.time()
-        entry = ThrottleQueue.Entry(view)
 
-        if entry in self.entries:
-            if now - self.last_signaled <= 0.01:  # Too fast, cancel this operation
-                return
+        with self.mutex:
+            if view_id in self.view_entry_mapping:
+                if now - self.last_signaled <= 0.01:  # Too fast, cancel this operation
+                    return
 
         if preemptive:
             # Cancel pending actions
-            self.entries.discard(entry)
+            with self.cond:
+                if view_id in self.view_entry_mapping:
+                    del self.view_entry_mapping[view_id]
+                    self.cond.notify()
             RendererManager.enqueue_view(view, only_exists=True)
             self.last_signaled = now
         else:
             with self.cond:
-                entry.filename = view.file_name()
-                entry.timeout = timeout
-                self.entries.add(entry)
+                filename = view.file_name()
+                if view_id not in self.view_entry_mapping:
+                    self.view_entry_mapping[view_id] = self.Entry(view, timeout)
+                else:
+                    entry = self.view_entry_mapping[view_id]
+                    entry.view = view
+                    entry.filename = filename
+                    entry.timeout = timeout
                 self.cond.notify()
 
     def enqueue_view_to_renderer_manager(self, view, filename):
-        view_id = view.id()
-        valid_view = False
-        for window in sublime.windows():
-            if valid_view:
-                break
-            for v in window.views():
-                if v.id() == view_id:  # Got view
-                    valid_view = True
-                    break
-
-        if not valid_view or view.is_loading() or view.file_name() != filename:
+        if view.is_loading() or view.file_name() != filename:
             return
         if RendererManager.has_renderer_enabled_in_view(view):
             RendererManager.enqueue_view(view, only_exists=True)
@@ -248,17 +246,18 @@ class ThrottleQueue(threading.Thread):
                     break
                 self.cond.wait(self.WAIT_TIMEOUT)
                 if self.stopping:
-                    break
-                if len(self.entries) > 0:
+                        break
+                if len(self.view_entry_mapping) > 0:
                     now = time.time()
                     diff_time = now - prev_time
-                    for entry in list(self.entries):
-                        entry.timeout -= min(diff_time, self.WAIT_TIMEOUT)
-                        if entry.timeout <= 0:
-                            self.entries.discard(entry)
-                            sublime.set_timeout(
-                                partial(self.enqueue_view_to_renderer_manager,
-                                        entry.view, entry.filename), 0)
+                    prev_time = time.time()
+                    for view_id in self.view_entry_mapping.keys():
+                        o = self.view_entry_mapping[view_id]
+                        o.timeout -= max(diff_time, self.WAIT_TIMEOUT)
+                        if o.timeout <= 0:
+                            del self.view_entry_mapping[view_id]
+                            sublime.set_timeout(partial(self.enqueue_view_to_renderer_manager,
+                                                        o.view, o.filename), 0)
                 else:
                     # No more items, sleep
                     self.cond.wait()
@@ -302,7 +301,7 @@ class PluginEventListener(sublime_plugin.EventListener):
         self.throttle.put(view, preemptive=True)
 
     def on_query_context(self, view, key, operator, operand, match_all):
-        # omp_is_enabled is here for backwards compatibility
+        # `omp_is_enabled` for backwards compatibility
         if key == 'omnimarkup_is_enabled' or key == 'omp_is_enabled':
             return RendererManager.has_renderer_enabled_in_view(view)
         return None
@@ -325,8 +324,7 @@ class PluginManager(object):
     def on_setting_changed(self, setting):
         if (setting.ajax_polling_interval != self.old_ajax_polling_interval or
                 setting.html_template_name != self.old_html_template_name):
-            sublime.status_message(
-                'OmniMarkupPreviewer requires a browser reload to apply changes')
+            sublime.status_message('OmniMarkupPreviewer requires a browser reload to apply changes')
 
         need_server_restart = (setting.server_host != self.old_server_host or
                                setting.server_port != self.old_server_port)
