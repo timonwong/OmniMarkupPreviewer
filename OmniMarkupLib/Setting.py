@@ -1,4 +1,5 @@
 import sublime
+
 from OmniMarkupLib import log
 from OmniMarkupLib.Common import Singleton
 

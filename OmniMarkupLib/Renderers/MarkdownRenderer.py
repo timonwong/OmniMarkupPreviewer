@@ -26,5 +26,4 @@ class MarkdownRenderer(MarkupRenderer):
 
     def render(self, text, **kwargs):
         return markdown.markdown(text, output_format='html5',
-            extensions=self.extensions
-        )
+                                 extensions=self.extensions)

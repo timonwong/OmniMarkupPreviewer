@@ -3,6 +3,7 @@ import re
 import urllib2
 import subprocess
 import tempfile
+
 from OmniMarkupLib import log
 
 

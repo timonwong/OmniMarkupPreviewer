@@ -20,12 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import sublime
+
+import base64
+import os
 import threading
 import sys
-import os
-import os.path
-import base64
-import sublime
+
 from OmniMarkupLib import log
 from OmniMarkupLib import LibraryPathManager
 from OmniMarkupLib.Setting import Setting

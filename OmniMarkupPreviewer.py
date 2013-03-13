@@ -20,6 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import sublime
+import sublime_plugin
+
 import codecs
 import os
 import sys
@@ -30,8 +33,6 @@ import subprocess
 import threading
 import time
 import tempfile
-import sublime
-import sublime_plugin
 from functools import partial
 
 # Reloading modules

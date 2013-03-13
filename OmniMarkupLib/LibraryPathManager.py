@@ -22,7 +22,6 @@ SOFTWARE.
 
 import sys
 import os
-import os.path
 
 
 def _try_get_short_path(path):

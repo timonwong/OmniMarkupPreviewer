@@ -20,20 +20,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import sublime
+
 import os
 import sys
 import threading
 import contextlib
 import urllib2
-import sublime
 import zipfile
-from OmniMarkupLib.Downloader import *
 
 try:
     import cStringIO
     StringIO = cStringIO
 except ImportError:
     import StringIO
+
+from OmniMarkupLib.Downloader import *
 
 
 MATHJAX_LIB_URL = 'http://cdn.bitbucket.org/timonwong/omnimarkuppreviewer/downloads/mathjax.zip'
