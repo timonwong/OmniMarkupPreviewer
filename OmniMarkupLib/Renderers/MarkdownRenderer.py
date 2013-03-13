@@ -5,7 +5,7 @@ import markdown
 
 @renderer
 class MarkdownRenderer(MarkupRenderer):
-    FILENAME_PATTERN_RE = re.compile(r'\.(md|mkdn?|mdwn|mdown|markdown)$')
+    FILENAME_PATTERN_RE = re.compile(r'\.(md|mkdn?|mdwn|mdown|markdown|litcoffee)$')
 
     def load_settings(self, renderer_options, global_setting):
         super(MarkdownRenderer, self).load_settings(renderer_options, global_setting)
