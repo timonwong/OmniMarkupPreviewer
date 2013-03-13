@@ -349,6 +349,7 @@ class RendererManager(object):
 
     @classmethod
     def load_renderers(cls):
+        log.info("Loading renderers...")
         renderers = []
         with cls.MUTEX:
             # Add library path to sys.path
@@ -385,7 +386,6 @@ class RendererManager(object):
         # Unload ignored renderers
         if cls.OLD_IGNORED_RENDERERS != setting.ignored_renderers:
             # Reload renderers, of course
-            log.info('Reloading renderers...')
             cls.load_renderers()
 
         for renderer_classname, renderer in cls.RENDERERS:
@@ -424,7 +424,6 @@ class RendererManager(object):
         #import OmniMarkupLib.Renderers
 
         def f():
-            log.info("Loading renderers...")
             cls.load_renderers()
             sublime.set_timeout(lambda: cls.on_setting_changed(setting), 0)
             cls.STARTED = True

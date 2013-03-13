@@ -1,81 +1,74 @@
+/* jshint forin:true, noarg:true, noempty:true, eqeqeq:true, undef:true, unused:true, curly:true, browser:true, indent:4, maxerr:50 */
+/* jshint devel: true */
+/* global $, MathJax */
+
 window.App = {};
 window.App.Options = {};
 
 $(function() {
     // From http://www.softcomplex.com/docs/get_window_size_and_scrollbar_position.html
-    function f_clientWidth() {
-        return f_filterResults (
-            window.innerWidth ? window.innerWidth : 0,
-            document.documentElement ? document.documentElement.clientWidth : 0,
-            document.body ? document.body.clientWidth : 0
-        );
+    function filterResult(win, docel, body) {
+        var result = win ? win : 0;
+        if (docel && (!result || (result > docel))) {
+            result = docel;
+        }
+        return body && (!result || (result > body)) ? body : result;
     }
 
-    function f_clientHeight() {
-        return f_filterResults (
+    function sliderHeight() {
+        return filterResult(
             window.innerHeight ? window.innerHeight : 0,
             document.documentElement ? document.documentElement.clientHeight : 0,
             document.body ? document.body.clientHeight : 0
         );
     }
 
-    function f_scrollLeft() {
-        return f_filterResults (
-            window.pageXOffset ? window.pageXOffset : 0,
-            document.documentElement ? document.documentElement.scrollLeft : 0,
-            document.body ? document.body.scrollLeft : 0
-        );
-    }
-
-    function f_scrollTop() {
-        return f_filterResults (
+    function sliderPos() {
+        return filterResult(
             window.pageYOffset ? window.pageYOffset : 0,
             document.documentElement ? document.documentElement.scrollTop : 0,
             document.body ? document.body.scrollTop : 0
         );
     }
 
-    function f_filterResults(n_win, n_docel, n_body) {
-        var n_result = n_win ? n_win : 0;
-        if (n_docel && (!n_result || (n_result > n_docel))) {
-            n_result = n_docel;
-        }
-        return n_body && (!n_result || (n_result > n_body)) ? n_body : n_result;
-    }
-
-    function get_vertical_scrollbar_props() {
+    function getVerticalScrollProperties() {
         var height = $('html, body').height();
-        return {'height': height, 'slider_height': f_clientHeight(), 'slider_pos': f_scrollTop()};
+        return {
+            'height': height,
+            'sliderHeight': sliderHeight(),
+            'sliderPos': sliderPos()
+        };
     }
 
     // Run the scipts of type=text/x-omnimarkup-config
-    (function load_config_blocks() {
+    (function() {
         var scripts$ = $('script');
-        scripts$.each(function () {
-            var type = String(this.type).replace(/ /g,"");
+        scripts$.each(function() {
+            var type = String(this.type).replace(/ /g, '');
             if (type.match(/^text\/x-omnimarkup-config(;.*)?$/) && !type.match(/;executed=true/)) {
-                this.type += ";executed=true";
+                this.type += ';executed=true';
                 eval(this.innerHTML);
             }
         });
     })();
 
-    var buffer_id = window.App.Options.buffer_id;
-    var polling_interval = window.App.Options.ajax_polling_interval;
-
-    function auto_scroll(old_scroll_props) {
-        var new_scroll_props = get_vertical_scrollbar_props();
-        var increment = new_scroll_props.height - old_scroll_props.height;
+    function autoScroll(oldScrollProps) {
+        var newScrollProps = getVerticalScrollProperties();
+        var increment = newScrollProps.height - oldScrollProps.height;
         $('html, body').animate(
-            { scrollTop: old_scroll_props.slider_pos + increment},
+            { scrollTop: oldScrollProps.sliderPos + increment},
             'fast'
         );
     }
 
+    var bufferId = window.App.Options.buffer_id;
+    var pollingInterval = window.App.Options.ajax_polling_interval;
+    var mathJaxEnabled = window.App.Options.mathjax_enabled;
+
     (function poll() {
         var content$ = $('#content');
         var timestamp = content$.data('timestamp');
-        var request = {'buffer_id': buffer_id, 'timestamp': timestamp};
+        var request = {'buffer_id': bufferId, 'timestamp': timestamp};
 
         setTimeout(function() {
             $.ajax({
@@ -83,10 +76,11 @@ $(function() {
                 url: '/api/query',
                 data: JSON.stringify(request),
                 dataType: 'json',
-                contentType:"application/json; charset=utf-8",
+                contentType: 'application/json; charset=utf-8',
                 success: function(data) {
                     if (data && (data.html_part !== null)) {
-                        var old_scroll_props = get_vertical_scrollbar_props();
+                        var oldScrollProps = getVerticalScrollProperties();
+
                         // Fill the filename
                         document.title = data.filename + '\u2014' + data.dirname;
                         $('#filename').text(data.filename);
@@ -94,23 +88,33 @@ $(function() {
                         // Replace content with latest one
                         content$.empty().html(data.html_part);
 
-                        // typeset for MathJax
-                        if (window.App.Options.mathjax_enabled) {
-                            MathJax.Hub.Queue(
-                                ["resetEquationNumbers",MathJax.InputJax.TeX],
-                                ['Typeset', MathJax.Hub, content$[0]],
-                                function() {
-                                    // Scroll after mathjax equations typeset
-                                    auto_scroll(old_scroll_props);
-                                }
-                            );
+                        // dirty hack for auto scrolling if images exist
+                        var img$ = $('img');
+                        var doAutoScroll;
+                        if (img$.length > 0) {
+                            doAutoScroll = function() {
+                                img$.imagesLoaded(function() {
+                                    autoScroll(oldScrollProps);
+                                });
+                            };
                         } else {
-                            auto_scroll(old_scroll_props);
+                            doAutoScroll = function() {
+                                autoScroll(oldScrollProps);
+                            };
+                        }
+
+                        // typeset for MathJax
+                        if (mathJaxEnabled) {
+                            MathJax.Hub.Queue(
+                                ['resetEquationNumbers', MathJax.InputJax.TeX],
+                                ['Typeset', MathJax.Hub, content$[0]], doAutoScroll);
+                        } else {
+                            doAutoScroll();
                         }
                     }
                 },
                 complete: poll
             });
-        }, polling_interval);
+        }, pollingInterval);
     })();
 });
