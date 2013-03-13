@@ -20,21 +20,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import sys
-import os
-import re
+import sublime
+
 import base64
-import threading
+import imp
 import inspect
 import mimetypes
-import sublime
+import os
+import re
+import sys
+import threading
 from urlparse import urlparse
 from time import time
+
 from OmniMarkupLib.Setting import Setting
 from OmniMarkupLib.Common import entities_unescape, Singleton, RWLock
 from OmniMarkupLib import LibraryPathManager
 from OmniMarkupLib import log
 
+# HACK: Make sure required base_renderer package load first
+import OmniMarkupLib.Renderers.base_renderer
+OmniMarkupLib.Renderers.base_renderer  # Prevent PEP8 Warning
 
 __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
@@ -198,6 +204,10 @@ class RendererWorker(threading.Thread):
 class RendererManager(object):
     MUTEX = threading.Lock()
     WORKER = RendererWorker(MUTEX)
+
+    WAIT_TIMEOUT = 1.0
+    RENDERERS_LOADING_THREAD = None
+
     LANG_RE = re.compile(r"^[^\s]+(?=\s+)")
     RENDERERS = []
 
@@ -311,48 +321,60 @@ class RendererManager(object):
         cls.WORKER.enqueue(buffer_id, view.file_name(), lang, text, immediate=immediate)
 
     @classmethod
-    def _load_renderer(cls, renderers, module_file, module_name):
+    def _import_module(cls, name, path, prefix=None):
+        if prefix and isinstance(prefix, str):
+            modname = "%s.%s" % (prefix, name)
+        else:
+            modname = name
+
+        f, filename, etc = imp.find_module(name, [path])
+        mod = imp.load_module(modname, f, filename, etc)
+        return mod
+
+    @classmethod
+    def _load_renderer(cls, renderers, path, module_name):
+        prefix = 'OmniMarkupLib.Renderers'
         try:
-            __import__(module_name)
-            mod = sys.modules[module_name] = reload(sys.modules[module_name])
+            mod = cls._import_module(module_name, path, prefix)
             # Get classes
             classes = inspect.getmembers(mod, inspect.isclass)
             for classname, classtype in classes:
                 # Register renderer into manager
                 if hasattr(classtype, 'IS_VALID_RENDERER__'):
                     try:
-                        log.info('Loaded renderer: OmniMarkupLib.Renderers.%s', classname)
+                        log.info('Loaded renderer: %s', classname)
                         # Add both classname and its instance
                         renderers.append((classname, classtype()))
                     except:
                         log.exception('Failed to load renderer: %s', classname)
         except:
-            log.exception('Failed to load renderer module: OmniMarkupLib/Renderers/%s', module_file)
+            log.exception('Failed to load renderer module: %s.%s', prefix, module_name)
 
     @classmethod
     def load_renderers(cls):
-        renderers = []
-        # Add library path to sys.path
-        LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
-        LibraryPathManager.add_search_path_if_not_exists(os.path.join(__path__, './Renderers/libs/'))
+        with cls.MUTEX:
+            renderers = []
+            # Add library path to sys.path
+            LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
+            LibraryPathManager.add_search_path_if_not_exists(os.path.join(__path__, './Renderers/libs/'))
 
-        # Change the current directory to that of the module. It's not safe to just
-        # add the modules directory to sys.path, as that won't accept unicode paths
-        # on Windows
-        renderers_path = os.path.join(__path__, 'Renderers/')
-        oldpath = os.getcwdu()
-        os.chdir(os.path.join(__path__, '..'))
-        try:
-            module_list = [f for f in os.listdir(renderers_path) if f.endswith('Renderer.py')]
-            # Load each renderer
-            for module_file in module_list:
-                module_name = 'OmniMarkupLib.Renderers.' + module_file[:-3]
-                cls._load_renderer(renderers, module_file, module_name)
+            # Change the current directory to that of the module. It's not safe to just
+            # add the modules directory to sys.path, as that won't accept unicode paths
+            # on Windows
+            renderers_path = os.path.join(__path__, 'Renderers/')
+            oldpath = os.getcwdu()
+            os.chdir(os.path.join(__path__, '..'))
 
-        finally:
-            # Restore the current directory
-            os.chdir(oldpath)
-            LibraryPathManager.pop_search_path()
+            try:
+                module_list = [f for f in os.listdir(renderers_path)
+                               if f.endswith('Renderer.py')]
+                # Load each renderer
+                for module_file in module_list:
+                    cls._load_renderer(renderers, renderers_path, module_file[:-3])
+            finally:
+                # Restore the current directory
+                os.chdir(oldpath)
+                LibraryPathManager.pop_search_path()
 
         cls.RENDERERS = renderers
 
@@ -384,11 +406,24 @@ class RendererManager(object):
         setting.subscribe('changing', cls.on_setting_changing)
         setting.subscribe('changed', cls.on_setting_changed)
 
-        cls.on_setting_changing(setting)
-        cls.load_renderers()
-        cls.on_setting_changed(setting)
         cls.WORKER.start()
+        cls.on_setting_changing(setting)
+
+        # HACK: OmniMarkupLib.Renderers must be recognizable to thread
+        #import OmniMarkupLib.Renderers
+
+        def f():
+            log.info("Loading renderers...")
+            cls.load_renderers()
+            sublime.set_timeout(lambda: cls.on_setting_changed(setting), 0)
+        cls.RENDERERS_LOADING_THREAD = threading.Thread(target=f)
+        sublime.set_timeout(lambda: cls.RENDERERS_LOADING_THREAD.start(), 0)
 
     @classmethod
     def stop(cls):
         cls.WORKER.stop()
+        if cls.RENDERERS_LOADING_THREAD is not None:
+            try:
+                cls.RENDERERS_LOADING_THREAD.join()
+            except:
+                pass

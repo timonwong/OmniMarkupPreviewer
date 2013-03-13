@@ -100,6 +100,11 @@ Known Issues
 What's New
 ----------
 
+v1.20 (TBD/2013)
+
+* Renderes are now loaded asynchronously on startup.
+* Add litcoffee support.
+
 v1.11 (12/24/2012)
 
 * Fix incorrect auto-scrolling behavior while pages contain images or mathjax equations.
