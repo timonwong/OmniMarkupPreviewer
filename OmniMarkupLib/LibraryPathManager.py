@@ -37,15 +37,7 @@ def _try_get_short_path(path):
     return path
 
 
-def add_search_path_if_not_exists(lib_path):
+def add_search_path(lib_path):
     lib_path = _try_get_short_path(lib_path)
     if lib_path not in sys.path:
         sys.path.append(lib_path)
-
-
-def push_search_path(lib_path):
-    sys.path.insert(0, _try_get_short_path(lib_path))
-
-
-def pop_search_path():
-    del sys.path[0]
