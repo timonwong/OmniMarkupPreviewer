@@ -219,7 +219,8 @@ class ThrottleQueue(threading.Thread):
 
         with self.mutex:
             if view_id in self.view_entry_mapping:
-                if now - self.last_signaled <= 0.01:  # Too fast, cancel this operation
+                # Too fast, cancel this operation
+                if now - self.last_signaled <= 0.01:
                     return
 
         if preemptive:
@@ -298,6 +299,7 @@ class PluginEventListener(sublime_plugin.EventListener):
         pass
 
     def on_modified(self, view):
+        # Prevent rare complaintion about slow callback
         def callback():
             setting = Setting.instance()
             if not setting.refresh_on_modified:

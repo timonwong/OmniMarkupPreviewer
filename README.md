@@ -74,22 +74,22 @@ The default key bindings:
 
 **Windows, Linux:**
 
-* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>: Preview current Markup file.
-* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>: Export Markup to html file.
-* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup to clipboard.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>: Preview Markup in Browser.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>: Export Markup as HTML.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup as HTML.
 
 **OSX:**
 
-* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>: Preview current Markup file.
-* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>X</kbd>: Export Markup to html file.
-* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup to clipboard.
+* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>: Preview Markup in Browser.
+* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>X</kbd>: Export Markup as HTML.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup as HTML.
 
 ### Command Palette
 
 Available OmniMarkupPreviewer commands in the command palette:
 
-* `OmniMarkupPreviewer: Preview Current File`
-* `OmniMarkupPreviewer: Export to html File`
+* `OmniMarkupPreviewer: Preview Current Markup in Browser`
+* `OmniMarkupPreviewer: Export Current Markup as HTML`
 * `OmniMarkupPreviewer: Empty Cache`
 
 Known Issues
@@ -101,9 +101,14 @@ Known Issues
 What's New
 ----------
 
+v1.20 (TBD)
+
+* Add new context command `Copy Markup as HTML`.
+* Remove unused command `Sweep Cache (Remove Unused)`.
+
 v1.12 (03/13/2013)
 
-* Renderes are now loaded asynchronously on startup.
+* Renderes are now loaded asynchronously on startup (faster Sublime Text 2 startup).
 * Add litcoffee support.
 
 v1.11 (12/24/2012)

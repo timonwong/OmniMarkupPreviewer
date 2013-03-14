@@ -16,11 +16,11 @@
         }
     },
     {
-        "caption": "OmniMarkupPreviewer: Preview Current File",
+        "caption": "OmniMarkupPreviewer: Preview Current Markup in Browser",
         "command": "omni_markup_preview"
     },
     {
-        "caption": "OmniMarkupPreviewer: Export to html File",
+        "caption": "OmniMarkupPreviewer: Export Current Markup as HTML",
         "command": "omni_markup_export"
     },
     {

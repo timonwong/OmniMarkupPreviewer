@@ -1,5 +1,5 @@
 OmniMarkupPreviewer v1.12 Changelog:
 
 
-* Renderes are now loaded asynchronously on startup.
+* Renderes are now loaded asynchronously on startup (faster Sublime Text 2 startup).
 * Add litcoffee support.
