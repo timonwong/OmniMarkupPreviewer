@@ -75,8 +75,8 @@ class CommandlineRenderer(MarkupRenderer):
         text = self.pre_process_encoding(text, **kwargs)
         text = self.pre_process(text, **kwargs)
         text = self.executable_check(text, kwargs['filename'])
-        text = self.post_process(text, **kwargs)
-        return self.post_process_encoding(text, **kwargs)
+        text = self.post_process_encoding(text, **kwargs)
+        return self.post_process(text, **kwargs)
 
     def executable_check(self, text, filename):
         tempfile_ = None

@@ -32,14 +32,13 @@ g_is_py3k = sys.version_info >= (3, 0, 0)
 
 if g_is_py3k:
     import urllib.request as urllib_compat
-    import io
+    from io import BytesIO
 else:
     import urllib2 as urllib_compat
-
     try:
-        import cStringIO as io
+        from cStringIO import StringIO as BytesIO
     except ImportError:
-        import StringIO as io
+        from StringIO import StringIO as BytesIO
 
 
 from .Downloader import *
@@ -93,7 +92,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
             # Download failed
             return
 
-        with contextlib.closing(io.StringIO(archive)) as archive_stream:
+        with contextlib.closing(BytesIO(archive)) as archive_stream:
             archive_stream.seek(0)
             log.info('Extrating contents from mathjax.zip ...')
             with contextlib.closing(zipfile.ZipFile(archive_stream)) as zip_file:
