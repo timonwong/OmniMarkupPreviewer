@@ -349,7 +349,6 @@ class RendererManager(object):
 
     @classmethod
     def load_renderers(cls):
-        log.info("Loading renderers...")
         renderers = []
         with cls.MUTEX:
             # Add library path to sys.path
