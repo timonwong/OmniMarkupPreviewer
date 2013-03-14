@@ -20,6 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from __future__ import print_function
+
 import sys
 import traceback
 import threading
@@ -31,7 +33,7 @@ g_lock = threading.Lock()
 
 def write_log(level, fmtstr, *args):
     with g_lock:
-        print NAME, '[' + level + ']', fmtstr % args
+        print(NAME, '[' + level + ']', fmtstr % args)
 
 
 def info(fmtstr, *args):
@@ -51,4 +53,4 @@ def exception(fmtstr, *args):
     exception_message = traceback.format_exception(exc_type, exc_value, exc_traceback)
     write_log('ERROR', fmtstr, *args)
     with g_lock:
-        print ''.join(['  ' + line for line in exception_message])
+        print(''.join(['  ' + line for line in exception_message]))

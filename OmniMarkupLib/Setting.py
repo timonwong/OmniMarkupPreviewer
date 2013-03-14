@@ -1,7 +1,7 @@
 import sublime
 
-from OmniMarkupLib import log
-from OmniMarkupLib.Common import Singleton
+from . import log
+from .Common import Singleton
 
 
 class SettingEventSource(object):

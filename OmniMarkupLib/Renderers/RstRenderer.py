@@ -1,4 +1,4 @@
-from base_renderer import *
+from .base_renderer import *
 import re
 from docutils.core import publish_parts
 from docutils.writers.html4css1 import Writer, HTMLTranslator

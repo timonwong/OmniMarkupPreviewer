@@ -24,14 +24,13 @@ import sublime
 
 import base64
 import os
-import threading
 import sys
+import threading
 
-from OmniMarkupLib import log
-from OmniMarkupLib import LibraryPathManager
-from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
-from OmniMarkupLib.Common import Future
+from . import log, LibraryPathManager
+from .Setting import Setting
+from .RendererManager import RenderedMarkupCache, RendererManager
+from .Common import Future
 
 
 __file__ = os.path.normpath(os.path.abspath(__file__))

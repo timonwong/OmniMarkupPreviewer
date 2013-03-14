@@ -27,7 +27,6 @@ import codecs
 import os
 import sys
 import types
-import desktop
 import locale
 import subprocess
 import threading
@@ -45,19 +44,31 @@ for key in sys.modules.keys():
         except:
             pass
 
-import OmniMarkupLib.LinuxModuleChecker
-OmniMarkupLib.LinuxModuleChecker.check()
+g_is_py3k = sys.version_info >= (3, 0, 0)
 
-from OmniMarkupLib import log
-from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
-from OmniMarkupLib.Server import Server
-from OmniMarkupLib.Common import Singleton
-
-try:
-    from OmniMarkupLib import OnDemandDownloader
-except:
-    log.exception("Error on loading OnDemandDownloader")
+if g_is_py3k:
+    from . import desktop
+    from .OmniMarkupLib import log
+    from .OmniMarkupLib.Setting import Setting
+    from .OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
+    from .OmniMarkupLib.Server import Server
+    from .OmniMarkupLib.Common import Singleton
+    try:
+        from .OmniMarkupLib import OnDemandDownloader
+    except:
+        log.exception('Error on loading OnDemandDownloader')
+else:
+    import desktop
+    exec('import OmniMarkupLib.LinuxModuleChecker')
+    from OmniMarkupLib import log
+    from OmniMarkupLib.Setting import Setting
+    from OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
+    from OmniMarkupLib.Server import Server
+    from OmniMarkupLib.Common import Singleton
+    try:
+        from OmniMarkupLib import OnDemandDownloader
+    except:
+        log.exception('Error on loading OnDemandDownloader')
 
 
 def launching_web_browser_for_url(url, success_msg_default=None, success_msg_user=None):
@@ -135,7 +146,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
             timestamp_format = setting.export_options['timestamp_format']
             timestr = time.strftime(timestamp_format, time.localtime())
 
-            if (not os.path.exists(fullpath) and target_folder == ".") or \
+            if (not os.path.exists(fullpath) and target_folder == '.') or \
                     not os.path.isdir(target_folder):
                 target_folder = None
             elif target_folder == '.':
@@ -181,7 +192,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
         except NotImplementedError:
             pass
         except:
-            log.exception("Error while exporting")
+            log.exception('Error while exporting')
 
     def is_enabled(self):
         return RendererManager.has_renderer_enabled_in_view(self.view)
@@ -378,9 +389,13 @@ def unload_handler():
     RendererManager.stop()
 
 
-# Setting must be the first to initialize.
-Setting.instance().init()
-PluginManager.instance().subscribe_setting_events()
-RendererManager.start()
-PluginManager.instance().restart_server()
-PluginManager.instance().try_download_mathjax()
+def plugin_loaded():
+    # Setting must be the first to initialize.
+    Setting.instance().init()
+    PluginManager.instance().subscribe_setting_events()
+    RendererManager.start()
+    PluginManager.instance().restart_server()
+    PluginManager.instance().try_download_mathjax()
+
+if not g_is_py3k:
+    plugin_loaded()

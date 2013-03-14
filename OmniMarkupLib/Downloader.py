@@ -1,10 +1,21 @@
 import os
 import re
-import urllib2
+import sys
 import subprocess
 import tempfile
 
-from OmniMarkupLib import log
+g_is_py3k = sys.version_info >= (3, 0, 0)
+
+if g_is_py3k:
+    from http.client import HTTPException
+    from urllib.request import ProxyHandler, install_opener, build_opener, Request, urlopen
+    from urllib.error import HTTPError, URLError
+else:
+    from httplib import HTTPException
+    from urllib2 import ProxyHandler, install_opener, build_opener, Request, urlopen
+    from urllib2 import HTTPError, URLError
+
+from . import log
 
 
 class BinaryNotFoundError(Exception):
@@ -80,7 +91,7 @@ class WgetDownloader(CliDownloader):
                 result = self.execute(command)
                 self.clean_tmp_file()
                 return result
-            except (NonCleanExitError) as (e):
+            except NonCleanExitError as e:
                 error_line = ''
                 with open(self.tmp_file) as f:
                     for line in list(f):
@@ -138,7 +149,7 @@ class CurlDownloader(CliDownloader):
             tries -= 1
             try:
                 return self.execute(command)
-            except (NonCleanExitError) as (e):
+            except (NonCleanExitError) as e:
                 if e.returncode == 22:
                     code = re.sub('^.*?(\d+)\s*$', '\\1', e.output)
                     if code == '503':
@@ -175,9 +186,9 @@ class UrlLib2Downloader(object):
                     proxies['https'] = http_proxy
             if https_proxy:
                 proxies['https'] = https_proxy
-            proxy_handler = urllib2.ProxyHandler(proxies)
+            proxy_handler = ProxyHandler(proxies)
         else:
-            proxy_handler = urllib2.ProxyHandler()
+            proxy_handler = ProxyHandler()
         handlers = [proxy_handler]
 
         # secure_url_match = re.match('^https://([^/]+)', url)
@@ -187,28 +198,34 @@ class UrlLib2Downloader(object):
         #   if not bundle_path:
         #       return False
         #   handlers.append(VerifiedHTTPSHandler(ca_certs=bundle_path))
-        urllib2.install_opener(urllib2.build_opener(*handlers))
+        install_opener(build_opener(*handlers))
 
         while tries > 0:
             tries -= 1
             try:
-                request = urllib2.Request(url, headers={"User-Agent": "OmniMarkup Downloader"})
-                http_file = urllib2.urlopen(request, timeout=timeout)
+                request = Request(url, headers={"User-Agent": "OmniMarkup Downloader"})
+                http_file = urlopen(request, timeout=timeout)
                 return http_file.read()
 
-            except (urllib2.HTTPError) as (e):
+            except HTTPException as e:
+                log.info('%s HTTP exception %s (%s) downloading %s.',
+                         error_message, e.__class__.__name__, e.message, url)
+
+            except HTTPError as e:
                 # Bitbucket and Github ratelimit using 503 a decent amount
                 if str(e.code) == '503':
                     log.info('Downloading %s was rate limited, trying again', url)
                     continue
-                log.info('%s HTTP error %s downloading %s.', error_message, str(e.code), url)
+                log.info('%s HTTP error %s downloading %s.',
+                         error_message, str(e.code), url)
 
-            except (urllib2.URLError) as (e):
+            except URLError as e:
                 # Bitbucket and Github timeout a decent amount
                 if str(e.reason) == 'The read operation timed out' or \
                         str(e.reason) == 'timed out':
                     log.info('Downloading %s timed out, trying again', url)
                     continue
-                log.info('%s URL error %s downloading %s.', error_message, str(e.reason), url)
+                log.info('%s URL error %s downloading %s.',
+                         error_message, str(e.reason), url)
             break
         return False

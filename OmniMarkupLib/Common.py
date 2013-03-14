@@ -22,12 +22,20 @@ SOFTWARE.
 
 import sys
 import re
-import htmlentitydefs
 import copy
-import thread
 from threading import Condition, Lock, current_thread
 from contextlib import contextmanager
 from time import time
+
+g_is_py3k = sys.version_info >= (3, 0, 0)
+
+if g_is_py3k:
+    import html.entities as htmlentitydefs
+    import _thread as thread
+    unichr = chr
+else:
+    import htmlentitydefs
+    import thread
 
 
 def entities_unescape(text):
@@ -314,6 +322,9 @@ class Future(object):
             while not self.__done:
                 self.__cond.wait()
         if self.__except:
-            raise self.__except[0], self.__except[1], self.__except[2]
+            if g_is_py3k:
+                exec('raise self.__except[0](self.__except[1]).with_traceback(self.__except[2])')
+            else:
+                exec('raise self.__except[0], self.__except[1], self.__except[2]')
         result = copy.deepcopy(self.__result)
         return result

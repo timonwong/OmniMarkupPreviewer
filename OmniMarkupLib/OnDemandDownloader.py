@@ -26,16 +26,23 @@ import os
 import sys
 import threading
 import contextlib
-import urllib2
 import zipfile
 
-try:
-    import cStringIO
-    StringIO = cStringIO
-except ImportError:
-    import StringIO
+g_is_py3k = sys.version_info >= (3, 0, 0)
 
-from OmniMarkupLib.Downloader import *
+if g_is_py3k:
+    import urllib.request as urllib_compat
+    import io
+else:
+    import urllib2 as urllib_compat
+
+    try:
+        import cStringIO as io
+    except ImportError:
+        import StringIO as io
+
+
+from .Downloader import *
 
 
 MATHJAX_LIB_URL = 'http://cdn.bitbucket.org/timonwong/omnimarkuppreviewer/downloads/mathjax.zip'
@@ -50,7 +57,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
         self.settings = {}
 
     def download_url(self, url, error_message):
-        has_ssl = 'ssl' in sys.modules and hasattr(urllib2, 'HTTPSHandler')
+        has_ssl = 'ssl' in sys.modules and hasattr(urllib_compat, 'HTTPSHandler')
         is_ssl = url.startswith('https://')
 
         if (is_ssl and has_ssl) or not is_ssl:
@@ -86,7 +93,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
             # Download failed
             return
 
-        with contextlib.closing(StringIO.StringIO(archive)) as archive_stream:
+        with contextlib.closing(io.StringIO(archive)) as archive_stream:
             archive_stream.seek(0)
             log.info('Extrating contents from mathjax.zip ...')
             with contextlib.closing(zipfile.ZipFile(archive_stream)) as zip_file:

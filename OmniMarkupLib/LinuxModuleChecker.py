@@ -22,6 +22,7 @@ SOFTWARE.
 
 import sublime
 import os
+import sys
 
 
 def cannot_import_some_modules_in_linux():
@@ -66,7 +67,12 @@ def check(force_check=False):
         settings.set('missing_module_reported', True)
         sublime.save_settings('OmniMarkupPreviewer.sublime-settings')
         try:
-            import pyexpat
-            import ctypes
+            # Prevent PEP8 warning
+            exec('import pyexpat')
+            exec('import ctypes')
         except ImportError:
             sublime.set_timeout(cannot_import_some_modules_in_linux, 500)
+
+
+if sys.version_info < (3, 0):
+    check()

@@ -30,17 +30,23 @@ import os
 import re
 import sys
 import threading
-from urlparse import urlparse
 from time import time
 
-from OmniMarkupLib.Setting import Setting
-from OmniMarkupLib.Common import entities_unescape, Singleton, RWLock
-from OmniMarkupLib import LibraryPathManager
-from OmniMarkupLib import log
+from . import log, LibraryPathManager
+from .Setting import Setting
+from .Common import entities_unescape, Singleton, RWLock
 
 # HACK: Make sure required base_renderer package load first
-import OmniMarkupLib.Renderers.base_renderer
-OmniMarkupLib.Renderers.base_renderer  # Prevent PEP8 Warning
+exec('from .Renderers import base_renderer')
+
+g_is_py3k = sys.version_info >= (3, 0, 0)
+
+if g_is_py3k:
+    from urllib.parse import urlparse
+    getcwd = os.getcwd
+else:
+    from urlparse import urlparse
+    getcwd = os.getcwdu
 
 __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
@@ -97,7 +103,7 @@ class RenderedMarkupCacheEntry(dict):
 
     def __init__(self, timestamp=None, filename='', dirname='', html_part=''):
         timestamp = timestamp or str(time())
-        for name, val in locals().iteritems():
+        for name, val in list(locals().items()):
             if name == 'self':
                 continue
             self[name] = val
@@ -330,7 +336,10 @@ class RendererManager(object):
 
     @classmethod
     def _load_renderer(cls, renderers, path, module_name):
-        prefix = 'OmniMarkupLib.Renderers'
+        if g_is_py3k:
+            prefix = 'OmniMarkupPreviewer.OmniMarkupLib.Renderers'
+        else:
+            prefix = 'OmniMarkupLib.Renderers'
         try:
             mod = cls._import_module(module_name, path, prefix)
             # Get classes
@@ -359,7 +368,7 @@ class RendererManager(object):
             # add the modules directory to sys.path, as that won't accept unicode paths
             # on Windows
             renderers_path = os.path.join(__path__, 'Renderers/')
-            oldpath = os.getcwdu()
+            oldpath = getcwd()
             os.chdir(os.path.join(__path__, '..'))
 
             try:
