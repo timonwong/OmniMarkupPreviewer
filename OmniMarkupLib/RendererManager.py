@@ -54,6 +54,12 @@ __path__ = os.path.dirname(__file__)
 
 LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
 LibraryPathManager.add_search_path(os.path.join(__path__, 'libs'))
+LibraryPathManager.add_search_path(os.path.join(__path__, 'Renderers', 'libs'))
+if g_is_py3k:
+    LibraryPathManager.add_search_path(os.path.join(__path__, 'Renderers', 'libs', 'python3'))
+else:
+    LibraryPathManager.add_search_path(os.path.join(__path__, 'Renderers', 'libs', 'python2'))
+
 from bottle import template
 
 
@@ -358,7 +364,6 @@ class RendererManager(object):
         with cls.MUTEX:
             # Add library path to sys.path
             LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
-            LibraryPathManager.add_search_path(os.path.join(__path__, './Renderers/libs/'))
 
             # Change the current directory to that of the module. It's not safe to just
             # add the modules directory to sys.path, as that won't accept unicode paths
