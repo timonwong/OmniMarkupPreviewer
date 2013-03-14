@@ -55,7 +55,7 @@ def _mk_folders(folders):
 
 _mk_folders([USER_STATIC_FILES_DIR, USER_TEMPLATE_FILES_DIR])
 
-LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
+LibraryPathManager.add_search_path_if_not_exists(os.path.dirname(sys.executable))
 LibraryPathManager.push_search_path(os.path.join(__path__, 'libs'))
 try:
     from cherrypy import wsgiserver
@@ -63,7 +63,6 @@ try:
     from bottle import Bottle, ServerAdapter
     from bottle import static_file, request, template
 finally:
-    LibraryPathManager.pop_search_path()
     LibraryPathManager.pop_search_path()
 
 bottle.TEMPLATE_PATH = [USER_TEMPLATE_FILES_DIR, DEFAULT_TEMPLATE_FILES_DIR]

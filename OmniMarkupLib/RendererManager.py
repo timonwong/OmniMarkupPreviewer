@@ -52,12 +52,11 @@ __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
 
 
-LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
+LibraryPathManager.add_search_path_if_not_exists(os.path.dirname(sys.executable))
 LibraryPathManager.push_search_path(os.path.join(__path__, 'libs'))
 try:
     from bottle import template
 finally:
-    LibraryPathManager.pop_search_path()
     LibraryPathManager.pop_search_path()
 
 
@@ -361,8 +360,10 @@ class RendererManager(object):
         renderers = []
         with cls.MUTEX:
             # Add library path to sys.path
-            LibraryPathManager.push_search_path(os.path.dirname(sys.executable))
-            LibraryPathManager.add_search_path_if_not_exists(os.path.join(__path__, './Renderers/libs/'))
+            LibraryPathManager.add_search_path_if_not_exists(os.path.dirname(
+                sys.executable))
+            LibraryPathManager.add_search_path_if_not_exists(os.path.join(
+                __path__, './Renderers/libs/'))
 
             # Change the current directory to that of the module. It's not safe to just
             # add the modules directory to sys.path, as that won't accept unicode paths
@@ -380,7 +381,6 @@ class RendererManager(object):
             finally:
                 # Restore the current directory
                 os.chdir(oldpath)
-                LibraryPathManager.pop_search_path()
         cls.RENDERERS = renderers
 
     OLD_IGNORED_RENDERERS = set()

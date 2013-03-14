@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 """
 Attribute List Extension for Python-Markdown
 ============================================
@@ -18,9 +19,11 @@ Dependencies:
 
 """
 
-import markdown
+from __future__ import absolute_import
+from . import Extension
+from ..treeprocessors import Treeprocessor
+from ..util import isBlockLevel
 import re
-from markdown.util import isBlockLevel
 
 try:
     Scanner = re.Scanner
@@ -41,9 +44,9 @@ def _handle_key_value(s, t):
 
 def _handle_word(s, t):
     if t.startswith('.'):
-        return u'.', t[1:]
+        return '.', t[1:]
     if t.startswith('#'):
-        return u'id', t[1:]
+        return 'id', t[1:]
     return t, t
 
 _scanner = Scanner([
@@ -61,16 +64,19 @@ def get_attrs(str):
 def isheader(elem):
     return elem.tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 
-class AttrListTreeprocessor(markdown.treeprocessors.Treeprocessor):
+class AttrListTreeprocessor(Treeprocessor):
     
     BASE_RE = r'\{\:?([^\}]*)\}'
     HEADER_RE = re.compile(r'[ ]*%s[ ]*$' % BASE_RE)
     BLOCK_RE = re.compile(r'\n[ ]*%s[ ]*$' % BASE_RE)
     INLINE_RE = re.compile(r'^%s' % BASE_RE)
+    NAME_RE = re.compile(r'[^A-Z_a-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02ff\u0370-\u037d'
+                         r'\u037f-\u1fff\u200c-\u200d\u2070-\u218f\u2c00-\u2fef'
+                         r'\u3001-\ud7ff\uf900-\ufdcf\ufdf0-\ufffd'
+                         r'\:\-\.0-9\u00b7\u0300-\u036f\u203f-\u2040]+')
 
     def run(self, doc):
         for elem in doc.getiterator():
-            #import pdb; pdb.set_trace()
             if isBlockLevel(elem.tag):
                 # Block level: check for attrs on last line of text
                 RE = self.BLOCK_RE
@@ -114,18 +120,20 @@ class AttrListTreeprocessor(markdown.treeprocessors.Treeprocessor):
                 else:
                     elem.set('class', v)
             else:
-                # assing attr k with v
-                elem.set(k, v)
+                # assign attr k with v
+                elem.set(self.sanitize_name(k), v)
+
+    def sanitize_name(self, name):
+        """
+        Sanitize name as 'an XML Name, minus the ":"'.
+        See http://www.w3.org/TR/REC-xml-names/#NT-NCName
+        """
+        return self.NAME_RE.sub('_', name)
 
 
-class AttrListExtension(markdown.extensions.Extension):
+class AttrListExtension(Extension):
     def extendMarkdown(self, md, md_globals):
-        if 'headerid' in md.treeprocessors.keys():
-            # insert after 'headerid' treeprocessor
-            md.treeprocessors.add('attr_list', AttrListTreeprocessor(md), '>headerid')
-        else:
-            # insert after 'inline' treeprocessor
-            md.treeprocessors.add('attr_list', AttrListTreeprocessor(md), '>inline')
+        md.treeprocessors.add('attr_list', AttrListTreeprocessor(md), '>prettify')
 
 
 def makeExtension(configs={}):

@@ -1,21 +1,21 @@
-"""
-CORE MARKDOWN BLOCKPARSER
-=============================================================================
+from __future__ import unicode_literals
+# CORE MARKDOWN BLOCKPARSER
+# ===========================================================================
+#
+# This parser handles basic parsing of Markdown blocks.  It doesn't concern itself
+# with inline elements such as **bold** or *italics*, but rather just catches 
+# blocks, lists, quotes, etc.
+#
+# The BlockParser is made up of a bunch of BlockProssors, each handling a 
+# different type of block. Extensions may add/replace/remove BlockProcessors
+# as they need to alter how markdown blocks are parsed.
 
-This parser handles basic parsing of Markdown blocks.  It doesn't concern itself
-with inline elements such as **bold** or *italics*, but rather just catches 
-blocks, lists, quotes, etc.
-
-The BlockParser is made up of a bunch of BlockProssors, each handling a 
-different type of block. Extensions may add/replace/remove BlockProcessors
-as they need to alter how markdown blocks are parsed.
-
-"""
-
+from __future__ import absolute_import
+from __future__ import division
 import logging
 import re
-import util
-from blockparser import BlockParser
+from . import util
+from .blockparser import BlockParser
 
 logger =  logging.getLogger('MARKDOWN')
 
@@ -485,7 +485,7 @@ class HRProcessor(BlockProcessor):
             # Recursively parse lines before hr so they get parsed first.
             self.parser.parseBlocks(parent, [prelines])
         # create hr
-        hr = util.etree.SubElement(parent, 'hr')
+        util.etree.SubElement(parent, 'hr')
         # check for lines in block after hr.
         postlines = block[self.match.end():].lstrip('\n')
         if postlines:
@@ -495,26 +495,27 @@ class HRProcessor(BlockProcessor):
 
 
 class EmptyBlockProcessor(BlockProcessor):
-    """ Process blocks and start with an empty line. """
-
-    # Detect a block that only contains whitespace 
-    # or only whitespace on the first line.
-    RE = re.compile(r'^\s*\n')
+    """ Process blocks that are empty or start with an empty line. """
 
     def test(self, parent, block):
-        return bool(self.RE.match(block))
+        return not block or block.startswith('\n')
 
     def run(self, parent, blocks):
         block = blocks.pop(0)
-        m = self.RE.match(block)
-        if m:
-            # Add remaining line to master blocks for later.
-            blocks.insert(0, block[m.end():])
-            sibling = self.lastChild(parent)
-            if sibling and sibling.tag == 'pre' and sibling[0] and \
-                    sibling[0].tag == 'code':
-                # Last block is a codeblock. Append to preserve whitespace.
-                sibling[0].text = util.AtomicString('%s/n/n/n' % sibling[0].text )
+        filler = '\n\n'
+        if block:
+            # Starts with empty line
+            # Only replace a single line.
+            filler = '\n'
+            # Save the rest for later.
+            theRest = block[1:]
+            if theRest:
+                # Add remaining lines to master blocks for later.
+                blocks.insert(0, theRest)
+        sibling = self.lastChild(parent)
+        if sibling and sibling.tag == 'pre' and len(sibling) and sibling[0].tag == 'code':
+            # Last block is a codeblock. Append to preserve whitespace.
+            sibling[0].text = util.AtomicString('%s%s' % (sibling[0].text, filler))
 
 
 class ParagraphProcessor(BlockProcessor):

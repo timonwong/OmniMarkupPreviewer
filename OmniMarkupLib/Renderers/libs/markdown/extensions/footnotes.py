@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 """
 ========================= FOOTNOTES =================================
 
@@ -23,16 +24,22 @@ Example:
 
 """
 
+from __future__ import absolute_import
+from . import Extension
+from ..preprocessors import Preprocessor
+from ..inlinepatterns import Pattern
+from ..treeprocessors import Treeprocessor
+from ..postprocessors import Postprocessor
+from ..util import etree, text_type
+from ..odict import OrderedDict
 import re
-import markdown
-from markdown.util import etree
 
 FN_BACKLINK_TEXT = "zz1337820767766393qq"
 NBSP_PLACEHOLDER =  "qq3936677670287331zz"
 DEF_RE = re.compile(r'[ ]{0,3}\[\^([^\]]*)\]:\s*(.*)')
 TABBED_RE = re.compile(r'((\t)|(    ))(.*)')
 
-class FootnoteExtension(markdown.Extension):
+class FootnoteExtension(Extension):
     """ Footnote Extension. """
 
     def __init__ (self, configs):
@@ -62,6 +69,9 @@ class FootnoteExtension(markdown.Extension):
         md.registerExtension(self)
         self.parser = md.parser
         self.md = md
+        self.sep = ':'
+        if self.md.output_format in ['html5', 'xhtml5']:
+            self.sep = '-'
         # Insert a preprocessor before ReferencePreprocessor
         md.preprocessors.add("footnote", FootnotePreprocessor(self),
                              "<reference")
@@ -80,7 +90,7 @@ class FootnoteExtension(markdown.Extension):
 
     def reset(self):
         """ Clear the footnotes on reset, and prepare for a distinct document. """
-        self.footnotes = markdown.odict.OrderedDict()
+        self.footnotes = OrderedDict()
         self.unique_prefix += 1
 
     def findFootnotesPlaceholder(self, root):
@@ -106,26 +116,26 @@ class FootnoteExtension(markdown.Extension):
     def makeFootnoteId(self, id):
         """ Return footnote link id. """
         if self.getConfig("UNIQUE_IDS"):
-            return 'fn:%d-%s' % (self.unique_prefix, id)
+            return 'fn%s%d-%s' % (self.sep, self.unique_prefix, id)
         else:
-            return 'fn:%s' % id
+            return 'fn%s%s' % (self.sep, id)
 
     def makeFootnoteRefId(self, id):
         """ Return footnote back-link id. """
         if self.getConfig("UNIQUE_IDS"):
-            return 'fnref:%d-%s' % (self.unique_prefix, id)
+            return 'fnref%s%d-%s' % (self.sep, self.unique_prefix, id)
         else:
-            return 'fnref:%s' % id
+            return 'fnref%s%s' % (self.sep, id)
 
     def makeFootnotesDiv(self, root):
         """ Return div of footnotes as et Element. """
 
-        if not self.footnotes.keys():
+        if not list(self.footnotes.keys()):
             return None
 
         div = etree.Element("div")
         div.set('class', 'footnote')
-        hr = etree.SubElement(div, "hr")
+        etree.SubElement(div, "hr")
         ol = etree.SubElement(div, "ol")
 
         for id in self.footnotes.keys():
@@ -152,7 +162,7 @@ class FootnoteExtension(markdown.Extension):
         return div
 
 
-class FootnotePreprocessor(markdown.preprocessors.Preprocessor):
+class FootnotePreprocessor(Preprocessor):
     """ Find all footnote references and store for later use. """
 
     def __init__ (self, footnotes):
@@ -171,7 +181,6 @@ class FootnotePreprocessor(markdown.preprocessors.Preprocessor):
         """
         newlines = []
         i = 0
-        #import pdb; pdb.set_trace() #for i, line in enumerate(lines):
         while True:
             m = DEF_RE.match(lines[i])
             if m:
@@ -244,11 +253,11 @@ class FootnotePreprocessor(markdown.preprocessors.Preprocessor):
         return items, i
 
 
-class FootnotePattern(markdown.inlinepatterns.Pattern):
+class FootnotePattern(Pattern):
     """ InlinePattern for footnote markers in a document's body text. """
 
     def __init__(self, pattern, footnotes):
-        markdown.inlinepatterns.Pattern.__init__(self, pattern)
+        super(FootnotePattern, self).__init__(pattern)
         self.footnotes = footnotes
 
     def handleMatch(self, m):
@@ -261,13 +270,13 @@ class FootnotePattern(markdown.inlinepatterns.Pattern):
             if self.footnotes.md.output_format not in ['html5', 'xhtml5']:
                 a.set('rel', 'footnote') # invalid in HTML5
             a.set('class', 'footnote-ref')
-            a.text = unicode(self.footnotes.footnotes.index(id) + 1)
+            a.text = text_type(self.footnotes.footnotes.index(id) + 1)
             return sup
         else:
             return None
 
 
-class FootnoteTreeprocessor(markdown.treeprocessors.Treeprocessor):
+class FootnoteTreeprocessor(Treeprocessor):
     """ Build and append footnote div to end of document. """
 
     def __init__ (self, footnotes):
@@ -289,7 +298,7 @@ class FootnoteTreeprocessor(markdown.treeprocessors.Treeprocessor):
             else:
                 root.append(footnotesDiv)
 
-class FootnotePostprocessor(markdown.postprocessors.Postprocessor):
+class FootnotePostprocessor(Postprocessor):
     """ Replace placeholders with html entities. """
     def __init__(self, footnotes):
         self.footnotes = footnotes

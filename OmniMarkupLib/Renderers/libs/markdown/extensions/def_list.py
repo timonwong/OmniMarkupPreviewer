@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+from __future__ import unicode_literals
 """
 Definition List Extension for Python-Markdown
 =============================================
@@ -19,12 +19,14 @@ Copyright 2008 - [Waylan Limberg](http://achinghead.com)
 
 """
 
+from __future__ import absolute_import
+from . import Extension
+from ..blockprocessors import BlockProcessor, ListIndentProcessor
+from ..util import etree
 import re
-import markdown
-from markdown.util import etree
 
 
-class DefListProcessor(markdown.blockprocessors.BlockProcessor):
+class DefListProcessor(BlockProcessor):
     """ Process Definition Lists. """
 
     RE = re.compile(r'(^|\n)[ ]{0,3}:[ ]{1,3}(.*?)(\n|$)')
@@ -34,10 +36,11 @@ class DefListProcessor(markdown.blockprocessors.BlockProcessor):
         return bool(self.RE.search(block))
 
     def run(self, parent, blocks):
-        block = blocks.pop(0)
-        m = self.RE.search(block)
-        terms = [l.strip() for l in block[:m.start()].split('\n') if l.strip()]
-        block = block[m.end():]
+
+        raw_block = blocks.pop(0)
+        m = self.RE.search(raw_block)
+        terms = [l.strip() for l in raw_block[:m.start()].split('\n') if l.strip()]
+        block = raw_block[m.end():]
         no_indent = self.NO_INDENT_RE.match(block)
         if no_indent:
             d, theRest = (block, None)
@@ -48,6 +51,11 @@ class DefListProcessor(markdown.blockprocessors.BlockProcessor):
         else:
             d = m.group(2)
         sibling = self.lastChild(parent)
+        if not terms and sibling is None:
+            # This is not a definition item. Most likely a paragraph that 
+            # starts with a colon at the begining of a document or list.
+            blocks.insert(0, raw_block)
+            return False
         if not terms and sibling.tag == 'p':
             # The previous paragraph contains the terms
             state = 'looselist'
@@ -79,7 +87,7 @@ class DefListProcessor(markdown.blockprocessors.BlockProcessor):
         if theRest:
             blocks.insert(0, theRest)
 
-class DefListIndentProcessor(markdown.blockprocessors.ListIndentProcessor):
+class DefListIndentProcessor(ListIndentProcessor):
     """ Process indented children of definition list items. """
 
     ITEM_TYPES = ['dd']
@@ -92,7 +100,7 @@ class DefListIndentProcessor(markdown.blockprocessors.ListIndentProcessor):
  
 
 
-class DefListExtension(markdown.Extension):
+class DefListExtension(Extension):
     """ Add definition lists to Markdown. """
 
     def extendMarkdown(self, md, md_globals):

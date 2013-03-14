@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 """
 INLINE PATTERNS
 =============================================================================
@@ -41,18 +42,18 @@ So, we apply the expressions in the following order:
 * finally we apply strong and emphasis
 """
 
-import util
-import odict
+from __future__ import absolute_import
+from . import util
+from . import odict
 import re
-from urlparse import urlparse, urlunparse
-import sys
-# If you see an ImportError for htmlentitydefs after using 2to3 to convert for 
-# use by Python3, then you are probably using the buggy version from Python 3.0.
-# We recomend using the tool from Python 3.1 even if you will be running the 
-# code on Python 3.0.  The following line should be converted by the tool to:
-# `from html import entities` and later calls to `htmlentitydefs` should be
-# changed to call `entities`. Python 3.1's tool does this but 3.0's does not.
-import htmlentitydefs
+try:
+    from urllib.parse import urlparse, urlunparse
+except ImportError:
+    from urlparse import urlparse, urlunparse
+try:
+    from html import entities
+except ImportError:
+    import htmlentitydefs as entities
 
 
 def build_inlinepatterns(md_instance, **kwargs):
@@ -142,7 +143,7 @@ The pattern classes
 -----------------------------------------------------------------------------
 """
 
-class Pattern:
+class Pattern(object):
     """Base class that inline patterns subclass. """
 
     def __init__(self, pattern, markdown_instance=None):
@@ -192,7 +193,7 @@ class Pattern:
         def itertext(el):
             ' Reimplement Element.itertext for older python versions '
             tag = el.tag
-            if not isinstance(tag, basestring) and tag is not None:
+            if not isinstance(tag, util.string_type) and tag is not None:
                 return
             if el.text:
                 yield el.text
@@ -205,7 +206,7 @@ class Pattern:
             id = m.group(1)
             if id in stash:
                 value = stash.get(id)
-                if isinstance(value, basestring):
+                if isinstance(value, util.string_type):
                     return value
                 else:
                     # An etree Element - return text content only
@@ -355,14 +356,18 @@ class LinkPattern(Pattern):
             return ''
         
         locless_schemes = ['', 'mailto', 'news']
+        allowed_schemes = locless_schemes + ['http', 'https', 'ftp', 'ftps']
+        if scheme not in allowed_schemes:
+            # Not a known (allowed) scheme. Not safe.
+            return ''
+            
         if netloc == '' and scheme not in locless_schemes:
-            # This fails regardless of anything else. 
-            # Return immediately to save additional proccessing
+            # This should not happen. Treat as suspect.
             return ''
 
         for part in url[2:]:
             if ":" in part:
-                # Not a safe url
+                # A colon in "path", "parameters", "query" or "fragment" is suspect.
                 return ''
 
         # Url passes all tests. Return url as-is.
@@ -433,6 +438,10 @@ class ImageReferencePattern(ReferencePattern):
         el.set("src", self.sanitize_url(href))
         if title:
             el.set("title", title)
+
+        if self.markdown.enable_attributes:
+            text = handleAttributes(text, el)
+
         el.set("alt", self.unescape(text))
         return el
 
@@ -457,7 +466,7 @@ class AutomailPattern(Pattern):
 
         def codepoint2name(code):
             """Return entity definition by code, or the code if not defined."""
-            entity = htmlentitydefs.codepoint2name.get(code)
+            entity = entities.codepoint2name.get(code)
             if entity:
                 return "%s%s;" % (util.AMP_SUBSTITUTE, entity)
             else:
