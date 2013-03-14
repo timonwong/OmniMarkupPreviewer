@@ -100,7 +100,7 @@ Known Issues
 What's New
 ----------
 
-v1.20 (TBD/2013)
+v1.12 (03/13/2013)
 
 * Renderes are now loaded asynchronously on startup.
 * Add litcoffee support.

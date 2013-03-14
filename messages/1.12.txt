@@ -1,0 +1,5 @@
+OmniMarkupPreviewer v1.12 Changelog:
+
+
+* Renderes are now loaded asynchronously on startup.
+* Add litcoffee support.
