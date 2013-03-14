@@ -1,7 +1,11 @@
 from .base_renderer import *
+import os
 import re
+import docutils.writers.html4css1
 from docutils.core import publish_parts
 from docutils.writers.html4css1 import Writer, HTMLTranslator
+
+docutils_dir = os.path.dirname(docutils.writers.html4css1.__file__)
 
 
 class GitHubHTMLTranslator(HTMLTranslator):
@@ -36,7 +40,9 @@ class RstRenderer(MarkupRenderer):
             'syntax_highlight': 'none',
             'math_output': 'latex',
             'input_encoding': 'utf-8',
-            'output_encoding': 'utf-8'
+            'output_encoding': 'utf-8',
+            'stylesheet_dirs': [os.path.normpath(os.path.join(docutils_dir, Writer.default_stylesheet))],
+            'template': os.path.normpath(os.path.join(docutils_dir, Writer.default_template))
         }
 
         writer = Writer()
