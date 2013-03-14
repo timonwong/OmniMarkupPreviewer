@@ -117,54 +117,62 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
 
 
 class OmniMarkupCleanCacheCommand(sublime_plugin.ApplicationCommand):
-    def run(self, remove_all=False):
+    def run(self):
         storage = RenderedMarkupCache.instance()
-        if remove_all:
-            storage.clean()
-            return
-        keep_ids_list = []
-        for window in sublime.windows():
-            for view in window.views():
-                keep_ids_list.append(view.buffer_id())
-        storage.clean(keep_ids=set(keep_ids_list))
+        storage.clean()
 
 
 class OmniMarkupExportCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def copy_to_clipboard(self, html_content):
+        sublime.set_clipboard(html_content)
+        sublime.status_message('Exported result copied to clipboard')
+
+    def write_to_file(self, html_content, setting):
+        target_folder = setting.export_options['target_folder']
+
+        if target_folder is not None:
+            fullpath = self.view.file_name() or ''
+            timestamp_format = setting.export_options['timestamp_format']
+            timestr = time.strftime(timestamp_format, time.localtime())
+
+            if (not os.path.exists(fullpath) and target_folder == ".") or \
+                    not os.path.isdir(target_folder):
+                target_folder = None
+            elif target_folder == '.':
+                fn_base, _ = os.path.splitext(fullpath)
+                html_fn = '%s%s.html' % (fn_base, timestr)
+            elif not os.path.exists(fullpath):
+                html_fn = os.path.join(target_folder, 'Untitled%s.html' % timestr)
+            else:
+                fn_base = os.path.basename(fullpath)
+                html_fn = os.path.join(target_folder, '%s%s.html' % (fn_base, timestr))
+
+        # No target folder, create file in temporary directory
+        if target_folder is None:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
+                html_fn = f.name
+
+        with codecs.open(html_fn, 'w', encoding='utf-8') as html_file:
+            html_file.write(html_content)
+
+        return html_fn
+
+    def run(self, edit, clipboard_only=False):
         view = self.view
         try:
             html_content = RendererManager.render_view_to_string(view)
+
+            if clipboard_only:
+                self.copy_to_clipboard(html_content)
+                return
+
             setting = Setting.instance()
-            target_folder = setting.export_options['target_folder']
-
-            if target_folder is not None:
-                fullpath = self.view.file_name() or ''
-                timestamp_format = setting.export_options['timestamp_format']
-                timestr = time.strftime(timestamp_format, time.localtime())
-
-                if (not os.path.exists(fullpath) and target_folder == ".") or \
-                        not os.path.isdir(target_folder):
-                    target_folder = None
-                elif target_folder == '.':
-                    fn_base, _ = os.path.splitext(fullpath)
-                    html_fn = '%s%s.html' % (fn_base, timestr)
-                elif not os.path.exists(fullpath):
-                    html_fn = os.path.join(target_folder, 'Untitled%s.html' % timestr)
-                else:
-                    fn_base = os.path.basename(fullpath)
-                    html_fn = os.path.join(target_folder, '%s%s.html' % (fn_base, timestr))
-
-            if target_folder is None:
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as f:
-                    html_fn = f.name
-
-            with codecs.open(html_fn, 'w', encoding='utf-8') as html_file:
-                html_file.write(html_content)
+            html_fn = self.write_to_file(html_content, setting)
 
             # Copy contents to clipboard
             if setting.export_options['copy_to_clipboard']:
-                sublime.set_clipboard(html_content)
-                sublime.status_message('Exported result copied to clipboard')
+                self.copy_to_clipboard(html_content)
+
             # Open output file if necessary
             if setting.export_options['open_after_exporting']:
                 log.info('Launching web browser for %s', html_fn)

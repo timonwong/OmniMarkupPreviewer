@@ -24,13 +24,7 @@
         "command": "omni_markup_export"
     },
     {
-        "caption": "OmniMarkupPreviewer: Sweep Cache (Remove Unused)",
-        "command": "omni_markup_clean_cache",
-        "args": {"remove_all": false}
-    },
-    {
         "caption": "OmniMarkupPreviewer: Empty Cache",
-        "command": "omni_markup_clean_cache",
-        "args": {"remove_all": true}
+        "command": "omni_markup_clean_cache"
     }
 ]

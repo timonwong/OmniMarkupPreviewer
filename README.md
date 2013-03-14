@@ -74,13 +74,15 @@ The default key bindings:
 
 **Windows, Linux:**
 
-* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>: Preview current file.
-* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>: Export to html file.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>: Preview current Markup file.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>: Export Markup to html file.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup to clipboard.
 
 **OSX:**
 
-* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>: Preview current file.
-* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>X</kbd>: Export to html file.
+* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>: Preview current Markup file.
+* <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>X</kbd>: Export Markup to html file.
+* <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup to clipboard.
 
 ### Command Palette
 
@@ -88,7 +90,6 @@ Available OmniMarkupPreviewer commands in the command palette:
 
 * `OmniMarkupPreviewer: Preview Current File`
 * `OmniMarkupPreviewer: Export to html File`
-* `OmniMarkupPreviewer: Sweep Cache (Remove Unused)`
 * `OmniMarkupPreviewer: Empty Cache`
 
 Known Issues

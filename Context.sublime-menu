@@ -1,4 +1,12 @@
 [
     { "caption": "-", "id": "file" },
-    { "command": "omni_markup_preview", "caption": "Preview Current File in Browser" }
+    { "command": "omni_markup_preview", "caption": "Preview Markup in Browser" },
+    { "command": "omni_markup_export", "caption": "Export Markup as HTML" },
+    {
+        "command": "omni_markup_export",
+        "caption": "Copy Markup as HTML",
+        "args": {
+            "clipboard_only": true
+        }
+    }
 ]

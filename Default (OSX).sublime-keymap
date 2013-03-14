@@ -6,5 +6,10 @@
     {
         "keys": ["super+alt+x"], "command": "omni_markup_export",
         "context": [{"key": "omnimarkup_is_enabled", "operator": "equal", "operand": ""}]
+    },
+    {
+        "keys": ["ctrl+alt+c"], "command": "omni_markup_export",
+        "args": { "clipboard_only": true },
+        "context": [{"key": "omnimarkup_is_enabled", "operator": "equal", "operand": ""}]
     }
 ]
