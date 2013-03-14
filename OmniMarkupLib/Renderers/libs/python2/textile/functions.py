@@ -403,7 +403,6 @@ class Textile(object):
 
         tag = 'p'
         atts = cite = graf = ext = ''
-        custom_tag = ''
         c1 = ''
 
         out = []
@@ -437,7 +436,6 @@ class Textile(object):
 
             else:
                 anon = True
-
                 if ext or not re.search(r'^\s', line):
                     o1, o2, content, c2, c1 = self.fBlock(tag, atts, ext,
                                                           cite, line)

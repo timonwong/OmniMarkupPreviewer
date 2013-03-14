@@ -14,7 +14,7 @@ def getimagesize(url):
     """
 
     try:
-        import ImageFile
+        from PIL import ImageFile
         import urllib2
     except ImportError:
         return ''
@@ -36,6 +36,6 @@ def getimagesize(url):
 def setup_module(module):
     from nose.plugins.skip import SkipTest
     try:
-        import ImageFile
+        from PIL import ImageFile
     except ImportError:
         raise SkipTest()
