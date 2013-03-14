@@ -28,7 +28,7 @@ g_is_py3k = sys.version_info >= (3, 0, 0)
 
 def _try_get_short_path(path):
     path = os.path.normpath(path)
-    if os.name == 'nt' and not g_is_py3k:
+    if not g_is_py3k and os.name == 'nt':
         from ctypes import windll, create_unicode_buffer
         buf = create_unicode_buffer(512)
         path = unicode(path)

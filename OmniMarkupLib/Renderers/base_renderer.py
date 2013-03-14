@@ -22,11 +22,13 @@ SOFTWARE.
 
 from __future__ import print_function
 
-import subprocess
-import os
-import os.path
 import locale
+import os
+import subprocess
+import sys
 import tempfile
+
+g_is_py3k = sys.version_info >= (3, 0, 0)
 
 
 class MarkupRenderer(object):
@@ -111,16 +113,16 @@ class CommandlineRenderer(MarkupRenderer):
         return result.strip()
 
     def get_executable(self):
-        if os.name == 'nt':
-            # On Windows, popen won't support unicode args
+        if not g_is_py3k and os.name == 'nt':
+            # [PY2K] On Windows, popen won't support unicode args
             if isinstance(self.executable, unicode):
                 encoding = locale.getpreferredencoding()
                 return self.executable.encode(encoding)
         return self.executable
 
     def get_args(self, filename=None):
-        if os.name == 'nt':
-            # On Windows, popen won't support unicode args
+        if not g_is_py3k and os.name == 'nt':
+            # [PY2K] On Windows, popen won't support unicode args
             encoding = locale.getpreferredencoding()
             args = [arg if isinstance(arg, str) else arg.encode(encoding) for arg in self.args]
         else:
