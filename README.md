@@ -95,7 +95,7 @@ Available OmniMarkupPreviewer commands in the command palette:
 Known Issues
 ------------
 
-* RDoc and Pod documents cannot be previewed until saved.
+* **RDoc** and **Pod** documents cannot be previewed until saved.
 
 
 What's New
@@ -103,6 +103,7 @@ What's New
 
 v1.20 (TBD)
 
+* Add support Sublime Text 3 (Experimental).
 * Add new context command `Copy Markup as HTML`.
 * Remove unused command `Sweep Cache (Remove Unused)`.
 

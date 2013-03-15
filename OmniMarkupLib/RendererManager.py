@@ -296,14 +296,13 @@ class RendererManager(object):
         return cls.IMG_TAG_RE.sub(encode_image_path, rendered_text)
 
     @classmethod
-    def render_view_to_string(cls, view):
+    def render_view_as_html(cls, view):
         fullpath = view.file_name() or ''
         lang = RendererManager.get_lang_by_scope_name(view.scope_name(0))
         text = view.substr(sublime.Region(0, view.size()))
         html_part = RendererManager.render_text(
             fullpath, lang, text,
-            post_process_func=cls.render_text_postprocess_exporting
-        )
+            post_process_func=cls.render_text_postprocess_exporting)
         setting = Setting.instance()
         return template(setting.export_options['template_name'],
                         mathjax_enabled=setting.mathjax_enabled,
@@ -427,9 +426,6 @@ class RendererManager(object):
 
         cls.WORKER.start()
         cls.on_setting_changing(setting)
-
-        # HACK: OmniMarkupLib.Renderers must be recognizable to thread
-        #import OmniMarkupLib.Renderers
 
         def f():
             cls.load_renderers()

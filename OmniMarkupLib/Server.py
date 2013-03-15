@@ -152,8 +152,7 @@ def handler_view(buffer_id):
     if entry is None:
         return bottle.HTTPError(
             404,
-            'buffer_id(%d) is not valid (not open or unsupported file format)' % buffer_id
-        )
+            'buffer_id(%d) is not valid (not open or unsupported file format)' % buffer_id)
     setting = Setting.instance()
     return template(setting.html_template_name,
                     buffer_id=buffer_id,

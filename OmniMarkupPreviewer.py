@@ -106,10 +106,10 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
             return
 
         buffer_id = self.view.buffer_id()
-        # Is opened in a tab?
+        # Opened in a tab already?
         opened = False
         for view in self.view.window().views():
-            if view.buffer_id == buffer_id:
+            if view.buffer_id() == buffer_id:
                 opened = True
                 break
         if not opened:
@@ -171,7 +171,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
     def run(self, edit, clipboard_only=False):
         view = self.view
         try:
-            html_content = RendererManager.render_view_to_string(view)
+            html_content = RendererManager.render_view_as_html(view)
 
             if clipboard_only:
                 self.copy_to_clipboard(html_content)
