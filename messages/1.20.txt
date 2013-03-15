@@ -1,0 +1,13 @@
+OmniMarkupPreviewer v1.20 Changelog:
+
+
+* Add support Sublime Text 3 (Experimental).
+* Add new context command `Copy Markup as HTML` (Ctrl+Alt+C).
+* Remove unused command `Sweep Cache (Remove Unused)`.
+* Auto scroll now works correctly for documents contain images and MathJax equations.
+
+Available context actions:
+
+* `Preview Markup in Browser`
+* `Export Markup as HTML`
+* `Copy Markup as HTML`

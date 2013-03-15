@@ -92,20 +92,16 @@ Available OmniMarkupPreviewer commands in the command palette:
 * `OmniMarkupPreviewer: Export Current Markup as HTML`
 * `OmniMarkupPreviewer: Empty Cache`
 
-Known Issues
-------------
-
-* **RDoc** and **Pod** documents cannot be previewed until saved.
-
 
 What's New
 ----------
 
-v1.20 (TBD)
+v1.20 (03/15/2013)
 
 * Add support Sublime Text 3 (Experimental).
 * Add new context command `Copy Markup as HTML`.
 * Remove unused command `Sweep Cache (Remove Unused)`.
+* Auto scroll now works correctly for documents contain images and MathJax equations.
 
 v1.12 (03/13/2013)
 
