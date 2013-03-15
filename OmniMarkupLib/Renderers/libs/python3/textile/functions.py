@@ -705,7 +705,7 @@ class Textile(object):
         """
         while True:
             old = text
-            for k, v in list(self.shelf.items()):
+            for k, v in self.shelf.items():
                 text = text.replace(k, v)
             if text == old:
                 break

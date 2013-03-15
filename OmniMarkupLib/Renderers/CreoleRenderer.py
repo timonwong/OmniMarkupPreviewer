@@ -1,5 +1,8 @@
 from .base_renderer import *
+import sys
 import creoleparser
+
+g_is_py3k = sys.version_info >= (3, 0, 0)
 
 
 @renderer
@@ -11,4 +14,7 @@ class CreoleRenderer(MarkupRenderer):
         return filename.endswith(".creole")
 
     def render(self, text, **kwargs):
-        return creoleparser.text2html(text)
+        result = creoleparser.text2html(text)
+        if g_is_py3k and isinstance(result, bytes):
+            result = result.decode('utf-8')
+        return result
