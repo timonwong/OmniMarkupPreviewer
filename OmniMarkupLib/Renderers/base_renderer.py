@@ -39,7 +39,7 @@ class MarkupRenderer(object):
         self.renderer_options = renderer_options
 
     @classmethod
-    def is_enabled(cls, filename, lang):
+    def is_enabled(cls, filename, syntax):
         return False
 
     def render(self, text, **kwargs):

@@ -7,11 +7,12 @@ class PodRenderer(CommandlineRenderer):
     def __init__(self):
         super(PodRenderer, self).__init__(
             executable='perl',
-            args=['-MPod::Simple::HTML', '-e', 'Pod::Simple::HTML::go']
-        )
+            args=['-MPod::Simple::HTML', '-e', 'Pod::Simple::HTML::go'])
 
     @classmethod
-    def is_enabled(cls, filename, lang):
+    def is_enabled(cls, filename, syntax):
+        if syntax == 'source.perl':
+            return True
         return filename.endswith('.pod')
 
     def post_process(self, rendered_text, **kwargs):

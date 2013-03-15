@@ -11,9 +11,10 @@ class RDocRenderer(CommandlineRenderer):
     def __init__(self):
         super(RDocRenderer, self).__init__(
             executable='ruby',
-            args=[os.path.join(__path__, 'bin/rdoc.rb')]
-        )
+            args=[os.path.join(__path__, 'bin/rdoc.rb')])
 
     @classmethod
-    def is_enabled(cls, filename, lang):
+    def is_enabled(cls, filename, syntax):
+        if syntax == 'text.rdoc':  # RDoc.tmLanguage
+            return True
         return filename.endswith('.rdoc')
