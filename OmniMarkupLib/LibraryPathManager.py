@@ -28,12 +28,15 @@ g_is_py3k = sys.version_info >= (3, 0, 0)
 
 def _try_get_short_path(path):
     path = os.path.normpath(path)
-    if not g_is_py3k and os.name == 'nt':
-        from ctypes import windll, create_unicode_buffer
-        buf = create_unicode_buffer(512)
-        path = unicode(path)
-        if windll.kernel32.GetShortPathNameW(path, buf, len(buf)):
-            path = buf.value
+    if not g_is_py3k and os.name == 'nt' and isinstance(path, unicode):
+        try:
+            import locale
+            path = path.encode(locale.getpreferredencoding())
+        except:
+            from ctypes import windll, create_unicode_buffer
+            buf = create_unicode_buffer(512)
+            if windll.kernel32.GetShortPathNameW(path, buf, len(buf)):
+                path = buf.value
     return path
 
 
