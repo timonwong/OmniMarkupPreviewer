@@ -301,7 +301,10 @@ class PluginEventListener(sublime_plugin.EventListener):
         self.throttle.stop()
 
     def on_close(self, view):
-        pass
+        storage = RenderedMarkupCache.instance()
+        entry = storage.get_entry(view.buffer_id())
+        if entry is not None:
+            entry.disconnected = True
 
     def on_new(self, view):
         pass

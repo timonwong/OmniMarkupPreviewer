@@ -81,21 +81,11 @@ def check_filesystem_case_sensitivity():
 check_filesystem_case_sensitivity()
 
 
-# @Singleton
-# class OpenedBufferManager(object):
-#     def __init__(self):
-#         self.rwlock = RWLock()
-#         self.buffers = {}
-
-#     def add_or_update(self, view):
-#         if not g_fs_case_sensitive:
-#             fn = view.file_name().lower()
-#         pass
-
-#     def remove(self, view):
-#         del self.buffers[buffer_id]
-#         is_closed = True
-#         pass
+def filesystem_path_equals(path1, path2):
+    if g_fs_case_sensitive:
+        return path1 == path2
+    else:
+        return path1.lower() == path2.lower()
 
 
 class RenderedMarkupCacheEntry(dict):
@@ -103,12 +93,16 @@ class RenderedMarkupCacheEntry(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
-    def __init__(self, timestamp=None, filename='', dirname='', html_part=''):
-        timestamp = timestamp or str(time())
-        for name, val in list(locals().items()):
-            if name == 'self':
-                continue
-            self[name] = val
+    def __init__(self, fullpath, html_part=''):
+        self.disconnected = False
+        revivable_key = base64.b64encode(fullpath)
+        filename = os.path.basename(fullpath)
+        dirname = os.path.dirname(fullpath)
+        self['revivable_key'] = revivable_key
+        self['filename'] = filename
+        self['dirname'] = dirname
+        self['timestamp'] = str(time())
+        self['html_part'] = html_part
         self['__deepcopy__'] = self.__deepcopy__
 
     def __deepcopy__(self, memo={}):
@@ -135,15 +129,9 @@ class RenderedMarkupCache(object):
         with self.rwlock.writelock:
             self.cache[buffer_id] = entry
 
-    def clean(self, keep_ids=set()):
+    def clean(self):
         with self.rwlock.writelock:
-            remove_ids = set(self.cache.keys())
-            remove_ids -= keep_ids
-            if len(remove_ids) == 0:
-                return
-            for buffer_id in remove_ids:
-                del self.cache[buffer_id]
-            log.info("Clean buffer ids in: %s" % list(remove_ids))
+            self.cache.clear()
 
 
 class WorkerQueueItem(object):
@@ -180,10 +168,8 @@ class RendererWorker(threading.Thread):
     def _run_queued_item(self, item):
         try:
             # Render text and save to cache
-            filename = os.path.basename(item.fullpath)
-            dirname = os.path.dirname(item.fullpath)
             html_part = RendererManager.render_text(item.fullpath, item.lang, item.text)
-            entry = RenderedMarkupCacheEntry(filename=filename, dirname=dirname, html_part=html_part)
+            entry = RenderedMarkupCacheEntry(item.fullpath, html_part=html_part)
             RenderedMarkupCache.instance().set_entry(item.buffer_id, entry)
         except NotImplementedError:
             pass
@@ -242,6 +228,7 @@ class RendererManager(object):
 
     @classmethod
     def render_text(cls, fullpath, lang, text, post_process_func=None):
+        """Render text (markups) as HTML"""
         if post_process_func is None:
             post_process_func = cls.render_text_postprocess
         filename = os.path.basename(fullpath)
@@ -313,16 +300,39 @@ class RendererManager(object):
     @classmethod
     def enqueue_view(cls, view, only_exists=False, immediate=False):
         buffer_id = view.buffer_id()
-        settings = view.settings()
         if only_exists and not RenderedMarkupCache.instance().exists(buffer_id):
-            # If current view is previously rendered, then ignore 'only_exists'
-            if not settings.get('omnimarkup_enabled', False):
-                return
-        settings.set('omnimarkup_enabled', True)
+            return
         region = sublime.Region(0, view.size())
         text = view.substr(region)
         lang = cls.get_lang_by_scope_name(view.scope_name(0))
         cls.WORKER.enqueue(buffer_id, view.file_name(), lang, text, immediate=immediate)
+
+    @classmethod
+    def enqueue_buffer_id(cls, buffer_id, only_exists=False, immediate=False):
+        """Render by view id immediately and return result as HTML"""
+
+        def query_valid_view(buffer_id):
+            """Query a valid view by buffer id"""
+
+            for window in sublime.windows():
+                for view in window.views():
+                    if view.buffer_id() == buffer_id:
+                        return view
+            return None
+
+        valid_view = query_valid_view(buffer_id)
+        if valid_view is not None:
+            RendererManager.enqueue_view(valid_view, only_exists=only_exists, immediate=immediate)
+        return RenderedMarkupCache.instance().get_entry(buffer_id)
+
+    @classmethod
+    def revive_buffer(cls, key):
+        key = base64.b64decode(key)
+        for window in sublime.windows():
+            for view in window.views():
+                if filesystem_path_equals(view.file_name(), key):
+                    return view.buffer_id()
+        return None
 
     @classmethod
     def _import_module(cls, name, path, prefix=None):

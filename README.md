@@ -4,11 +4,14 @@ OmniMarkupPreviewer
 Description
 -----------
 
-OmniMarkupPreviewer is a [Sublime Text 2](http://www.sublimetext.com/2) plugin
+OmniMarkupPreviewer is a plugin for both [Sublime Text 2] and [Sublime Text 3]
 that preview markups in web browsers. OmniMarkupPreviewer renders markups into
 htmls and send it to web browser in the backgound, which enables a live preview.
 Besides, OmniMarkupPreviewer provide support for exporting result to
 html file as well.
+
+[Sublime Text 2]: http://www.sublimetext.com/2
+[Sublime Text 3]: http://www.sublimetext.com/3
 
 OmniMarkupPreviewer has builtin support following markups:
 

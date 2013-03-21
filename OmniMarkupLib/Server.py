@@ -32,9 +32,18 @@ from .Setting import Setting
 from .RendererManager import RenderedMarkupCache, RendererManager
 from .Common import Future
 
-
 __file__ = os.path.normpath(os.path.abspath(__file__))
 __path__ = os.path.dirname(__file__)
+
+# Add path for finding cherrypy server and bottlepy web framework
+LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
+LibraryPathManager.add_search_path(os.path.join(__path__, 'libs'))
+
+from cherrypy import wsgiserver
+import bottle
+bottle.debug(True)
+from bottle import Bottle, ServerAdapter
+from bottle import static_file, request, template
 
 
 DEFAULT_STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
@@ -54,15 +63,6 @@ def _mk_folders(folders):
                 pass
 
 _mk_folders([USER_STATIC_FILES_DIR, USER_TEMPLATE_FILES_DIR])
-
-LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
-LibraryPathManager.add_search_path(os.path.join(__path__, 'libs'))
-
-from cherrypy import wsgiserver
-import bottle
-from bottle import Bottle, ServerAdapter
-from bottle import static_file, request, template
-
 bottle.TEMPLATE_PATH = [USER_TEMPLATE_FILES_DIR, DEFAULT_TEMPLATE_FILES_DIR]
 
 
@@ -70,14 +70,17 @@ bottle.TEMPLATE_PATH = [USER_TEMPLATE_FILES_DIR, DEFAULT_TEMPLATE_FILES_DIR]
 app = Bottle()
 
 
-@app.route('/public/<filepath:path>')
-def handler_public(filepath):
-    """ Serving static files """
-    global DEFAULT_STATIC_FILES_DIR
-    # User static files have a higher priority
+def get_static_public_file(filepath):
     if os.path.exists(os.path.join(USER_STATIC_FILES_DIR, filepath)):
         return static_file(filepath, root=USER_STATIC_FILES_DIR)
     return static_file(filepath, root=DEFAULT_STATIC_FILES_DIR)
+
+
+@app.route('/public/<filepath:path>')
+def handler_public(filepath):
+    """ Serving static files """
+    # User static files have a higher priority
+    return get_static_public_file(filepath)
 
 
 @app.route('/local/<base64_encoded_path>')
@@ -97,62 +100,67 @@ def handler_api_query():
         obj = request.json
         buffer_id = obj['buffer_id']
         timestamp = str(obj['timestamp'])
-
         storage = RenderedMarkupCache.instance()
         entry = storage.get_entry(buffer_id)
     except:
-        pass
-
-    if entry is None:
-        return {
-            'timestamp': -1,
-            'filename': '',
-            'dirname': '',
-            'html_part': None
-        }
-
-    if entry.timestamp == timestamp:  # Keep old entry
-        return {
-            'timestamp': entry.timestamp,
-            'filename': None,
-            'dirname': None,
-            'html_part': None
-        }
-    else:
-        return {
-            'timestamp': entry.timestamp,
-            'filename': entry.filename,
-            'dirname': entry.dirname,
-            'html_part': entry.html_part
-        }
-
-
-def render_text_by_buffer_id(buffer_id):
-    valid_view = None
-    for window in sublime.windows():
-        if valid_view is not None:
-            break
-        for view in window.views():
-            if view.buffer_id() == buffer_id:
-                valid_view = view
-                break
-    if valid_view is None:
         return None
-    RendererManager.enqueue_view(valid_view, immediate=True)
-    return RenderedMarkupCache.instance().get_entry(buffer_id)
+
+    result = {
+        'status': 'DISCONNECTED',
+        'timestamp': '-1',
+        'filename': '',
+        'dirname': '',
+        'html_part': ''
+    }
+
+    if entry.disconnected:
+        return result
+
+    result['timestamp'] = entry.timestamp
+    if entry.timestamp == timestamp:  # Keep old entry
+        result['status'] = 'UNCHANGED'
+    else:
+        result['status'] = 'OK'
+        result['filename'] = entry.filename,
+        result['dirname'] = entry.dirname,
+        result['html_part'] = entry.html_part
+    return result
+
+
+@app.post('/api/revive')
+def handler_api_revive():
+    """ Revive buffer """
+    try:
+        obj = request.json
+        revivable_key = obj['revivable_key']
+    except:
+        return None
+
+    f = Future(lambda: RendererManager.revive_buffer(revivable_key))
+    sublime.set_timeout(f, 0)
+    buffer_id = f.result()
+    result = {
+        'status': 'NOT FOUND',
+        'buffer_id': -1
+    }
+
+    if buffer_id is not None:
+        result['status'] = 'OK'
+        result['buffer_id'] = buffer_id
+    return result
 
 
 @app.route('/view/<buffer_id:int>')
 def handler_view(buffer_id):
     # A browser refresh always get the latest result
-    f = Future(render_text_by_buffer_id, buffer_id)
+    f = Future(lambda: RendererManager.enqueue_buffer_id(buffer_id, immediate=True))
     sublime.set_timeout(f, 0)
     entry = f.result()
     entry = entry or RenderedMarkupCache.instance().get_entry(buffer_id)
     if entry is None:
         return bottle.HTTPError(
             404,
-            'buffer_id(%d) is not valid (not open or unsupported file format)' % buffer_id)
+            'buffer_id(%d) is not valid (closed or unsupported file format)' % buffer_id)
     setting = Setting.instance()
     return template(setting.html_template_name,
                     buffer_id=buffer_id,
@@ -162,7 +170,8 @@ def handler_view(buffer_id):
 
 
 class StoppableCherryPyServer(ServerAdapter):
-    """ HACK for making a stoppable server """
+    """HACK for making a stoppable server"""
+
     def __int__(self, *args, **kwargs):
         super(ServerAdapter, self).__init__(*args, **kwargs)
         self.srv = None
@@ -184,7 +193,6 @@ class StoppableCherryPyServer(ServerAdapter):
 
 def bottle_run(server):
     try:
-        global app
         log.info("Bottle v%s server starting up..." % (bottle.__version__))
         log.info("Listening on http://%s:%d/" % (server.host, server.port))
         server.run(app)

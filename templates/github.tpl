@@ -12,17 +12,21 @@
   <body>
     <div class="container">
       <div id="markup">
-        <article id="content" class="markdown-body" data-timestamp="{{timestamp}}">
+        <article id="content" class="markdown-body">
           {{!html_part}}
         </article>
       </div>
     </div>
   </body>
   <script type="text/x-omnimarkup-config">
+    window.App.Context = {
+      buffer_id: {{buffer_id}},
+      timestamp: '{{timestamp}}',
+      revivable_key: '{{revivable_key}}'
+    };
     window.App.Options = {
-      'buffer_id': {{buffer_id}},
-      'ajax_polling_interval': {{ajax_polling_interval}},
-      'mathjax_enabled': {{'true' if mathjax_enabled else 'false'}}
+      ajax_polling_interval: {{ajax_polling_interval}},
+      mathjax_enabled: {{'true' if mathjax_enabled else 'false'}}
     };
   </script>
   <script type="text/javascript" src="/public/jquery-1.9.1.min.js"></script>

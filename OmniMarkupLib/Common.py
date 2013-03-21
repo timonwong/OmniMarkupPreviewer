@@ -351,5 +351,5 @@ class Future(object):
         if self.__except:
             exc = self.__except
             reraise(exc[0], exc[1], exc[2])
-        result = copy.deepcopy(self.__result)
-        return result
+        result = self.__result
+        return copy.deepcopy(result)
