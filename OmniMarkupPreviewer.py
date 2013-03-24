@@ -274,7 +274,7 @@ class ThrottleQueue(threading.Thread):
                     now = time.time()
                     diff_time = now - prev_time
                     prev_time = time.time()
-                    for view_id in self.view_entry_mapping.keys():
+                    for view_id in list(self.view_entry_mapping.keys()):
                         o = self.view_entry_mapping[view_id]
                         o.timeout -= max(diff_time, self.WAIT_TIMEOUT)
                         if o.timeout <= 0:

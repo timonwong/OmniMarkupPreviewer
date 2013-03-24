@@ -95,7 +95,7 @@ class RenderedMarkupCacheEntry(dict):
 
     def __init__(self, fullpath, html_part=''):
         self.disconnected = False
-        revivable_key = base64.b64encode(fullpath)
+        revivable_key = base64.b64encode(fullpath.encode('utf-8'))
         filename = os.path.basename(fullpath)
         dirname = os.path.dirname(fullpath)
         self['revivable_key'] = revivable_key
@@ -327,7 +327,7 @@ class RendererManager(object):
 
     @classmethod
     def revive_buffer(cls, key):
-        key = base64.b64decode(key)
+        key = base64.b64decode(key).decode('utf-8')
         for window in sublime.windows():
             for view in window.views():
                 if filesystem_path_equals(view.file_name(), key):
