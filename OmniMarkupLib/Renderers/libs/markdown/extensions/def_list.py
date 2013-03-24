@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 """
 Definition List Extension for Python-Markdown
 =============================================
@@ -20,6 +19,7 @@ Copyright 2008 - [Waylan Limberg](http://achinghead.com)
 """
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
 from . import Extension
 from ..blockprocessors import BlockProcessor, ListIndentProcessor
 from ..util import etree
@@ -95,7 +95,7 @@ class DefListIndentProcessor(ListIndentProcessor):
 
     def create_item(self, parent, block):
         """ Create a new dd and parse the block with it as the parent. """
-        dd = markdown.etree.SubElement(parent, 'dd')
+        dd = etree.SubElement(parent, 'dd')
         self.parser.parseBlocks(dd, [block])
  
 
