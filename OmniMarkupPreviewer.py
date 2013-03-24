@@ -44,9 +44,12 @@ for key in sys.modules.keys():
         except:
             pass
 
-g_is_py3k = sys.version_info >= (3, 0, 0)
+try:
+    from .OmniMarkupLib.Common import PY3K
+except:
+    from OmniMarkupLib.Common import PY3K
 
-if g_is_py3k:
+if PY3K:
     from . import desktop
     from .OmniMarkupLib import log
     from .OmniMarkupLib.Setting import Setting
@@ -306,12 +309,6 @@ class PluginEventListener(sublime_plugin.EventListener):
         if entry is not None:
             entry.disconnected = True
 
-    def on_new(self, view):
-        pass
-
-    def on_load(self, view):
-        pass
-
     def on_modified(self, view):
         # Prevent rare complaintion about slow callback
         def callback():
@@ -400,5 +397,5 @@ def plugin_loaded():
     PluginManager.instance().restart_server()
     PluginManager.instance().try_download_mathjax()
 
-if not g_is_py3k:
+if not PY3K:
     plugin_loaded()

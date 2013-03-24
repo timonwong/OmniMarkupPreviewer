@@ -100,30 +100,24 @@ def handler_api_query():
         obj = request.json
         buffer_id = obj['buffer_id']
         timestamp = str(obj['timestamp'])
-        storage = RenderedMarkupCache.instance()
-        entry = storage.get_entry(buffer_id)
+        entry = RenderedMarkupCache.instance().get_entry(buffer_id)
     except:
         return None
 
-    result = {
-        'status': 'DISCONNECTED',
-        'timestamp': '-1',
-        'filename': '',
-        'dirname': '',
-        'html_part': ''
-    }
+    if entry is None or entry.disconnected:
+        return {'status': 'DISCONNECTED'}
 
-    if entry.disconnected:
-        return result
-
-    result['timestamp'] = entry.timestamp
     if entry.timestamp == timestamp:  # Keep old entry
-        result['status'] = 'UNCHANGED'
-    else:
-        result['status'] = 'OK'
-        result['filename'] = entry.filename,
-        result['dirname'] = entry.dirname,
-        result['html_part'] = entry.html_part
+        return {'status': 'UNCHANGED'}
+
+    result = {
+        'status': 'OK',
+        'timestamp': entry.timestamp,
+        'revivable_key': entry.revivable_key,
+        'filename': entry.filename,
+        'dirname': entry.dirname,
+        'html_part': entry.html_part
+    }
     return result
 
 
@@ -139,15 +133,17 @@ def handler_api_revive():
     f = Future(lambda: RendererManager.revive_buffer(revivable_key))
     sublime.set_timeout(f, 0)
     buffer_id = f.result()
-    result = {
-        'status': 'NOT FOUND',
-        'buffer_id': -1
-    }
 
-    if buffer_id is not None:
-        result['status'] = 'OK'
-        result['buffer_id'] = buffer_id
-    return result
+    if buffer_id is None:
+        return {'status': 'NOT FOUND'}
+
+    # Check wheter buffer is ready
+    if not RenderedMarkupCache.instance().exists(buffer_id):
+        # Add this view to the queue
+        sublime.set_timeout(lambda: RendererManager.enqueue_buffer_id(buffer_id), 0)
+        return {'status': 'NOT READY'}
+
+    return {'status': 'OK', 'buffer_id': buffer_id}
 
 
 @app.route('/view/<buffer_id:int>')

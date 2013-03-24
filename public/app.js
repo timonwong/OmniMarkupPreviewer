@@ -86,7 +86,7 @@ $(function () {
             }
         }).always(function () {
             if (disconnected) {
-                setTimeout(reviveBuffer, pollingInterval);
+                setTimeout(reviveBuffer, Math.max(pollingInterval, 600));
             }
         });
     }
@@ -125,6 +125,7 @@ $(function () {
                     // Replace content with latest one
                     content$.empty().html(data.html_part);
                     window.App.Context.timestamp = data.timestamp;
+                    window.App.Context.revivable_key = data.revivable_key;
 
                     // dirty hack for auto scrolling if images exist
                     var img$ = $('img');
