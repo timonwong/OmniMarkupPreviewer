@@ -1,12 +1,11 @@
 import os
 import re
-import sys
 import subprocess
 import tempfile
 
-g_is_py3k = sys.version_info >= (3, 0, 0)
+from .Common import PY3K
 
-if g_is_py3k:
+if PY3K:
     from http.client import HTTPException
     from urllib.request import ProxyHandler, install_opener, build_opener, Request, urlopen
     from urllib.error import HTTPError, URLError

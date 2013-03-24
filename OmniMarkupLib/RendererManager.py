@@ -34,14 +34,12 @@ from time import time
 
 from . import log, LibraryPathManager
 from .Setting import Setting
-from .Common import entities_unescape, Singleton, RWLock
+from .Common import entities_unescape, Singleton, RWLock, PY3K
 
 # HACK: Make sure required base_renderer package load first
 exec('from .Renderers import base_renderer')
 
-g_is_py3k = sys.version_info >= (3, 0, 0)
-
-if g_is_py3k:
+if PY3K:
     from urllib.parse import urlparse
     getcwd = os.getcwd
 else:
@@ -55,7 +53,7 @@ __path__ = os.path.dirname(__file__)
 LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
 LibraryPathManager.add_search_path(os.path.join(__path__, 'libs'))
 LibraryPathManager.add_search_path(os.path.join(__path__, 'Renderers', 'libs'))
-if g_is_py3k:
+if PY3K:
     LibraryPathManager.add_search_path(os.path.join(__path__, 'Renderers', 'libs', 'python3'))
 else:
     LibraryPathManager.add_search_path(os.path.join(__path__, 'Renderers', 'libs', 'python2'))
@@ -347,7 +345,7 @@ class RendererManager(object):
 
     @classmethod
     def _load_renderer(cls, renderers, path, module_name):
-        if g_is_py3k:
+        if PY3K:
             prefix = 'OmniMarkupPreviewer.OmniMarkupLib.Renderers'
         else:
             prefix = 'OmniMarkupLib.Renderers'

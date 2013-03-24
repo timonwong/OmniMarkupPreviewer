@@ -28,9 +28,9 @@ import threading
 import contextlib
 import zipfile
 
-g_is_py3k = sys.version_info >= (3, 0, 0)
+from .Common import PY3K
 
-if g_is_py3k:
+if PY3K:
     import urllib.request as urllib_compat
     from io import BytesIO
 else:

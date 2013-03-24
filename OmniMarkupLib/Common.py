@@ -27,9 +27,9 @@ from threading import Condition, Lock, current_thread
 from contextlib import contextmanager
 from time import time
 
-g_is_py3k = sys.version_info >= (3, 0, 0)
+PY3K = sys.version_info >= (3, 0, 0)
 
-if g_is_py3k:
+if PY3K:
     import html.entities as htmlentitydefs
     import _thread as thread
     unichr = chr

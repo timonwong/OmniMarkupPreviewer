@@ -23,12 +23,12 @@ SOFTWARE.
 import sys
 import os
 
-g_is_py3k = sys.version_info >= (3, 0, 0)
+from .Common import PY3K
 
 
 def _try_get_short_path(path):
     path = os.path.normpath(path)
-    if not g_is_py3k and os.name == 'nt' and isinstance(path, unicode):
+    if not PY3K and os.name == 'nt' and isinstance(path, unicode):
         try:
             import locale
             path = path.encode(locale.getpreferredencoding())
