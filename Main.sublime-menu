@@ -12,6 +12,7 @@
                 "children":
                 [
                     {
+                        "id": "OmniMarkupPreviewer",
                         "caption": "OmniMarkupPreviewer",
                         "children":
                         [

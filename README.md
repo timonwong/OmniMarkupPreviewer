@@ -23,6 +23,10 @@ OmniMarkupPreviewer has builtin support following markups:
   and can be found in `PATH`, if the perl version < `5.10`, `Pod::Simple` should be
   installed from `CPAN`.)
 * [RDoc](http://rdoc.sourceforge.net/) (Requires ruby in your `PATH`)
+* [Org Mode](http://orgmode.org) (Requires ruby, and gem `org-ruby` should be installed)
+* [MediaWiki](http://www.mediawiki.org/) (Requires ruby, as well as gem `wikicloth`)
+* [AsciiDoc](http://www.methods.co.nz/asciidoc/) (Requires ruby, as well as gem `asciidoctor`)
+
 
 ### Donation
 
@@ -103,8 +107,15 @@ What's New
 
 **v2.0 (TBD)**
 
+* Added support for [Org Mode](http://orgmode.org) (Requires ruby, and gem
+  `org-ruby` should be installed).
+* Added support for [MediaWiki](http://www.mediawiki.org/) (Requires ruby, as
+  well as gem `wikicloth`).
+* Added support for [AsciiDoc](http://www.methods.co.nz/asciidoc/) (Requires ruby,
+  as well as gem `asciidoctor`).
 * Reviving view (redirecting to the new location) automatically after reconnected.
 * Prevent Package Control for Sublime Text 3 installing this package as `.sublime-package` (zip archive).
+* Fixed broken `ignored_renderer` setting.
 * Improved Sublime Text 3 compatibility.
 
 **v1.20 (03/15/2013)**

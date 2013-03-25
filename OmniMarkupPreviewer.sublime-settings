@@ -29,7 +29,7 @@
     //     "RDocRenderer", "RstRenderer", "TextitleRenderer"
     // for example, to disable Textile and Pod renderer:
     //   "ignored_renderers": ["TextitleRenderer", "PodRenderer"]
-    "ignored_renderers": [],
+    "ignored_renderers": ["LiterateHaskellRenderer"],
 
     // Enable MathJax (http://www.mathjax.org/)
     // MathJax javascript libraries will downloaded automatically, it may take some while.

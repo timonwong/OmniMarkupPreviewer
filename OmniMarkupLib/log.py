@@ -31,9 +31,24 @@ NAME = 'OmniMarkupPreviewer:'
 g_lock = threading.Lock()
 
 
+DEBUG = False
+
+if DEBUG:
+    try:
+        import ctypes
+        OutputDebugStringW = ctypes.windll.kernel32.OutputDebugStringW
+        OutputDebugStringW.argtypes = [ctypes.c_wchar_p]
+    except:
+        global DEBUG
+        DEBUG = False
+
+
 def write_log(level, fmtstr, *args):
+    s = NAME + ' [' + level + '] ' + (fmtstr % args)
+    if DEBUG:
+        OutputDebugStringW(s)
     with g_lock:
-        print(NAME, '[' + level + ']', fmtstr % args)
+        print(s)
 
 
 def info(fmtstr, *args):
