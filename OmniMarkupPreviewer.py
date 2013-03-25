@@ -37,6 +37,9 @@ from functools import partial
 
 PY3K = sys.version_info >= (3, 0, 0)
 
+if PY3K:
+    from imp import reload
+
 # Reloading modules
 for key in sys.modules.keys():
     if key.find('OmniMarkupLib') >= 0:
