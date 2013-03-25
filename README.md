@@ -99,22 +99,22 @@ Available OmniMarkupPreviewer commands in the command palette:
 What's New
 ----------
 
-** For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md) **
+**For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
 
-** v2.0 (TBD) **
+**v2.0 (TBD)**
 
 * Reviving view (redirecting to the new location) automatically after reconnected.
 * Prevent Package Control for Sublime Text 3 installing this package as `.sublime-package` (zip archive).
 * Improved Sublime Text 3 compatibility.
 
-** v1.20 (03/15/2013) **
+**v1.20 (03/15/2013)**
 
 * Add support Sublime Text 3 (Experimental).
 * Add new context command `Copy Markup as HTML`.
 * Remove unused command `Sweep Cache (Remove Unused)`.
 * Auto scroll now works correctly for documents contain images and MathJax equations.
 
-** v1.12 (03/13/2013) **
+**v1.12 (03/13/2013)**
 
 * Renderes are now loaded asynchronously on startup (faster Sublime Text 2 startup).
 * Add litcoffee support.
