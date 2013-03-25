@@ -36,8 +36,8 @@ from . import log, LibraryPathManager
 from .Setting import Setting
 from .Common import entities_unescape, Singleton, RWLock, PY3K
 
-# HACK: Make sure required base_renderer package load first
-exec('from .Renderers import base_renderer')
+# HACK: Make sure required Renderers package load first
+exec('from . import Renderers')
 
 if PY3K:
     from urllib.parse import urlparse

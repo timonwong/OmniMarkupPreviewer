@@ -55,7 +55,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
         self.mark_file = mark_file
         self.settings = {}
 
-    def download_url(self, url, error_message):
+    def fetch(self, url, error_message):
         has_ssl = 'ssl' in sys.modules and hasattr(urllib_compat, 'HTTPSHandler')
         is_ssl = url.startswith('https://')
 
@@ -87,7 +87,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
         downloading_message = 'Downloading MathJax from %s' % MATHJAX_LIB_URL
         log.info(downloading_message)
         sublime.set_timeout(lambda: sublime.status_message(downloading_message), 0)
-        archive = self.download_url(MATHJAX_LIB_URL, 'Unable to download mathjax library from %s' % MATHJAX_LIB_URL)
+        archive = self.fetch(MATHJAX_LIB_URL, 'Unable to download mathjax library from %s' % MATHJAX_LIB_URL)
         if not archive:
             # Download failed
             return
