@@ -129,7 +129,7 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
             success_msg_user='Preview launched in user defined web browser')
 
     def is_enabled(self):
-        return RendererManager.has_renderer_enabled_in_view(self.view)
+        return RendererManager.any_available_renderer_for_view(self.view)
 
 
 class OmniMarkupCleanCacheCommand(sublime_plugin.ApplicationCommand):
@@ -200,7 +200,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
             log.exception('Error while exporting')
 
     def is_enabled(self):
-        return RendererManager.has_renderer_enabled_in_view(self.view)
+        return RendererManager.any_available_renderer_for_view(self.view)
 
 
 class ThrottleQueue(threading.Thread):
@@ -227,7 +227,7 @@ class ThrottleQueue(threading.Thread):
         self.view_entry_mapping = {}
 
     def put(self, view, preemptive=True, timeout=0.5):
-        if not RendererManager.has_renderer_enabled_in_view(view):
+        if not RendererManager.any_available_renderer_for_view(view):
             return
 
         view_id = view.id()
@@ -262,7 +262,7 @@ class ThrottleQueue(threading.Thread):
     def enqueue_view_to_renderer_manager(self, view, filename):
         if view.is_loading() or view.file_name() != filename:
             return
-        if RendererManager.has_renderer_enabled_in_view(view):
+        if RendererManager.any_available_renderer_for_view(view):
             RendererManager.enqueue_view(view, only_exists=True)
             self.last_signaled = time.time()
 
@@ -329,7 +329,7 @@ class PluginEventListener(sublime_plugin.EventListener):
     def on_query_context(self, view, key, operator, operand, match_all):
         # `omp_is_enabled` for backwards compatibility
         if key == 'omnimarkup_is_enabled' or key == 'omp_is_enabled':
-            return RendererManager.has_renderer_enabled_in_view(view)
+            return RendererManager.any_available_renderer_for_view(view)
         return None
 
 g_server = None

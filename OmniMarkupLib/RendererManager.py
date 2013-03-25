@@ -201,13 +201,19 @@ class RendererManager(object):
     RENDERERS = []
 
     @classmethod
-    def has_any_valid_renderer(cls, filename, lang):
+    def any_available_renderer(cls, filename, lang):
         # filename may be None, so prevent it
         filename = filename or ""
         for renderer_classname, renderer in cls.RENDERERS:
             if renderer.is_enabled(filename, lang):
                 return True
         return False
+
+    @classmethod
+    def any_available_renderer_for_view(cls, view):
+        filename = view.file_name()
+        lang = cls.get_lang_by_scope_name(view.scope_name(0))
+        return cls.any_available_renderer(filename, lang)
 
     @classmethod
     def get_lang_by_scope_name(cls, scope_name):
@@ -217,12 +223,6 @@ class RendererManager(object):
         else:
             lang = m.group(0).lower()
         return lang
-
-    @classmethod
-    def has_renderer_enabled_in_view(cls, view):
-        filename = view.file_name()
-        lang = cls.get_lang_by_scope_name(view.scope_name(0))
-        return cls.has_any_valid_renderer(filename, lang)
 
     @classmethod
     def render_text(cls, fullpath, lang, text, post_process_func=None):
