@@ -344,13 +344,13 @@ class RendererManager(object):
         return mod
 
     @classmethod
-    def _load_renderer(cls, renderers, path, module_name):
+    def _load_renderer(cls, renderers, path, name):
+        prefix = 'OmniMarkupLib.Renderers'
         if PY3K:
-            prefix = 'OmniMarkupPreviewer.OmniMarkupLib.Renderers'
-        else:
-            prefix = 'OmniMarkupLib.Renderers'
+            prefix = 'OmniMarkupPreviewer.' + prefix
+
         try:
-            mod = cls._import_module(module_name, path, prefix)
+            mod = cls._import_module(name, path, prefix)
             # Get classes
             classes = inspect.getmembers(mod, inspect.isclass)
             for classname, classtype in classes:
@@ -363,10 +363,10 @@ class RendererManager(object):
                     except:
                         log.exception('Failed to load renderer: %s', classname)
         except:
-            log.exception('Failed to load renderer module: %s.%s', prefix, module_name)
+            log.exception('Failed to load renderer module: %s.%s', prefix, name)
 
     @classmethod
-    def load_renderers(cls):
+    def load_renderers(cls, excludes):
         renderers = []
         with cls.MUTEX:
             # Add library path to sys.path
@@ -384,7 +384,10 @@ class RendererManager(object):
                                if f.endswith('Renderer.py')]
                 # Load each renderer
                 for module_file in module_list:
-                    cls._load_renderer(renderers, renderers_path, module_file[:-3])
+                    name = module_file[:-3]
+                    if name in excludes:
+                        continue
+                    cls._load_renderer(renderers, renderers_path, name)
             finally:
                 # Restore the current directory
                 os.chdir(oldpath)
@@ -401,7 +404,7 @@ class RendererManager(object):
         # Unload ignored renderers
         if cls.OLD_IGNORED_RENDERERS != setting.ignored_renderers:
             # Reload renderers, of course
-            cls.load_renderers()
+            cls.load_renderers(setting.ignored_renderers)
 
         for renderer_classname, renderer in cls.RENDERERS:
             key = 'renderer_options-' + renderer_classname
@@ -436,7 +439,7 @@ class RendererManager(object):
         cls.on_setting_changing(setting)
 
         def f():
-            cls.load_renderers()
+            cls.load_renderers(setting.ignored_renderers)
             sublime.set_timeout(lambda: cls.on_setting_changed(setting), 0)
             cls.STARTED = True
             cls.RENDERERS_LOADING_THREAD = None
