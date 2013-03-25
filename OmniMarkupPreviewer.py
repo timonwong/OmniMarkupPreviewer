@@ -28,28 +28,26 @@ import os
 import locale
 import subprocess
 import sys
+import tempfile
 import threading
 import time
-import tempfile
+import types
 from functools import partial
 
 
 PY3K = sys.version_info >= (3, 0, 0)
 
 # Reloading modules
-g_reloader_modname = 'OmniMarkupLib.Reloader'
+for key in sys.modules.keys():
+    if key.find('OmniMarkupLib') >= 0:
+        try:
+            mod = sys.modules[key]
+            if isinstance(mod, types.ModuleType):
+                reload(mod)
+        except:
+            pass
 
 if PY3K:
-    g_reloader_modname = 'OmniMarkupPreviewer.' + g_reloader_modname
-
-if g_reloader_modname in sys.modules:
-    from imp import reload
-    reload(sys.modules[g_reloader_modname])
-
-
-if PY3K:
-    exec('from .OmniMarkupLib import Reloader')
-
     from . import desktop
     from .OmniMarkupLib import log
     from .OmniMarkupLib.Setting import Setting
@@ -61,8 +59,6 @@ if PY3K:
     except:
         log.exception('Error on loading OnDemandDownloader')
 else:
-    exec('from OmniMarkupLib import Reloader')
-
     import desktop
     exec('import OmniMarkupLib.LinuxModuleChecker')
     from OmniMarkupLib import log
