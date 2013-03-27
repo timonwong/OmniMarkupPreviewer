@@ -52,10 +52,9 @@ for key in sys.modules.keys():
 
 if PY3K:
     from . import desktop
-    from .OmniMarkupLib import log
+    from .OmniMarkupLib import log, Server
     from .OmniMarkupLib.Setting import Setting
     from .OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
-    from .OmniMarkupLib.Server import Server
     from .OmniMarkupLib.Common import Singleton
     try:
         from .OmniMarkupLib import OnDemandDownloader
@@ -64,10 +63,9 @@ if PY3K:
 else:
     import desktop
     exec('import OmniMarkupLib.LinuxModuleChecker')
-    from OmniMarkupLib import log
+    from OmniMarkupLib import log, Server
     from OmniMarkupLib.Setting import Setting
     from OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
-    from OmniMarkupLib.Server import Server
     from OmniMarkupLib.Common import Singleton
     try:
         from OmniMarkupLib import OnDemandDownloader
@@ -367,7 +365,7 @@ class PluginManager(object):
         if g_server is not None:
             self.stop_server()
         setting = Setting.instance()
-        g_server = Server(host=setting.server_host, port=setting.server_port)
+        g_server = Server.Server(host=setting.server_host, port=setting.server_port)
 
     def stop_server(self):
         global g_server
@@ -391,6 +389,7 @@ def unload_handler():
 
 
 def plugin_loaded():
+    Server.init()
     # Setting must be the first to initialize.
     Setting.instance().init()
     PluginManager.instance().subscribe_setting_events()

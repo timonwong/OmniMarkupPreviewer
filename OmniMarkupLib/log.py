@@ -39,7 +39,6 @@ if DEBUG:
         OutputDebugStringW = ctypes.windll.kernel32.OutputDebugStringW
         OutputDebugStringW.argtypes = [ctypes.c_wchar_p]
     except:
-        global DEBUG
         DEBUG = False
 
 

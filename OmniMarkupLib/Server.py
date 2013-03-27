@@ -46,24 +46,30 @@ from bottle import Bottle, ServerAdapter
 from bottle import static_file, request, template
 
 
-DEFAULT_STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
-USER_STATIC_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
-                                         'User', 'OmniMarkupPreviewer', 'public'))
-DEFAULT_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
-USER_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
-                                           'User', 'OmniMarkupPreviewer', 'templates'))
+def init():
+    global DEFAULT_STATIC_FILES_DIR
+    global USER_STATIC_FILES_DIR
+    global DEFAULT_TEMPLATE_FILES_DIR
+    global USER_TEMPLATE_FILES_DIR
 
+    DEFAULT_STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
+    USER_STATIC_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
+                                             'User', 'OmniMarkupPreviewer', 'public'))
 
-def _mk_folders(folders):
-    for folder in folders:
-        if not os.path.exists(folder):
-            try:
-                os.makedirs(folder)
-            except:
-                pass
+    DEFAULT_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
+    USER_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
+                                               'User', 'OmniMarkupPreviewer', 'templates'))
 
-_mk_folders([USER_STATIC_FILES_DIR, USER_TEMPLATE_FILES_DIR])
-bottle.TEMPLATE_PATH = [USER_TEMPLATE_FILES_DIR, DEFAULT_TEMPLATE_FILES_DIR]
+    def mk_folders(folders):
+        for folder in folders:
+            if not os.path.exists(folder):
+                try:
+                    os.makedirs(folder)
+                except:
+                    pass
+
+    mk_folders([USER_STATIC_FILES_DIR, USER_TEMPLATE_FILES_DIR])
+    bottle.TEMPLATE_PATH = [USER_TEMPLATE_FILES_DIR, DEFAULT_TEMPLATE_FILES_DIR]
 
 
 # Create a new app stack
