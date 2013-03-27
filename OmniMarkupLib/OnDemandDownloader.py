@@ -87,7 +87,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
         downloading_message = 'Downloading MathJax from %s' % MATHJAX_LIB_URL
         log.info(downloading_message)
         sublime.set_timeout(lambda: sublime.status_message(downloading_message), 0)
-        archive = self.fetch(MATHJAX_LIB_URL, 'Unable to download mathjax library from %s' % MATHJAX_LIB_URL)
+        archive = self.fetch(MATHJAX_LIB_URL, 'Unable to download mathjax library')
         if not archive:
             # Download failed
             return

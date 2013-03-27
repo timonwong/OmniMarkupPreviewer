@@ -15,6 +15,9 @@ else:
     from urllib2 import HTTPError, URLError
 
 from . import log
+# exception about `LookupError: unknown encoding: idna`
+#   will be thrown occasionally.
+exec('from encodings import idna')
 
 
 class BinaryNotFoundError(Exception):
