@@ -105,7 +105,7 @@ class WgetDownloader(CliDownloader):
                     regex = re.compile('^.*ERROR (\d+):.*', re.S)
                     if re.sub(regex, '\\1', error_line) == '503':
                         # GitHub and BitBucket seem to rate limit via 503
-                        log.info('Downloading %s was rate limited, trying again', url)
+                        log.warning('Downloading %s was rate limited, trying again', url)
                         continue
                     error_string = 'HTTP error ' + re.sub('^.*? ERROR ', '', error_line)
 
@@ -113,14 +113,14 @@ class WgetDownloader(CliDownloader):
                     error_string = re.sub('^.*?failed: ', '', error_line)
                     # GitHub and BitBucket seem to time out a lot
                     if error_string.find('timed out') != -1:
-                        log.info('Downloading %s timed out, trying again', url)
+                        log.warning('Downloading %s timed out, trying again', url)
                         continue
 
                 else:
                     error_string = re.sub('^.*?(ERROR[: ]|failed: )', '\\1', error_line)
 
                 error_string = re.sub('\\.?\s*\n\s*$', '', error_string)
-                log.info('%s %s downloading %s.', error_message, error_string, url)
+                log.warning('%s %s downloading %s.', error_message, error_string, url)
             self.clean_tmp_file()
             break
         return False
@@ -156,19 +156,19 @@ class CurlDownloader(CliDownloader):
                     code = re.sub('^.*?(\d+)\s*$', '\\1', e.output)
                     if code == '503':
                         # GitHub and BitBucket seem to rate limit via 503
-                        log.info('Downloading %s was rate limited, trying again', url)
+                        log.warning('Downloading %s was rate limited, trying again', url)
                         continue
                     error_string = 'HTTP error ' + code
                 elif e.returncode == 6:
                     error_string = 'URL error host not found'
                 elif e.returncode == 28:
                     # GitHub and BitBucket seem to time out a lot
-                    log.info('Downloading %s timed out, trying again', url)
+                    log.warning('Downloading %s timed out, trying again', url)
                     continue
                 else:
                     error_string = e.output.rstrip()
 
-                log.info('%s %s downloading %s.', error_message, error_string, url)
+                log.warning('%s %s downloading %s.', error_message, error_string, url)
             break
         return False
 
@@ -210,24 +210,24 @@ class UrlLib2Downloader(object):
                 return http_file.read()
 
             except HTTPException as e:
-                log.info('%s HTTP exception %s (%s) downloading %s.',
+                log.warning('%s HTTP exception %s (%s) downloading %s.',
                          error_message, e.__class__.__name__, e.message, url)
 
             except HTTPError as e:
                 # Bitbucket and Github ratelimit using 503 a decent amount
                 if str(e.code) == '503':
-                    log.info('Downloading %s was rate limited, trying again', url)
+                    log.warning('Downloading %s was rate limited, trying again', url)
                     continue
-                log.info('%s HTTP error %s downloading %s.',
+                log.warning('%s HTTP error %s downloading %s.',
                          error_message, str(e.code), url)
 
             except URLError as e:
                 # Bitbucket and Github timeout a decent amount
                 if str(e.reason) == 'The read operation timed out' or \
                         str(e.reason) == 'timed out':
-                    log.info('Downloading %s timed out, trying again', url)
+                    log.warning('Downloading %s timed out, trying again', url)
                     continue
-                log.info('%s URL error %s downloading %s.',
+                log.warning('%s URL error %s downloading %s.',
                          error_message, str(e.reason), url)
             break
         return False
