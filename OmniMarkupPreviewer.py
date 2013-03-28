@@ -377,7 +377,7 @@ class PluginManager(object):
         if setting is None:
             setting = Setting.instance()
         if setting.mathjax_enabled:
-            OnDemandDownloader.on_demand_download_mathjax()
+            OnDemandDownloader.on_demand_download_mathjax(setting)
 
 
 def unload_handler():

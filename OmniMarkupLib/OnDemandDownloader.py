@@ -44,27 +44,27 @@ else:
 from .Downloader import *
 
 
-MATHJAX_LIB_URL = 'http://cdn.bitbucket.org/timonwong/omnimarkuppreviewer/downloads/mathjax.zip'
+MATHJAX_LIB_URL = 'http://bitbucket.org/timonwong/omnimarkuppreviewer/downloads/mathjax.zip'
 
 
 class MathJaxOnDemandDownloader(threading.Thread):
-    def __init__(self, target_folder, mark_file):
+    def __init__(self, setting, target_folder, mark_file):
         threading.Thread.__init__(self)
         #
         self.target_folder = target_folder
         self.mark_file = mark_file
-        self.settings = {}
+        self.setting = setting
 
     def fetch(self, url, error_message):
         has_ssl = 'ssl' in sys.modules and hasattr(urllib_compat, 'HTTPSHandler')
         is_ssl = url.startswith('https://')
 
         if (is_ssl and has_ssl) or not is_ssl:
-            downloader = UrlLib2Downloader(self.settings)
+            downloader = UrlLib2Downloader(self.setting)
         else:
             for downloader_class in [CurlDownloader, WgetDownloader]:
                 try:
-                    downloader = downloader_class(self.settings)
+                    downloader = downloader_class(self.setting)
                     break
                 except BinaryNotFoundError:
                     pass
@@ -126,7 +126,7 @@ class MathJaxOnDemandDownloader(threading.Thread):
 __g_mathjax_thread_started = False
 
 
-def on_demand_download_mathjax():
+def on_demand_download_mathjax(setting):
     global __g_mathjax_thread_started
     if __g_mathjax_thread_started:
         # Already started
@@ -140,6 +140,6 @@ def on_demand_download_mathjax():
         # Already downloaded
         return
 
-    thread = MathJaxOnDemandDownloader(target_folder, mark_file)
+    thread = MathJaxOnDemandDownloader(setting, target_folder, mark_file)
     __g_mathjax_thread_started = True
     thread.start()

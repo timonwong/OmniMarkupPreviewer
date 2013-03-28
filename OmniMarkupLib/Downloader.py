@@ -7,17 +7,21 @@ from .Common import PY3K
 
 if PY3K:
     from http.client import HTTPException
-    from urllib.request import ProxyHandler, install_opener, build_opener, Request, urlopen
+    from urllib.request import ProxyHandler, HTTPRedirectHandler, build_opener, Request
     from urllib.error import HTTPError, URLError
 else:
     from httplib import HTTPException
-    from urllib2 import ProxyHandler, install_opener, build_opener, Request, urlopen
+    from urllib2 import ProxyHandler, HTTPRedirectHandler, build_opener, Request
     from urllib2 import HTTPError, URLError
 
 from . import log
-# exception about `LookupError: unknown encoding: idna`
+
+# HACK: Exception about `LookupError: unknown encoding: idna`
 #   will be thrown occasionally.
-exec('from encodings import idna')
+try:
+    exec('from encodings import idna')
+except:
+    pass
 
 
 class BinaryNotFoundError(Exception):
@@ -33,8 +37,8 @@ class NonCleanExitError(Exception):
 
 
 class CliDownloader(object):
-    def __init__(self, settings):
-        self.settings = settings
+    def __init__(self, setting):
+        self.setting = setting
 
     def find_binary(self, name):
         for dir in os.environ['PATH'].split(os.pathsep):
@@ -61,8 +65,8 @@ class CliDownloader(object):
 
 
 class WgetDownloader(CliDownloader):
-    def __init__(self, settings):
-        self.settings = settings
+    def __init__(self, setting):
+        self.setting = setting
         self.wget = self.find_binary('wget')
 
     def clean_tmp_file(self):
@@ -80,12 +84,12 @@ class WgetDownloader(CliDownloader):
 
         command.append(url)
 
-        if self.settings.get('http_proxy'):
-            os.putenv('http_proxy', self.settings.get('http_proxy'))
-            if not self.settings.get('https_proxy'):
-                os.putenv('https_proxy', self.settings.get('http_proxy'))
-        if self.settings.get('https_proxy'):
-            os.putenv('https_proxy', self.settings.get('https_proxy'))
+        if self.setting.http_proxy:
+            os.putenv('http_proxy', self.setting.http_proxy)
+            if not self.setting.https_proxy:
+                os.putenv('https_proxy', self.setting.http_proxy)
+        if self.setting.https_proxy:
+            os.putenv('https_proxy', self.setting.https_proxy)
 
         while tries > 0:
             tries -= 1
@@ -127,8 +131,8 @@ class WgetDownloader(CliDownloader):
 
 
 class CurlDownloader(CliDownloader):
-    def __init__(self, settings):
-        self.settings = settings
+    def __init__(self, setting):
+        self.setting = setting
         self.curl = self.find_binary('curl')
 
     def download(self, url, error_message, timeout, tries):
@@ -140,12 +144,12 @@ class CurlDownloader(CliDownloader):
 
         command.append(url)
 
-        if self.settings.get('http_proxy'):
-            os.putenv('http_proxy', self.settings.get('http_proxy'))
-            if not self.settings.get('https_proxy'):
-                os.putenv('HTTPS_PROXY', self.settings.get('http_proxy'))
-        if self.settings.get('https_proxy'):
-            os.putenv('HTTPS_PROXY', self.settings.get('https_proxy'))
+        if self.setting.http_proxy:
+            os.putenv('http_proxy', self.setting.http_proxy)
+            if not self.setting.https_proxy:
+                os.putenv('HTTPS_PROXY', self.setting.http_proxy)
+        if self.setting.https_proxy:
+            os.putenv('HTTPS_PROXY', self.setting.https_proxy)
 
         while tries > 0:
             tries -= 1
@@ -174,12 +178,12 @@ class CurlDownloader(CliDownloader):
 
 
 class UrlLib2Downloader(object):
-    def __init__(self, settings):
-        self.settings = settings
+    def __init__(self, setting):
+        self.setting = setting
 
     def download(self, url, error_message, timeout, tries):
-        http_proxy = self.settings.get('http_proxy')
-        https_proxy = self.settings.get('https_proxy')
+        http_proxy = self.setting.http_proxy
+        https_proxy = self.setting.https_proxy
         if http_proxy or https_proxy:
             proxies = {}
             if http_proxy:
@@ -191,7 +195,7 @@ class UrlLib2Downloader(object):
             proxy_handler = ProxyHandler(proxies)
         else:
             proxy_handler = ProxyHandler()
-        handlers = [proxy_handler]
+        handlers = [proxy_handler, HTTPRedirectHandler()]
 
         # secure_url_match = re.match('^https://([^/]+)', url)
         # if secure_url_match != None:
@@ -200,18 +204,18 @@ class UrlLib2Downloader(object):
         #   if not bundle_path:
         #       return False
         #   handlers.append(VerifiedHTTPSHandler(ca_certs=bundle_path))
-        install_opener(build_opener(*handlers))
+        opener = build_opener(*handlers)
 
         while tries > 0:
             tries -= 1
             try:
                 request = Request(url, headers={"User-Agent": "OmniMarkup Downloader"})
-                http_file = urlopen(request, timeout=timeout)
+                http_file = opener.open(request, timeout=timeout)
                 return http_file.read()
 
             except HTTPException as e:
                 log.warning('%s HTTP exception %s (%s) downloading %s.',
-                         error_message, e.__class__.__name__, e.message, url)
+                            error_message, e.__class__.__name__, e.message, url)
 
             except HTTPError as e:
                 # Bitbucket and Github ratelimit using 503 a decent amount
@@ -219,7 +223,7 @@ class UrlLib2Downloader(object):
                     log.warning('Downloading %s was rate limited, trying again', url)
                     continue
                 log.warning('%s HTTP error %s downloading %s.',
-                         error_message, str(e.code), url)
+                            error_message, str(e.code), url)
 
             except URLError as e:
                 # Bitbucket and Github timeout a decent amount
@@ -228,6 +232,6 @@ class UrlLib2Downloader(object):
                     log.warning('Downloading %s timed out, trying again', url)
                     continue
                 log.warning('%s URL error %s downloading %s.',
-                         error_message, str(e.reason), url)
+                            error_message, str(e.reason), url)
             break
         return False

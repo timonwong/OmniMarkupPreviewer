@@ -56,6 +56,8 @@ class Setting(SettingEventSource):
         self.ajax_polling_interval = settings.get("ajax_polling_interval", 500)
         self.ignored_renderers = set(settings.get("ignored_renderers", []))
         self.mathjax_enabled = settings.get("mathjax_enabled", False)
+        self.http_proxy = settings.get("http_proxy", None)
+        self.https_proxy = settings.get("https_proxy", None)
         self.export_options = self.DEFAULT_EXPORT_OPTIONS.copy()
         # Merge with the user defined export options
         self.export_options.update(settings.get("export_options", {}))
