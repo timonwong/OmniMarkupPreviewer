@@ -197,7 +197,7 @@ class RendererManager(object):
     MUTEX = threading.Lock()
     WORKER = RendererWorker(MUTEX)
 
-    LANG_RE = re.compile(r"^[^\s]+(?=\s+)")
+    LANG_RE = re.compile(r'^[^\s]+(?=\s+)')
     RENDERERS = []
 
     @classmethod
@@ -239,7 +239,7 @@ class RendererManager(object):
                 log.exception('Exception occured while rendering using %s', renderer_classname)
         raise NotImplementedError()
 
-    IMG_TAG_RE = re.compile('(<img [^>]*src=")([^"]+)("[^>]*>)', re.DOTALL | re.IGNORECASE | re.MULTILINE)
+    IMG_TAG_RE = re.compile(r'(<img [^>]*src=")([^"]+)("[^>]*>)', re.DOTALL | re.IGNORECASE | re.MULTILINE)
 
     @classmethod
     def render_text_postprocess(cls, rendered_text, filename):
@@ -248,12 +248,13 @@ class RendererManager(object):
         def encode_image_path(m):
             url = m.group(2)
             o = urlparse(url)
-            if len(o.scheme) > 0:
+            if len(o.scheme) > 0 or url.startswith('//'):
                 # Is a valid url, returns original text
                 return m.group(0)
             # or local file (maybe?)
             local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
-            return m.group(1) + '/local/' + base64.urlsafe_b64encode(local_path.encode('utf-8')) + m.group(3)
+            encoded_path = base64.urlsafe_b64encode(local_path.encode('utf-8')).decode('ascii')
+            return m.group(1) + '/local/' + encoded_path + m.group(3)
 
         return cls.IMG_TAG_RE.sub(encode_image_path, rendered_text)
 
@@ -265,7 +266,7 @@ class RendererManager(object):
         def encode_image_path(m):
             url = m.group(2)
             o = urlparse(url)
-            if len(o.scheme) > 0:
+            if len(o.scheme) > 0 or url.startswith('//'):
                 # Is a valid url, returns original text
                 return m.group(0)
             # or local file (maybe?)
@@ -325,6 +326,9 @@ class RendererManager(object):
 
     @classmethod
     def revive_buffer(cls, revivable_key):
+        # Wait until all renderers finished initializing
+        if not cls.STARTED:
+            return None
         revivable_key = base64.b64decode(revivable_key).decode('utf-8')
         for window in sublime.windows():
             for view in window.views():
@@ -369,9 +373,6 @@ class RendererManager(object):
     def load_renderers(cls, excludes):
         renderers = []
         with cls.MUTEX:
-            # Add library path to sys.path
-            LibraryPathManager.add_search_path(os.path.dirname(sys.executable))
-
             # Change the current directory to that of the module. It's not safe to just
             # add the modules directory to sys.path, as that won't accept unicode paths
             # on Windows
@@ -429,7 +430,7 @@ class RendererManager(object):
 
     @classmethod
     def start(cls):
-        cls.STARTED = True
+        cls.STARTED = False
 
         setting = Setting.instance()
         setting.subscribe('changing', cls.on_setting_changing)
@@ -438,20 +439,23 @@ class RendererManager(object):
         cls.WORKER.start()
         cls.on_setting_changing(setting)
 
-        def f():
+        def _start():
             cls.load_renderers(setting.ignored_renderers)
-            sublime.set_timeout(lambda: cls.on_setting_changed(setting), 0)
-            cls.STARTED = True
+            f = Future(lambda: cls.on_setting_changed(setting))
+            sublime.set_timeout(f, 0)
+            f.result()
             cls.RENDERERS_LOADING_THREAD = None
-        cls.RENDERERS_LOADING_THREAD = threading.Thread(target=f)
-        sublime.set_timeout(lambda: cls.RENDERERS_LOADING_THREAD.start(), 0)
+            cls.STARTED = True
+
+        cls.RENDERERS_LOADING_THREAD = threading.Thread(target=_start)
+        cls.RENDERERS_LOADING_THREAD.start()
 
     @classmethod
     def stop(cls):
+        cls.STARTED = False
         cls.WORKER.stop()
         if cls.RENDERERS_LOADING_THREAD is not None:
             try:
                 cls.RENDERERS_LOADING_THREAD.join()
             except:
                 pass
-        cls.STARTED = False

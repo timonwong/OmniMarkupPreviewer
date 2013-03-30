@@ -41,22 +41,22 @@ LibraryPathManager.add_search_path(os.path.join(__path__, 'libs'))
 
 from cherrypy import wsgiserver
 import bottle
-bottle.debug(True)
+# bottle.debug(True)
 from bottle import Bottle, ServerAdapter
 from bottle import static_file, request, template
 
+DEFAULT_STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
+USER_STATIC_FILES_DIR = None
+DEFAULT_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
+USER_TEMPLATE_FILES_DIR = None
+
 
 def init():
-    global DEFAULT_STATIC_FILES_DIR
     global USER_STATIC_FILES_DIR
-    global DEFAULT_TEMPLATE_FILES_DIR
     global USER_TEMPLATE_FILES_DIR
 
-    DEFAULT_STATIC_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'public'))
     USER_STATIC_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
                                              'User', 'OmniMarkupPreviewer', 'public'))
-
-    DEFAULT_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(__path__, '..', 'templates'))
     USER_TEMPLATE_FILES_DIR = os.path.normpath(os.path.join(sublime.packages_path(),
                                                'User', 'OmniMarkupPreviewer', 'templates'))
 
@@ -92,7 +92,7 @@ def handler_public(filepath):
 @app.route('/local/<base64_encoded_path>')
 def handler_local(base64_encoded_path):
     """ Serving local files """
-    fullpath = unicode(base64.urlsafe_b64decode(base64_encoded_path), 'utf-8')
+    fullpath = base64.urlsafe_b64decode(base64_encoded_path).decode('utf-8')
     basename = os.path.basename(fullpath)
     dirname = os.path.dirname(fullpath)
     return static_file(basename, root=dirname)

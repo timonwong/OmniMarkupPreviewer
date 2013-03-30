@@ -46,12 +46,12 @@ for key in sys.modules.keys():
         try:
             mod = sys.modules[key]
             if isinstance(mod, types.ModuleType):
+                #print key
                 reload(mod)
         except:
             pass
 
 if PY3K:
-    from . import desktop
     from .OmniMarkupLib import log, Server
     from .OmniMarkupLib.Setting import Setting
     from .OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
@@ -60,8 +60,8 @@ if PY3K:
         from .OmniMarkupLib import OnDemandDownloader
     except:
         log.exception('Error on loading OnDemandDownloader')
+    from . import desktop
 else:
-    import desktop
     exec('import OmniMarkupLib.LinuxModuleChecker')
     from OmniMarkupLib import log, Server
     from OmniMarkupLib.Setting import Setting
@@ -71,6 +71,7 @@ else:
         from OmniMarkupLib import OnDemandDownloader
     except:
         log.exception('Error on loading OnDemandDownloader')
+    import desktop
 
 
 def launching_web_browser_for_url(url, success_msg_default=None, success_msg_user=None):
