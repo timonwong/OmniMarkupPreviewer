@@ -29,12 +29,13 @@ import mimetypes
 import os
 import re
 import sys
+import tempfile
 import threading
 from time import time
 
 from . import log, LibraryPathManager
 from .Setting import Setting
-from .Common import entities_unescape, Singleton, RWLock, PY3K
+from .Common import entities_unescape, Singleton, RWLock, Future, PY3K
 
 # HACK: Make sure required Renderers package load first
 exec('from . import Renderers')
@@ -67,7 +68,6 @@ g_fs_case_sensitive = True
 
 
 def check_filesystem_case_sensitivity():
-    import tempfile
     global g_fs_case_sensitive
     fd, path = tempfile.mkstemp()
     if os.path.exists(path.upper()):
@@ -93,7 +93,7 @@ class RenderedMarkupCacheEntry(dict):
 
     def __init__(self, fullpath, html_part=''):
         self.disconnected = False
-        revivable_key = base64.b64encode(fullpath.encode('utf-8'))
+        revivable_key = base64.b64encode(fullpath.encode('utf-8')).decode('ascii')
         filename = os.path.basename(fullpath)
         dirname = os.path.dirname(fullpath)
         self['revivable_key'] = revivable_key
@@ -324,11 +324,11 @@ class RendererManager(object):
         return RenderedMarkupCache.instance().get_entry(buffer_id)
 
     @classmethod
-    def revive_buffer(cls, key):
-        key = base64.b64decode(key).decode('utf-8')
+    def revive_buffer(cls, revivable_key):
+        revivable_key = base64.b64decode(revivable_key).decode('utf-8')
         for window in sublime.windows():
             for view in window.views():
-                if filesystem_path_equals(view.file_name(), key):
+                if filesystem_path_equals(view.file_name(), revivable_key):
                     return view.buffer_id()
         return None
 
