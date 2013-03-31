@@ -38,7 +38,7 @@ from .Setting import Setting
 from .Common import entities_unescape, Singleton, RWLock, Future, PY3K
 
 # HACK: Make sure required Renderers package load first
-exec('from . import Renderers')
+exec('from .Renderers import base_renderer')
 
 if PY3K:
     from urllib.parse import urlparse
@@ -417,13 +417,13 @@ class RendererManager(object):
 
     WAIT_TIMEOUT = 1.0
     STARTED = True
-    RENDERERS_LOADING_THREAD = None
+    RENDERERS_LOADER_THREAD = None
 
     @classmethod
     def ensure_started(cls):
-        if cls.RENDERERS_LOADING_THREAD is not None:
+        if cls.RENDERERS_LOADER_THREAD is not None:
             try:
-                cls.RENDERERS_LOADING_THREAD.join(cls.WAIT_TIMEOUT)
+                cls.RENDERERS_LOADER_THREAD.join(cls.WAIT_TIMEOUT)
             except:
                 pass
         return cls.STARTED
@@ -444,18 +444,19 @@ class RendererManager(object):
             f = Future(lambda: cls.on_setting_changed(setting))
             sublime.set_timeout(f, 0)
             f.result()
-            cls.RENDERERS_LOADING_THREAD = None
+            cls.RENDERERS_LOADER_THREAD = None
             cls.STARTED = True
 
-        cls.RENDERERS_LOADING_THREAD = threading.Thread(target=_start)
-        cls.RENDERERS_LOADING_THREAD.start()
+        cls.RENDERERS_LOADER_THREAD = threading.Thread(target=_start)
+        # Postpone renderer loader thread, otherwise break loading of other plugins.
+        sublime.set_timeout(lambda: cls.RENDERERS_LOADER_THREAD.start(), 0)
 
     @classmethod
     def stop(cls):
         cls.STARTED = False
         cls.WORKER.stop()
-        if cls.RENDERERS_LOADING_THREAD is not None:
+        if cls.RENDERERS_LOADER_THREAD is not None:
             try:
-                cls.RENDERERS_LOADING_THREAD.join()
+                cls.RENDERERS_LOADER_THREAD.join()
             except:
                 pass
