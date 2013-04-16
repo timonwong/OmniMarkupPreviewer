@@ -31,7 +31,7 @@
 
 <h2>Description</h2>
 
-<p>OmniMarkupPreviewer is a <a href="http://www.sublimetext.com/2">Sublime Text 2</a> plugin
+<p>OmniMarkupPreviewer is a plugin for both <a href="http://www.sublimetext.com/2">Sublime Text 2</a> and <a href="http://www.sublimetext.com/3">Sublime Text 3</a>
 that preview markups in web browsers. OmniMarkupPreviewer renders markups into
 htmls and send it to web browser in the backgound, which enables a live preview.
 Besides, OmniMarkupPreviewer provide support for exporting result to
@@ -45,18 +45,24 @@ html file as well.</p>
 <li><a href="http://wikicreole.org/">WikiCreole</a></li>
 <li><a href="http://www.textism.com/tools/textile/">Textile</a></li>
 <li>
-<a href="http://search.cpan.org/dist/perl/pod/perlpod.pod">Pod</a> (Requires Perl &gt;= 5.10
-and can be found in <code>PATH</code>, if the perl version &lt; 5.10, <code>Pod::Simple</code> should be
+<a href="http://search.cpan.org/dist/perl/pod/perlpod.pod">Pod</a> (Requires Perl &gt;= <code>5.10</code>
+and can be found in <code>PATH</code>, if the perl version &lt; <code>5.10</code>, <code>Pod::Simple</code> should be
 installed from <code>CPAN</code>.)</li>
 <li>
-<a href="http://rdoc.sourceforge.net/">RDoc</a> (Requires ruby in your <code>PATH</code>)</li>
+<a href="http://rdoc.sourceforge.net/">RDoc</a> (Requires <code>ruby</code> in your <code>PATH</code>)</li>
+<li>
+<a href="http://orgmode.org">Org Mode</a> (Requires <code>ruby</code>, and gem <code>org-ruby</code> should be installed)</li>
+<li>
+<a href="http://www.mediawiki.org/">MediaWiki</a> (Requires <code>ruby</code>, as well as gem <code>wikicloth</code>)</li>
+<li>
+<a href="http://www.methods.co.nz/asciidoc/">AsciiDoc</a> (Requires <code>ruby</code>, as well as gem <code>asciidoctor</code>)</li>
 </ul><h3>Donation</h3>
 
 <p>If you find my work useful, please consider buying me a cup of coffee, all
 donations are much appreciated :)</p>
 
-<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=timon86%2ewang%40gmail%2ecom&amp;lc=US&amp;item_name=Buy%20me%20a%20cup%20of%20coffee&amp;item_number=OmniMarkupPreviewer&amp;no_note=0&amp;currency_code=USD&amp;bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHostedGuest"><img src="http://dl.dropbox.com/u/2451120/donate-with-paypal.png" alt="Donate via PayPal"></a>
-<a href="https://me.alipay.com/timonwong"><img src="http://dl.dropbox.com/u/2451120/donate-with-alipay.png" alt="使用支付宝捐赠"></a></p>
+<p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=TD4HF4X2R53NE"><img src="https://dl.dropbox.com/u/2451120/donate-with-paypal.png" alt="Donate via PayPal"></a>
+<a href="https://me.alipay.com/timonwong"><img src="https://dl.dropbox.com/u/2451120/donate-with-alipay.png" alt="使用支付宝捐赠"></a></p>
 
 <h2>Installation</h2>
 
@@ -131,108 +137,34 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 <li><code>OmniMarkupPreviewer: Empty Cache</code></li>
 </ul><h2>What's New</h2>
 
-<p>v1.20 (03/15/2013)</p>
+<p><strong>For a complete list of changes, see <a href="https://github.com/timonwong/OmniMarkupPreviewer/blob/master/CHANGELOG.md">CHANGELOG.md</a></strong></p>
+
+<p><strong>v2.0 (03/31/2013)</strong></p>
+
+<ul>
+<li>Added support for <a href="http://orgmode.org">Org Mode</a> (Requires ruby, and gem
+<code>org-ruby</code> should be installed).</li>
+<li>Added support for <a href="http://www.mediawiki.org/">MediaWiki</a> (Requires ruby, as
+well as gem <code>wikicloth</code>).</li>
+<li>Added support for <a href="http://www.methods.co.nz/asciidoc/">AsciiDoc</a> (Requires ruby,
+as well as gem <code>asciidoctor</code>).</li>
+<li>Reviving view (redirecting to the new location) automatically after reconnected.</li>
+<li>Prevent Package Control for Sublime Text 3 installing this package as
+<code>.sublime-package</code> (zip archive).</li>
+<li>Fixed broken <code>ignored_renderer</code> setting.</li>
+<li>Improved Sublime Text 3 compatibility.</li>
+</ul><p><strong>v1.20 (03/15/2013)</strong></p>
 
 <ul>
 <li>Add support Sublime Text 3 (Experimental).</li>
 <li>Add new context command <code>Copy Markup as HTML</code>.</li>
 <li>Remove unused command <code>Sweep Cache (Remove Unused)</code>.</li>
 <li>Auto scroll now works correctly for documents contain images and MathJax equations.</li>
-</ul><p>v1.12 (03/13/2013)</p>
+</ul><p><strong>v1.12 (03/13/2013)</strong></p>
 
 <ul>
 <li>Renderes are now loaded asynchronously on startup (faster Sublime Text 2 startup).</li>
 <li>Add litcoffee support.</li>
-</ul><p>v1.11 (12/24/2012)</p>
-
-<ul>
-<li>Fix incorrect auto-scrolling behavior while pages contain images or mathjax equations.</li>
-</ul><p>v1.10 (11/22/2012)</p>
-
-<ul>
-<li>Fix <code>UnicodeEncodeError</code> exception while image file path conatins non-ascii characters.</li>
-<li>Fix missing background image for <code>hr</code> element from exported htmls.</li>
-</ul><p>v1.9 (11/12/2012)</p>
-
-<ul>
-<li>Provide support for exporting result to html file, images on disk will be inlined (data-url).
-You can customize the settings of the exporter through the <code>"export_options"</code> option.</li>
-<li>Fix incorrect code block detecting (due to wrong tab length setting) in
-markdown renderer.</li>
-</ul><p>v1.8 (11/10/2012)</p>
-
-<ul>
-<li>OmniMarkupPreview is now able to use user defined browser command for launching
-web browser, through the <code>"browser_command"</code> option.</li>
-<li>Unopened file can be previewed correctly in browser without returning "404" error.</li>
-<li>Update cherrypy module in order to fix a random server crash on startup in
-Windows (Refer to <a href="https://bitbucket.org/cherrypy/cherrypy/issue/1016/windowserror-error-6-the-handle-is-invalid">CherrPy #1016</a>)</li>
-</ul><p>v1.7 (11/07/2012)</p>
-
-<ul>
-<li>Add option <code>"server_host"</code> for server listening address.</li>
-<li>Now OmniMarkupPreviewer doesn't require restart on some settings change anymore.</li>
-<li>On demand downloader for mathjax should work under Linux now (using <code>wget</code> or <code>curl</code>).</li>
-<li>Unsaved textile documents can now be previewed as well.</li>
-</ul><p>v1.6 (11/03/2012)</p>
-
-<ul>
-<li>
-<a href="http://www.mathjax.org">MathJax</a> support is now added (through the <code>"mathjax_enabled"</code> option), you can
-use <code>$..$</code> and <code>\(..\)</code> delimiters for inline math, <code>$$..$$</code> and <code>\[..\]</code> delimiters
-for display math. <a href="http://www.mathjax.org">MathJax</a> libraries will be downloaded on demand. for more
-information, visit <a href="http://theo.im/blog/2012/11/03/latex-support-in-omnimarkuppreviewer/">my blog</a>.</li>
-<li>Add support to custom the behavior of markdown renderer (through the
-<code>"renderer_options-MarkdownRenderer"</code> option).</li>
-<li>Responsive width on browser width change.</li>
-<li>Much better http server performance (Thanks to the <a href="http://www.cherrypy.org">CherryPy</a> project).</li>
-</ul><p>v1.5.1 (11/01/2012)</p>
-
-<ul>
-<li>Fixed a bug that all renderers wouldn't work if any renderer raised exception
-while loading.</li>
-</ul><p>v1.5 (10/31/2012)</p>
-
-<ul>
-<li>Images on local machine can now be displayed corectlly.</li>
-<li>New <code>"ajax_polling_interval"</code> option.</li>
-<li>Allow users to use their own templates.</li>
-</ul><p>v1.4 (10/28/2012)</p>
-
-<ul>
-<li>Code blocks from <a href="http://github.github.com/github-flavored-markdown/">GitHub flavored markdown</a> is supported now, through the
-<a href="http://packages.python.org/Markdown/extensions/fenced_code_blocks.html">Fenced Code Blocks Extension</a>.</li>
-<li>
-<a href="http://michelf.ca/projects/php-markdown/extra/#table">PHP Markdown Tables</a> support is added, through the <a href="http://packages.python.org/Markdown/extensions/tables.html">Tables Extension</a>.</li>
-<li>Support strikeout extension syntax (Pandoc and GitHub) for markdown: <code>This ~~is deleted text.~~</code>
-</li>
-<li>Added <code>"ignored_renderers"</code> option to settings, in order to ignore specific
-markup renderers.</li>
-</ul><p>v1.3 (10/27/2012)</p>
-
-<ul>
-<li>Added syntax highlight support for Markdown, through the <a href="http://packages.python.org/Markdown/extensions/code_hilite.html">CodeHilite Extension</a>.</li>
-<li>Unsaved buffer can now be previewed without error.</li>
-<li>Updated github template.</li>
-</ul><p>v1.2 (10/16/2012)</p>
-
-<ul>
-<li>OmniMarkupPreviewer now can be installed from Package Control under Linux.</li>
-</ul><p>v1.1 (10/16/2012)</p>
-
-<ul>
-<li>Added support for <a href="http://rdoc.sourceforge.net/">RDoc</a> (Requires ruby).</li>
-<li>Added support for <a href="http://search.cpan.org/dist/perl/pod/perlpod.pod">Pod</a> (Requires perl).</li>
-<li>Auto scroll while text added/deleted.</li>
-</ul><p>v1.0.1 (10/14/2012)</p>
-
-<ul>
-<li>OSX support added to Package Control.</li>
-<li>Added ability to clean cache.</li>
-</ul><p>v1.0 (10/14/2012)</p>
-
-<ul>
-<li>First release.</li>
 </ul><h2>License</h2>
 
 <p>This plugin released under MIT License:</p>
