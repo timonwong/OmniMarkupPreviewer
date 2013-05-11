@@ -15,4 +15,6 @@ class MediaWikiRenderer(CommandlineRenderer):
 
     @classmethod
     def is_enabled(cls, filename, syntax):
+        if syntax == 'text.html.mediawiki':
+            return True
         return filename.endswith('.mediawiki') or filename.endswith('.wiki')

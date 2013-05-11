@@ -1,6 +1,10 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
+**v2.0.1 (TBD)**
+
+* Check syntax name as well as filename extension for MediaWiki files.
+
 **v2.0 (03/31/2013)**
 
 * Added support for [Org Mode](http://orgmode.org) (Requires ruby, and gem
