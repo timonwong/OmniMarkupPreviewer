@@ -3,6 +3,6 @@
     "name": "OmniMarkupPreviewer",
     "description": "Live previewer/exporter for markup files (markdown, rst, creole, textile...).",
     "author": "timonwong",
-    "homepage": "http://timonwong.github.com/OmniMarkupPreviewer",
+    "homepage": "http://timonwong.github.io/OmniMarkupPreviewer/",
     "platforms": ["*"]
 }
