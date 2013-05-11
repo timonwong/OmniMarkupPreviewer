@@ -6,6 +6,7 @@ import markdown
 @renderer
 class MarkdownRenderer(MarkupRenderer):
     FILENAME_PATTERN_RE = re.compile(r'\.(md|mkdn?|mdwn|mdown|markdown|litcoffee)$')
+    YAML_FRONTMATTER_RE = re.compile(r'\A---\s*\n.*?\n?^---\s*$\n?', re.DOTALL | re.MULTILINE)
 
     def load_settings(self, renderer_options, global_setting):
         super(MarkdownRenderer, self).load_settings(renderer_options, global_setting)
@@ -25,5 +26,6 @@ class MarkdownRenderer(MarkupRenderer):
         return cls.FILENAME_PATTERN_RE.search(filename) is not None
 
     def render(self, text, **kwargs):
+        text = self.YAML_FRONTMATTER_RE.sub('', text)
         return markdown.markdown(text, output_format='html5',
                                  extensions=self.extensions)

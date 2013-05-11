@@ -3,6 +3,7 @@ OmniMarkupPreviewer Changes
 
 **v2.0.1 (TBD)**
 
+* Strip YAML frontmatter for Markdown files automatically.
 * Check syntax name as well as filename extension for MediaWiki files.
 
 **v2.0 (03/31/2013)**
