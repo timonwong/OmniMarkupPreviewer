@@ -105,7 +105,7 @@ What's New
 
 **For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
 
-**v2.0.1 (TBD)**
+**v2.0.1 (05/12/2013)**
 
 * Strip YAML frontmatter for Markdown files automatically.
 * Check syntax name as well as filename extension for MediaWiki files.
