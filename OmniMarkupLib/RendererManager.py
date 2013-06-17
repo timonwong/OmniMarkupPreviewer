@@ -41,9 +41,11 @@ from .Common import entities_unescape, Singleton, RWLock, Future, PY3K
 exec('from .Renderers import base_renderer')
 
 if PY3K:
+    from urllib.request import url2pathname
     from urllib.parse import urlparse
     getcwd = os.getcwd
 else:
+    from urllib import url2pathname
     from urlparse import urlparse
     getcwd = os.getcwdu
 
@@ -84,6 +86,34 @@ def filesystem_path_equals(path1, path2):
         return path1 == path2
     else:
         return path1.lower() == path2.lower()
+
+
+PathCreateFromUrlW  = None
+if sys.platform == 'win32':
+    import ctypes
+
+    def run():
+        global PathCreateFromUrlW
+        shlwapi = ctypes.windll.LoadLibrary('Shlwapi.dll')
+        PathCreateFromUrlW = shlwapi.PathCreateFromUrlW
+        PathCreateFromUrlW.restype = ctypes.HRESULT
+        PathCreateFromUrlW.argtypes = [
+            ctypes.c_wchar_p,
+            ctypes.c_wchar_p,
+            ctypes.POINTER(ctypes.c_uint32),
+            ctypes.c_uint32,
+        ]
+    run()
+
+
+def file_uri_to_path(uri):
+    if PathCreateFromUrlW is not None:
+        path_len = ctypes.c_uint32(260)
+        path = ctypes.create_unicode_buffer(path_len.value)
+        PathCreateFromUrlW(uri, path, ctypes.byref(path_len), 0)
+        return path.value
+    else:
+        return url2pathname(urlparse(uri).path)
 
 
 class RenderedMarkupCacheEntry(dict):
@@ -248,11 +278,14 @@ class RendererManager(object):
         def encode_image_path(m):
             url = m.group(2)
             o = urlparse(url)
-            if len(o.scheme) > 0 or url.startswith('//'):
+            if (len(o.scheme) > 0 and o.scheme != 'file') or url.startswith('//'):
                 # Is a valid url, returns original text
                 return m.group(0)
             # or local file (maybe?)
-            local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
+            if o.scheme == 'file':
+                local_path = file_uri_to_path(url)
+            else:
+                local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
             encoded_path = base64.urlsafe_b64encode(local_path.encode('utf-8')).decode('ascii')
             return m.group(1) + '/local/' + encoded_path + m.group(3)
 
@@ -266,11 +299,14 @@ class RendererManager(object):
         def encode_image_path(m):
             url = m.group(2)
             o = urlparse(url)
-            if len(o.scheme) > 0 or url.startswith('//'):
+            if (len(o.scheme) > 0 and o.scheme != 'file') or url.startswith('//'):
                 # Is a valid url, returns original text
                 return m.group(0)
             # or local file (maybe?)
-            local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
+            if o.scheme == 'file':
+                local_path = file_uri_to_path(url)
+            else:
+                local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
             mime_type, _ = mimetypes.guess_type(os.path.basename(local_path))
             if mime_type is not None:
                 data_uri = open(local_path, 'rb').read().encode('base64').replace('\n', '')

@@ -46,7 +46,6 @@ for key in sys.modules.keys():
         try:
             mod = sys.modules[key]
             if isinstance(mod, types.ModuleType):
-                #print key
                 reload(mod)
         except:
             pass
