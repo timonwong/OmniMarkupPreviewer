@@ -46,7 +46,7 @@ class TemplateLoader(object):
     
     >>> import tempfile
     >>> fd, path = tempfile.mkstemp(suffix='.html', prefix='template')
-    >>> os.write(fd, '<p>$var</p>')
+    >>> os.write(fd, u'<p>$var</p>'.encode('utf-8'))
     11
     >>> os.close(fd)
     
@@ -283,7 +283,7 @@ class TemplateLoader(object):
         """
         def _load_from_directory(filename):
             filepath = os.path.join(path, filename)
-            fileobj = open(filepath, 'U')
+            fileobj = open(filepath, 'rb')
             mtime = os.path.getmtime(filepath)
             def _uptodate():
                 return mtime == os.path.getmtime(filepath)

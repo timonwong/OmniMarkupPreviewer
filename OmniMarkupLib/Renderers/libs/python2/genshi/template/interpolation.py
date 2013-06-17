@@ -115,7 +115,9 @@ def lex(text, textpos, filepath):
             level = 1
             while level:
                 match = token_re.match(text, pos)
-                if match is None:
+                if match is None or not match.group():
+                    # if there isn't a match or the match is the empty
+                    # string, we're not going to match up braces ever
                     raise TemplateSyntaxError('invalid syntax',  filepath,
                                               *textpos[1:])
                 pos = match.end()

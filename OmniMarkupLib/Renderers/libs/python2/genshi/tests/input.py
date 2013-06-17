@@ -12,12 +12,12 @@
 # history and logs, available at http://genshi.edgewall.org/log/.
 
 import doctest
-from StringIO import StringIO
 import sys
 import unittest
 
 from genshi.core import Attrs, Stream
 from genshi.input import XMLParser, HTMLParser, ParseError
+from genshi.compat import StringIO, BytesIO
 
 
 class XMLParserTestCase(unittest.TestCase):
@@ -59,7 +59,7 @@ bar</elem>'''
 
     def test_latin1_encoded(self):
         text = u'<div>\xf6</div>'.encode('iso-8859-1')
-        events = list(XMLParser(StringIO(text), encoding='iso-8859-1'))
+        events = list(XMLParser(BytesIO(text), encoding='iso-8859-1'))
         kind, data, pos = events[1]
         self.assertEqual(Stream.TEXT, kind)
         self.assertEqual(u'\xf6', data)
@@ -68,7 +68,7 @@ bar</elem>'''
         text = u"""<?xml version="1.0" encoding="iso-8859-1" ?>
         <div>\xf6</div>
         """.encode('iso-8859-1')
-        events = list(XMLParser(StringIO(text)))
+        events = list(XMLParser(BytesIO(text)))
         kind, data, pos = events[2]
         self.assertEqual(Stream.TEXT, kind)
         self.assertEqual(u'\xf6', data)
@@ -116,7 +116,7 @@ bar</elem>'''
 class HTMLParserTestCase(unittest.TestCase):
 
     def test_text_node_pos_single_line(self):
-        text = '<elem>foo bar</elem>'
+        text = u'<elem>foo bar</elem>'
         events = list(HTMLParser(StringIO(text)))
         kind, data, pos = events[1]
         self.assertEqual(Stream.TEXT, kind)
@@ -124,7 +124,7 @@ class HTMLParserTestCase(unittest.TestCase):
         self.assertEqual((None, 1, 6), pos)
 
     def test_text_node_pos_multi_line(self):
-        text = '''<elem>foo
+        text = u'''<elem>foo
 bar</elem>'''
         events = list(HTMLParser(StringIO(text)))
         kind, data, pos = events[1]
@@ -134,14 +134,14 @@ bar</elem>'''
 
     def test_input_encoding_text(self):
         text = u'<div>\xf6</div>'.encode('iso-8859-1')
-        events = list(HTMLParser(StringIO(text), encoding='iso-8859-1'))
+        events = list(HTMLParser(BytesIO(text), encoding='iso-8859-1'))
         kind, data, pos = events[1]
         self.assertEqual(Stream.TEXT, kind)
         self.assertEqual(u'\xf6', data)
 
     def test_input_encoding_attribute(self):
         text = u'<div title="\xf6"></div>'.encode('iso-8859-1')
-        events = list(HTMLParser(StringIO(text), encoding='iso-8859-1'))
+        events = list(HTMLParser(BytesIO(text), encoding='iso-8859-1'))
         kind, (tag, attrib), pos = events[0]
         self.assertEqual(Stream.START, kind)
         self.assertEqual(u'\xf6', attrib.get('title'))
@@ -154,7 +154,7 @@ bar</elem>'''
         self.assertEqual(u'\u2013', data)
 
     def test_html_entity_in_attribute(self):
-        text = '<p title="&nbsp;"></p>'
+        text = u'<p title="&nbsp;"></p>'
         events = list(HTMLParser(StringIO(text)))
         kind, data, pos = events[0]
         self.assertEqual(Stream.START, kind)
@@ -163,19 +163,38 @@ bar</elem>'''
         self.assertEqual(Stream.END, kind)
 
     def test_html_entity_in_text(self):
-        text = '<p>&nbsp;</p>'
+        text = u'<p>&nbsp;</p>'
         events = list(HTMLParser(StringIO(text)))
         kind, data, pos = events[1]
         self.assertEqual(Stream.TEXT, kind)
         self.assertEqual(u'\xa0', data)
 
     def test_processing_instruction(self):
-        text = '<?php echo "Foobar" ?>'
+        text = u'<?php echo "Foobar" ?>'
         events = list(HTMLParser(StringIO(text)))
         kind, (target, data), pos = events[0]
         self.assertEqual(Stream.PI, kind)
         self.assertEqual('php', target)
         self.assertEqual('echo "Foobar"', data)
+
+    def test_processing_instruction_no_data_1(self):
+        text = u'<?foo ?>'
+        events = list(HTMLParser(StringIO(text)))
+        kind, (target, data), pos = events[0]
+        self.assertEqual(Stream.PI, kind)
+        self.assertEqual('foo', target)
+        self.assertEqual('', data)
+
+    def test_processing_instruction_no_data_2(self):
+        text = u'<?experiment>...<?/experiment>'
+        events = list(HTMLParser(StringIO(text)))
+        kind, (target, data), pos = events[0]
+        self.assertEqual(Stream.PI, kind)
+        self.assertEqual('experiment', target)
+        self.assertEqual('', data)
+        kind, (target, data), pos = events[2]
+        self.assertEqual('/experiment', target)
+        self.assertEqual('', data)
 
     def test_xmldecl(self):
         text = '<?xml version="1.0" ?><root />'
@@ -205,7 +224,7 @@ bar</elem>'''
         self.assertEqual(1, standalone)
 
     def test_processing_instruction_trailing_qmark(self):
-        text = '<?php echo "Foobar" ??>'
+        text = u'<?php echo "Foobar" ??>'
         events = list(HTMLParser(StringIO(text)))
         kind, (target, data), pos = events[0]
         self.assertEqual(Stream.PI, kind)
@@ -213,7 +232,7 @@ bar</elem>'''
         self.assertEqual('echo "Foobar" ?', data)
 
     def test_out_of_order_tags1(self):
-        text = '<span><b>Foobar</span></b>'
+        text = u'<span><b>Foobar</span></b>'
         events = list(HTMLParser(StringIO(text)))
         self.assertEqual(5, len(events))
         self.assertEqual((Stream.START, ('span', ())), events[0][:2])
@@ -223,8 +242,8 @@ bar</elem>'''
         self.assertEqual((Stream.END, 'span'), events[4][:2])
 
     def test_out_of_order_tags2(self):
-        text = '<span class="baz"><b><i>Foobar</span></b></i>'
-        events = list(HTMLParser(StringIO(text)))
+        text = u'<span class="baz"><b><i>Foobar</span></b></i>'.encode('utf-8')
+        events = list(HTMLParser(BytesIO(text), encoding='utf-8'))
         self.assertEqual(7, len(events))
         self.assertEqual((Stream.START, ('span', Attrs([('class', 'baz')]))),
                          events[0][:2])
@@ -236,8 +255,8 @@ bar</elem>'''
         self.assertEqual((Stream.END, 'span'), events[6][:2])
 
     def test_out_of_order_tags3(self):
-        text = '<span><b>Foobar</i>'
-        events = list(HTMLParser(StringIO(text)))
+        text = u'<span><b>Foobar</i>'.encode('utf-8')
+        events = list(HTMLParser(BytesIO(text), encoding='utf-8'))
         self.assertEqual(5, len(events))
         self.assertEqual((Stream.START, ('span', ())), events[0][:2])
         self.assertEqual((Stream.START, ('b', ())), events[1][:2])
@@ -246,12 +265,19 @@ bar</elem>'''
         self.assertEqual((Stream.END, 'span'), events[4][:2])
 
     def test_hex_charref(self):
-        text = '<span>&#x27;</span>'
+        text = u'<span>&#x27;</span>'
         events = list(HTMLParser(StringIO(text)))
         self.assertEqual(3, len(events))
         self.assertEqual((Stream.START, ('span', ())), events[0][:2])
         self.assertEqual((Stream.TEXT, "'"), events[1][:2])
         self.assertEqual((Stream.END, 'span'), events[2][:2])
+
+    def test_multibyte_character_on_chunk_boundary(self):
+        text = u'a' * ((4 * 1024) - 1) + u'\xe6'
+        events = list(HTMLParser(BytesIO(text.encode('utf-8')),
+                                 encoding='utf-8'))
+        self.assertEqual(1, len(events))
+        self.assertEqual((Stream.TEXT, text), events[0][:2])
 
 
 def suite():

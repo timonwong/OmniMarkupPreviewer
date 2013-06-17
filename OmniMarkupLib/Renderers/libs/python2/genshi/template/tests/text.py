@@ -94,17 +94,17 @@ class OldTextTemplateTestCase(unittest.TestCase):
 """, tmpl.generate(items=range(3)).render(encoding=None))
 
     def test_include(self):
-        file1 = open(os.path.join(self.dirname, 'tmpl1.txt'), 'w')
+        file1 = open(os.path.join(self.dirname, 'tmpl1.txt'), 'wb')
         try:
-            file1.write("Included\n")
+            file1.write(u"Included\n".encode("utf-8"))
         finally:
             file1.close()
 
-        file2 = open(os.path.join(self.dirname, 'tmpl2.txt'), 'w')
+        file2 = open(os.path.join(self.dirname, 'tmpl2.txt'), 'wb')
         try:
-            file2.write("""----- Included data below this line -----
+            file2.write(u"""----- Included data below this line -----
             #include tmpl1.txt
-            ----- Included data above this line -----""")
+            ----- Included data above this line -----""".encode("utf-8"))
         finally:
             file2.close()
 
@@ -219,17 +219,17 @@ class NewTextTemplateTestCase(unittest.TestCase):
         """, tmpl.generate().render(encoding=None))
 
     def test_include(self):
-        file1 = open(os.path.join(self.dirname, 'tmpl1.txt'), 'w')
+        file1 = open(os.path.join(self.dirname, 'tmpl1.txt'), 'wb')
         try:
-            file1.write("Included")
+            file1.write(u"Included".encode("utf-8"))
         finally:
             file1.close()
 
-        file2 = open(os.path.join(self.dirname, 'tmpl2.txt'), 'w')
+        file2 = open(os.path.join(self.dirname, 'tmpl2.txt'), 'wb')
         try:
-            file2.write("""----- Included data below this line -----
+            file2.write(u"""----- Included data below this line -----
 {% include tmpl1.txt %}
------ Included data above this line -----""")
+----- Included data above this line -----""".encode("utf-8"))
         finally:
             file2.close()
 
@@ -241,17 +241,17 @@ Included
                          tmpl.generate().render(encoding=None))
 
     def test_include_expr(self):
-         file1 = open(os.path.join(self.dirname, 'tmpl1.txt'), 'w')
+         file1 = open(os.path.join(self.dirname, 'tmpl1.txt'), 'wb')
          try:
-             file1.write("Included")
+             file1.write(u"Included".encode("utf-8"))
          finally:
              file1.close()
  
-         file2 = open(os.path.join(self.dirname, 'tmpl2.txt'), 'w')
+         file2 = open(os.path.join(self.dirname, 'tmpl2.txt'), 'wb')
          try:
-             file2.write("""----- Included data below this line -----
+             file2.write(u"""----- Included data below this line -----
     {% include ${'%s.txt' % ('tmpl1',)} %}
-    ----- Included data above this line -----""")
+    ----- Included data above this line -----""".encode("utf-8"))
          finally:
              file2.close()
 

@@ -232,7 +232,7 @@ class Context(object):
         
         :return: a list of variables
         """
-        return [(key, self.get(key)) for key in self.keys()]
+        return [(key, self.get(key)) for key in list(self.keys())]
 
     def update(self, mapping):
         """Update the context from the mapping provided."""
@@ -246,6 +246,18 @@ class Context(object):
 
     def pop(self):
         """Pop the top-most scope from the stack."""
+
+    def copy(self):
+        """Create a copy of this Context object."""
+        # required to make f_locals a dict-like object
+        # See http://genshi.edgewall.org/ticket/249 for
+        # example use case in Twisted tracebacks
+        ctxt = Context()
+        ctxt.frames.pop()  # pop empty dummy context
+        ctxt.frames.extend(self.frames)
+        ctxt._match_templates.extend(self._match_templates)
+        ctxt._choice_stack.extend(self._choice_stack)
+        return ctxt
 
 
 def _apply_directives(stream, directives, ctxt, vars):

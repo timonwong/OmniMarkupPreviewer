@@ -15,7 +15,7 @@ import doctest
 import unittest
 import sys
 
-from genshi.core import Attrs, Stream, QName
+from genshi.core import Attrs, Markup, QName, Stream
 from genshi.input import HTML, XML
 from genshi.output import DocType, XMLSerializer, XHTMLSerializer, \
                           HTMLSerializer, EmptyTagFilter
@@ -356,10 +356,27 @@ class XHTMLSerializerTestCase(unittest.TestCase):
         </div>""", output)
 
     def test_html5_doctype(self):
-        stream = HTML('<html></html>')
+        stream = HTML(u'<html></html>')
         output = stream.render(XHTMLSerializer, doctype=DocType.HTML5,
                                encoding=None)
         self.assertEqual('<!DOCTYPE html>\n<html></html>', output)
+
+    def test_ignorable_space(self):
+        text = '<foo> Mess  \n\n\n with me!  </foo>'
+        output = XML(text).render(XMLSerializer, encoding=None)
+        self.assertEqual('<foo> Mess\n with me!  </foo>', output)
+
+    def test_cache_markup(self):
+        loc = (None, -1, -1)
+        stream = Stream([(Stream.START, (QName('foo'), Attrs()), loc),
+                         (Stream.TEXT, u'&hellip;', loc),
+                         (Stream.END, QName('foo'), loc),
+                         (Stream.START, (QName('bar'), Attrs()), loc),
+                         (Stream.TEXT, Markup('&hellip;'), loc),
+                         (Stream.END, QName('bar'), loc)])
+        output = stream.render(XMLSerializer, encoding=None, 
+                               strip_whitespace=False)
+        self.assertEqual('<foo>&amp;hellip;</foo><bar>&hellip;</bar>', output)
 
 
 class HTMLSerializerTestCase(unittest.TestCase):
@@ -427,7 +444,7 @@ class HTMLSerializerTestCase(unittest.TestCase):
         </style>""", output)
 
     def test_html5_doctype(self):
-        stream = HTML('<html></html>')
+        stream = HTML(u'<html></html>')
         output = stream.render(HTMLSerializer, doctype=DocType.HTML5,
                                encoding=None)
         self.assertEqual('<!DOCTYPE html>\n<html></html>', output)

@@ -45,7 +45,7 @@ def interpolate(text, filepath=None, lineno=-1, offset=0, lookup='strict'):
     string.
     
     >>> for kind, data, pos in interpolate("hey ${foo}bar"):
-    ...     print('%s %r' % (kind, data))
+    ...     print(('%s %r' % (kind, data)))
     TEXT 'hey '
     EXPR Expression('foo')
     TEXT 'bar'
@@ -115,7 +115,9 @@ def lex(text, textpos, filepath):
             level = 1
             while level:
                 match = token_re.match(text, pos)
-                if match is None:
+                if match is None or not match.group():
+                    # if there isn't a match or the match is the empty
+                    # string, we're not going to match up braces ever
                     raise TemplateSyntaxError('invalid syntax',  filepath,
                                               *textpos[1:])
                 pos = match.end()
@@ -151,3 +153,4 @@ def lex(text, textpos, filepath):
 
     if pos < end:
         yield False, text[pos:]
+

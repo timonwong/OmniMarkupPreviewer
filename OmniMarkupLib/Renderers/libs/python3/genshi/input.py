@@ -16,7 +16,8 @@ sources.
 """
 
 from itertools import chain
-from html import entities
+import codecs
+import html.entities as entities
 import html.parser as html
 from xml.parsers import expat
 
@@ -38,7 +39,7 @@ def ET(element):
     """
     tag_name = QName(element.tag.lstrip('{'))
     attrs = Attrs([(QName(attr.lstrip('{')), value)
-                   for attr, value in element.items()])
+                   for attr, value in list(element.items())])
 
     yield START, (tag_name, attrs), (None, -1, -1)
     if element.text:
@@ -81,8 +82,8 @@ class XMLParser(object):
     
     >>> parser = XMLParser(StringIO('<root id="2"><child>Foo</child></root>'))
     >>> for kind, data, pos in parser:
-    ...     print('%s %s' % (kind, data))
-    START (QName('root'), Attrs([(QName('id'), u'2')]))
+    ...     print(('%s %s' % (kind, data)))
+    START (QName('root'), Attrs([(QName('id'), '2')]))
     START (QName('child'), Attrs())
     TEXT Foo
     END child
@@ -90,7 +91,7 @@ class XMLParser(object):
     """
 
     _entitydefs = ['<!ENTITY %s "&#%d;">' % (name, value) for name, value in
-                   entities.name2codepoint.items()]
+                   list(entities.name2codepoint.items())]
     _external_dtd = '\n'.join(_entitydefs).encode('utf-8')
 
     def __init__(self, source, filename=None, encoding=None):
@@ -262,9 +263,9 @@ def XML(text):
     >>> xml = XML('<doc><elem>Foo</elem><elem>Bar</elem></doc>')
     >>> print(xml)
     <doc><elem>Foo</elem><elem>Bar</elem></doc>
-    >>> print(xml.select('elem'))
+    >>> print((xml.select('elem')))
     <elem>Foo</elem><elem>Bar</elem>
-    >>> print(xml.select('elem/text()'))
+    >>> print((xml.select('elem/text()')))
     FooBar
     
     :param text: the XML source
@@ -282,10 +283,10 @@ class HTMLParser(html.HTMLParser, object):
     
     The parsing is initiated by iterating over the parser object:
     
-    >>> parser = HTMLParser(BytesIO(u'<UL compact><LI>Foo</UL>'.encode('utf-8')), encoding='utf-8')
+    >>> parser = HTMLParser(BytesIO('<UL compact><LI>Foo</UL>'.encode('utf-8')), encoding='utf-8')
     >>> for kind, data, pos in parser:
-    ...     print('%s %s' % (kind, data))
-    START (QName('ul'), Attrs([(QName('compact'), u'compact')]))
+    ...     print(('%s %s' % (kind, data)))
+    START (QName('ul'), Attrs([(QName('compact'), 'compact')]))
     START (QName('li'), Attrs())
     TEXT Foo
     END li
@@ -317,22 +318,23 @@ class HTMLParser(html.HTMLParser, object):
         :raises ParseError: if the HTML text is not well formed
         """
         def _generate():
+            if self.encoding:
+                reader = codecs.getreader(self.encoding)
+                source = reader(self.source)
+            else:
+                source = self.source
             try:
                 bufsize = 4 * 1024 # 4K
                 done = False
                 while 1:
                     while not done and len(self._queue) == 0:
-                        data = self.source.read(bufsize)
+                        data = source.read(bufsize)
                         if not data: # end of data
                             self.close()
                             done = True
                         else:
                             if not isinstance(data, str):
-                                # bytes
-                                if self.encoding:
-                                    data = data.decode(self.encoding)
-                                else:
-                                    raise UnicodeError("source returned bytes, but no encoding specified")
+                                raise UnicodeError("source returned bytes, but no encoding specified")
                             self.feed(data)
                     for kind, data, pos in self._queue:
                         yield kind, data, pos
@@ -364,9 +366,7 @@ class HTMLParser(html.HTMLParser, object):
         fixed_attrib = []
         for name, value in attrib: # Fixup minimized attributes
             if value is None:
-                value = str(name)
-            elif not isinstance(value, str):
-                value = value.decode(self.encoding, 'replace')
+                value = name
             fixed_attrib.append((QName(name), stripentities(value)))
 
         self._enqueue(START, (QName(tag), Attrs(fixed_attrib)))
@@ -384,8 +384,6 @@ class HTMLParser(html.HTMLParser, object):
                     break
 
     def handle_data(self, text):
-        if not isinstance(text, str):
-            text = text.decode(self.encoding, 'replace')
         self._enqueue(TEXT, text)
 
     def handle_charref(self, name):
@@ -403,9 +401,14 @@ class HTMLParser(html.HTMLParser, object):
         self._enqueue(TEXT, text)
 
     def handle_pi(self, data):
-        target, data = data.split(None, 1)
         if data.endswith('?'):
             data = data[:-1]
+        try:
+            target, data = data.split(None, 1)
+        except ValueError:
+            # PI with no data
+            target = data
+            data = ''
         self._enqueue(PI, (target.strip(), data.strip()))
 
     def handle_comment(self, text):
@@ -421,9 +424,9 @@ def HTML(text, encoding=None):
     >>> html = HTML('<body><h1>Foo</h1></body>', encoding='utf-8')
     >>> print(html)
     <body><h1>Foo</h1></body>
-    >>> print(html.select('h1'))
+    >>> print((html.select('h1')))
     <h1>Foo</h1>
-    >>> print(html.select('h1/text()'))
+    >>> print((html.select('h1/text()')))
     Foo
     
     :param text: the HTML source
@@ -432,7 +435,10 @@ def HTML(text, encoding=None):
                         fails
     """
     if isinstance(text, str):
-        return Stream(list(HTMLParser(StringIO(text), encoding=encoding)))
+        # If it's unicode text the encoding should be set to None.
+        # The option to pass in an incorrect encoding is for ease
+        # of writing doctests that work in both Python 2.x and 3.x.
+        return Stream(list(HTMLParser(StringIO(text), encoding=None)))
     return Stream(list(HTMLParser(BytesIO(text), encoding=encoding)))
 
 
@@ -452,3 +458,4 @@ def _coalesce(stream):
                 textpos = None
             if kind:
                 yield kind, data, pos
+

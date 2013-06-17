@@ -44,7 +44,7 @@ class AbstractTemplateEnginePlugin(object):
             options = {}
         self.options = options
 
-        self.default_encoding = options.get('genshi.default_encoding', 'utf-8')
+        self.default_encoding = options.get('genshi.default_encoding', None)
         auto_reload = options.get('genshi.auto_reload', '1')
         if isinstance(auto_reload, basestring):
             auto_reload = auto_reload.lower() in ('1', 'on', 'yes', 'true')

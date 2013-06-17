@@ -16,6 +16,8 @@
 import htmlentitydefs as entities
 import re
 
+from compat import any, all, stringrepr
+
 __docformat__ = 'restructuredtext en'
 
 
@@ -246,29 +248,3 @@ def striptags(text):
     """
     return _STRIPTAGS_RE.sub('', text)
 
-
-def stringrepr(string):
-    ascii = string.encode('ascii', 'backslashreplace')
-    quoted = "'" +  ascii.replace("'", "\\'") + "'"
-    if len(ascii) > len(string):
-        return 'u' + quoted
-    return quoted
-
-
-# Compatibility fallback implementations for older Python versions
-
-try:
-    all = all
-    any = any
-except NameError:
-    def any(S):
-        for x in S:
-            if x:
-               return True
-        return False
-
-    def all(S):
-        for x in S:
-            if not x:
-               return False
-        return True

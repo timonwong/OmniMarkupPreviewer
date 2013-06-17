@@ -74,7 +74,7 @@ class CommentDirective(I18NDirective):
     >>> translator = Translator()
     >>> translator.setup(tmpl)
     >>> list(translator.extract(tmpl.stream))
-    [(2, None, u'Foo', [u'As in Foo Bar'])]
+    [(2, None, 'Foo', ['As in Foo Bar'])]
     """
     __slots__ = ['comment']
 
@@ -99,8 +99,8 @@ class MsgDirective(ExtractableI18NDirective):
     >>> translator = Translator()
     >>> translator.setup(tmpl)
     >>> list(translator.extract(tmpl.stream))
-    [(2, None, u'[1:Foo]\n    [2:Bar]', []), (6, None, u'Foo [1:bar]!', [])]
-    >>> print(tmpl.generate().render())
+    [(2, None, '[1:Foo]\n    [2:Bar]', []), (6, None, 'Foo [1:bar]!', [])]
+    >>> print((tmpl.generate().render()))
     <html>
       <div><p>Foo</p>
         <p>Bar</p></div>
@@ -116,8 +116,8 @@ class MsgDirective(ExtractableI18NDirective):
     ... </html>''')
     >>> translator.setup(tmpl)
     >>> list(translator.extract(tmpl.stream)) #doctest: +NORMALIZE_WHITESPACE
-    [(2, None, u'[1:First Name: %(fname)s]\n    [2:Last Name: %(lname)s]', []),
-    (6, None, u'Foo [1:bar]!', [])]
+    [(2, None, '[1:First Name: %(fname)s]\n    [2:Last Name: %(lname)s]', []),
+    (6, None, 'Foo [1:bar]!', [])]
 
     >>> tmpl = MarkupTemplate('''<html xmlns:i18n="http://genshi.edgewall.org/i18n">
     ...   <div i18n:msg="fname, lname">
@@ -127,7 +127,7 @@ class MsgDirective(ExtractableI18NDirective):
     ...   <p i18n:msg="">Foo <em>bar</em>!</p>
     ... </html>''')
     >>> translator.setup(tmpl)
-    >>> print(tmpl.generate(fname='John', lname='Doe').render())
+    >>> print((tmpl.generate(fname='John', lname='Doe').render()))
     <html>
       <div><p>First Name: John</p>
         <p>Last Name: Doe</p></div>
@@ -298,8 +298,8 @@ class ChooseDirective(ExtractableI18NDirective):
     >>> translator = Translator()
     >>> translator.setup(tmpl)
     >>> list(translator.extract(tmpl.stream)) #doctest: +NORMALIZE_WHITESPACE
-    [(2, 'ngettext', (u'There is %(num)s coin',
-                      u'There are %(num)s coins'), [])]
+    [(2, 'ngettext', ('There is %(num)s coin',
+                      'There are %(num)s coins'), [])]
 
     >>> tmpl = MarkupTemplate('''<html xmlns:i18n="http://genshi.edgewall.org/i18n">
     ...   <div i18n:choose="num; num">
@@ -308,13 +308,13 @@ class ChooseDirective(ExtractableI18NDirective):
     ...   </div>
     ... </html>''')
     >>> translator.setup(tmpl)
-    >>> print(tmpl.generate(num=1).render())
+    >>> print((tmpl.generate(num=1).render()))
     <html>
       <div>
         <p>There is 1 coin</p>
       </div>
     </html>
-    >>> print(tmpl.generate(num=2).render())
+    >>> print((tmpl.generate(num=2).render()))
     <html>
       <div>
         <p>There are 2 coins</p>
@@ -331,8 +331,8 @@ class ChooseDirective(ExtractableI18NDirective):
     ... </html>''')
     >>> translator.setup(tmpl)
     >>> list(translator.extract(tmpl.stream)) #doctest: +NORMALIZE_WHITESPACE
-    [(2, 'ngettext', (u'There is %(num)s coin',
-                      u'There are %(num)s coins'), [])]
+    [(2, 'ngettext', ('There is %(num)s coin',
+                      'There are %(num)s coins'), [])]
     """
     __slots__ = ['numeral', 'params', 'lineno']
 
@@ -507,7 +507,7 @@ class DomainDirective(I18NDirective):
     >>> translator = Translator(translations)
     >>> translator.setup(tmpl)
 
-    >>> print(tmpl.generate().render())
+    >>> print((tmpl.generate().render()))
     <html>
       <p>Voh</p>
       <div>
@@ -574,7 +574,7 @@ class Translator(DirectiveFactory):
     When generating the template output, our hard-coded translations should be
     applied as expected:
     
-    >>> print(tmpl.generate(username='Hans', _=pseudo_gettext))
+    >>> print((tmpl.generate(username='Hans', _=pseudo_gettext)))
     <html>
       <head>
         <title>Beispiel</title>
@@ -791,11 +791,11 @@ class Translator(DirectiveFactory):
         ...   </body>
         ... </html>''', filename='example.html')
         >>> for line, func, msg, comments in Translator().extract(tmpl.stream):
-        ...    print('%d, %r, %r' % (line, func, msg))
-        3, None, u'Example'
-        6, None, u'Example'
-        7, '_', u'Hello, %(name)s'
-        8, 'ngettext', (u'You have %d item', u'You have %d items', None)
+        ...    print(('%d, %r, %r' % (line, func, msg)))
+        3, None, 'Example'
+        6, None, 'Example'
+        7, '_', 'Hello, %(name)s'
+        8, 'ngettext', ('You have %d item', 'You have %d items', None)
         
         :param stream: the event stream to extract strings from; can be a
                        regular stream or a template stream
@@ -948,8 +948,17 @@ class MessageBuffer(object):
         self.values = {}
         self.depth = 1
         self.order = 1
+        self._prev_order = None
         self.stack = [0]
         self.subdirectives = {}
+
+    def _add_event(self, order, event):
+        if order == self._prev_order:
+            self.events[order][-1].append(event)
+        else:
+            self._prev_order = order
+            self.events.setdefault(order, [])
+            self.events[order].append([event])
 
     def append(self, kind, data, pos):
         """Append a stream event to the buffer.
@@ -965,17 +974,17 @@ class MessageBuffer(object):
             subdirectives, substream = data
             # Store the directives that should be applied after translation
             self.subdirectives.setdefault(order, []).extend(subdirectives)
-            self.events.setdefault(order, []).append((SUB_START, None, pos))
+            self._add_event(order, (SUB_START, None, pos))
             for skind, sdata, spos in substream:
                 self.append(skind, sdata, spos)
-            self.events.setdefault(order, []).append((SUB_END, None, pos))
+            self._add_event(order, (SUB_END, None, pos))
         elif kind is TEXT:
             if '[' in data or ']' in data:
                 # Quote [ and ] if it ain't us adding it, ie, if the user is
                 # using those chars in his templates, escape them
                 data = data.replace('[', '\[').replace(']', '\]')
             self.string.append(data)
-            self.events.setdefault(self.stack[-1], []).append((kind, data, pos))
+            self._add_event(self.stack[-1], (kind, data, pos))
         elif kind is EXPR:
             if self.params:
                 param = self.params.pop(0)
@@ -992,20 +1001,19 @@ class MessageBuffer(object):
                                                      'In-memory Template'),
                                     pos[1]))
             self.string.append('%%(%s)s' % param)
-            self.events.setdefault(self.stack[-1], []).append((kind, data, pos))
+            self._add_event(self.stack[-1], (kind, data, pos))
             self.values[param] = (kind, data, pos)
         else:
             if kind is START: 
                 self.string.append('[%d:' % self.order)
                 self.stack.append(self.order)
-                self.events.setdefault(self.stack[-1],
-                                       []).append((kind, data, pos))
+                self._add_event(self.stack[-1], (kind, data, pos))
                 self.depth += 1
                 self.order += 1
             elif kind is END:
                 self.depth -= 1
                 if self.depth:
-                    self.events[self.stack[-1]].append((kind, data, pos))
+                    self._add_event(self.stack[-1], (kind, data, pos))
                     self.string.append(']')
                     self.stack.pop()
 
@@ -1040,10 +1048,7 @@ class MessageBuffer(object):
 
         while parts:
             order, string = parts.pop(0)
-            if len(parts_counter[order]) == 1:
-                events = self.events[order]
-            else:
-                events = [self.events[order].pop(0)]
+            events = self.events[order].pop(0)
             parts_counter[order].pop()
 
             for event in events:
@@ -1158,12 +1163,12 @@ def extract_from_code(code, gettext_functions):
     >>> from genshi.template.eval import Expression
     >>> expr = Expression('_("Hello")')
     >>> list(extract_from_code(expr, GETTEXT_FUNCTIONS))
-    [('_', u'Hello')]
+    [('_', 'Hello')]
     
     >>> expr = Expression('ngettext("You have %(num)s item", '
     ...                            '"You have %(num)s items", num)')
     >>> list(extract_from_code(expr, GETTEXT_FUNCTIONS))
-    [('ngettext', (u'You have %(num)s item', u'You have %(num)s items', None))]
+    [('ngettext', ('You have %(num)s item', 'You have %(num)s items', None))]
     
     :param code: the `Code` object
     :type code: `genshi.template.eval.Code`
@@ -1245,3 +1250,4 @@ def extract(fileobj, keywords, comment_tags, options):
         tmpl.add_directives(Translator.NAMESPACE, translator)
     for message in translator.extract(tmpl.stream, gettext_functions=keywords):
         yield message
+

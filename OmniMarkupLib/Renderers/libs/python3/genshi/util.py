@@ -13,9 +13,8 @@
 
 """Various utility classes and functions."""
 
-from html import entities
+import html.entities as entities
 import re
-import sys
 
 from .compat import any, all, stringrepr
 
@@ -166,7 +165,7 @@ def plaintext(text, keeplinebreaks=True):
     """Return the text with all entities and tags removed.
     
     >>> plaintext('<b>1 &lt; 2</b>')
-    u'1 < 2'
+    '1 < 2'
     
     The `keeplinebreaks` parameter can be set to ``False`` to replace any line
     breaks by simple spaces:
@@ -174,7 +173,7 @@ def plaintext(text, keeplinebreaks=True):
     >>> plaintext('''<b>1
     ... &lt;
     ... 2</b>''', keeplinebreaks=False)
-    u'1 < 2'
+    '1 < 2'
     
     :param text: the text to convert to plain text
     :param keeplinebreaks: whether line breaks in the text should be kept intact
@@ -192,19 +191,19 @@ def stripentities(text, keepxmlentities=False):
     replaced by the equivalent UTF-8 characters.
     
     >>> stripentities('1 &lt; 2')
-    u'1 < 2'
+    '1 < 2'
     >>> stripentities('more &hellip;')
-    u'more \u2026'
+    'more \u2026'
     >>> stripentities('&#8230;')
-    u'\u2026'
+    '\u2026'
     >>> stripentities('&#x2026;')
-    u'\u2026'
+    '\u2026'
     
     If the `keepxmlentities` parameter is provided and is a truth value, the
     core XML entities (&amp;, &apos;, &gt;, &lt; and &quot;) are left intact.
     
     >>> stripentities('1 &lt; 2 &hellip;', keepxmlentities=True)
-    u'1 &lt; 2 \u2026'
+    '1 &lt; 2 \u2026'
     """
     def _replace_entity(match):
         if match.group(1): # numeric entity

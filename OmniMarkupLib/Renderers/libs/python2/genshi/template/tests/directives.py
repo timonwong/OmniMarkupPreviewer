@@ -30,9 +30,9 @@ class AttrsDirectiveTestCase(unittest.TestCase):
         tmpl = MarkupTemplate("""<doc xmlns:py="http://genshi.edgewall.org/">
           <elem py:for="item in items" py:attrs="item"/>
         </doc>""")
-        items = [{'id': 1, 'class': 'foo'}, {'id': 2, 'class': 'bar'}]
+        items = [{'id': 1}, {'id': 2}]
         self.assertEqual("""<doc>
-          <elem id="1" class="foo"/><elem id="2" class="bar"/>
+          <elem id="1"/><elem id="2"/>
         </doc>""", tmpl.generate(items=items).render(encoding=None))
 
     def test_update_existing_attr(self):
@@ -395,14 +395,14 @@ class DefDirectiveTestCase(unittest.TestCase):
         tmpl = MarkupTemplate("""<doc xmlns:py="http://genshi.edgewall.org/">
           <div py:def="f(*args, **kwargs)">
             ${repr(args)}
-            ${repr(kwargs)}
+            ${repr(sorted(kwargs.items()))}
           </div>
           ${f(1, 2, a=3, b=4)}
         </doc>""")
         self.assertEqual("""<doc>
           <div>
             [1, 2]
-            {'a': 3, 'b': 4}
+            [('a', 3), ('b', 4)]
           </div>
         </doc>""", tmpl.generate().render(encoding=None))
 
@@ -457,7 +457,7 @@ class ForDirectiveTestCase(unittest.TestCase):
         self.assertEqual("""<doc>
             <p>key=a, value=1</p>
             <p>key=b, value=2</p>
-        </doc>""", tmpl.generate(items=dict(a=1, b=2).items())
+        </doc>""", tmpl.generate(items=(('a', 1), ('b', 2)))
                        .render(encoding=None))
 
     def test_nested_assignment(self):
@@ -472,7 +472,7 @@ class ForDirectiveTestCase(unittest.TestCase):
         self.assertEqual("""<doc>
             <p>0: key=a, value=1</p>
             <p>1: key=b, value=2</p>
-        </doc>""", tmpl.generate(items=enumerate(dict(a=1, b=2).items()))
+        </doc>""", tmpl.generate(items=enumerate([('a', 1), ('b', 2)]))
                        .render(encoding=None))
 
     def test_not_iterable(self):
@@ -1005,6 +1005,27 @@ class MatchDirectiveTestCase(unittest.TestCase):
           </body>
         </html>""", tmpl.generate().render())
 
+    def test_match_multiple_times3(self):
+        # See http://genshi.edgewall.org/ticket/370#comment:12
+        tmpl = MarkupTemplate("""<?xml version="1.0"?>
+          <root xmlns:py="http://genshi.edgewall.org/">
+            <py:match path="foo/bar">
+              <zzzzz/>
+            </py:match>
+            <foo>
+              <bar/>
+              <bar/>
+            </foo>
+            <bar/>
+          </root>""")
+        self.assertEqual("""<?xml version="1.0"?>\n<root>
+            <foo>
+              <zzzzz/>
+              <zzzzz/>
+            </foo>
+            <bar/>
+          </root>""", tmpl.generate().render())
+
     # FIXME
     #def test_match_after_step(self):
     #    tmpl = MarkupTemplate("""<div xmlns:py="http://genshi.edgewall.org/">
@@ -1137,8 +1158,8 @@ class WithDirectiveTestCase(unittest.TestCase):
           <py:with vars="x = x * 2; y = x / 2;">${x} ${y}</py:with>
         </div>""")
         self.assertEqual("""<div>
-          84 42
-        </div>""", tmpl.generate(x=42).render(encoding=None))
+          84 %s
+        </div>""" % (84 / 2), tmpl.generate(x=42).render(encoding=None))
 
     def test_semicolon_escape(self):
         tmpl = MarkupTemplate("""<div xmlns:py="http://genshi.edgewall.org/">

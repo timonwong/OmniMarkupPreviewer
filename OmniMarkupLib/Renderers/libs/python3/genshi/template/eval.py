@@ -237,14 +237,14 @@ class Undefined(object):
     
     >>> try:
     ...     foo('bar')
-    ... except UndefinedError, e:
-    ...     print e.msg
+    ... except UndefinedError as e:
+    ...     print(e.msg)
     "foo" not defined
 
     >>> try:
     ...     foo.bar
-    ... except UndefinedError, e:
-    ...     print e.msg
+    ... except UndefinedError as e:
+    ...     print(e.msg)
     "foo" not defined
     
     :see: `LenientLookup`
@@ -391,8 +391,8 @@ class StrictLookup(LookupBase):
     >>> expr = Expression('nothing', lookup='strict')
     >>> try:
     ...     expr.evaluate({})
-    ... except UndefinedError, e:
-    ...     print e.msg
+    ... except UndefinedError as e:
+    ...     print(e.msg)
     "nothing" not defined
     
     The same happens when a non-existing attribute or item is accessed on an
@@ -401,8 +401,8 @@ class StrictLookup(LookupBase):
     >>> expr = Expression('something.nil', lookup='strict')
     >>> try:
     ...     expr.evaluate({'something': dict()})
-    ... except UndefinedError, e:
-    ...     print e.msg
+    ... except UndefinedError as e:
+    ...     print(e.msg)
     {} has no member named "nil"
     """
 
@@ -634,3 +634,4 @@ class ExpressionASTTransformer(TemplateASTTransformer):
             _new(_ast.Tuple, (self.visit(node.slice.value),), _ast.Load())
         ]
         return _new(_ast.Call, func, args, [])
+

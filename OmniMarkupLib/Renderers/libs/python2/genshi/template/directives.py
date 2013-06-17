@@ -175,9 +175,10 @@ class AttrsDirective(Directive):
                         attrs = []
                 elif not isinstance(attrs, list): # assume it's a dict
                     attrs = attrs.items()
-                attrib -= [name for name, val in attrs if val is None]
-                attrib |= [(QName(name), unicode(val).strip()) for name, val
-                           in attrs if val is not None]
+                attrib |= [
+                    (QName(n), v is not None and unicode(v).strip() or None)
+                    for n, v in attrs
+                ]
             yield kind, (tag, attrib), pos
             for event in stream:
                 yield event
@@ -621,13 +622,13 @@ class WhenDirective(Directive):
         if not info:
             raise TemplateRuntimeError('"when" directives can only be used '
                                        'inside a "choose" directive',
-                                       self.filename, *stream.next()[2][1:])
+                                       self.filename, *(stream.next())[2][1:])
         if info[0]:
             return []
         if not self.expr and not info[1]:
             raise TemplateRuntimeError('either "choose" or "when" directive '
                                        'must have a test expression',
-                                       self.filename, *stream.next()[2][1:])
+                                       self.filename, *(stream.next())[2][1:])
         if info[1]:
             value = info[2]
             if self.expr:
@@ -660,7 +661,7 @@ class OtherwiseDirective(Directive):
         if not info:
             raise TemplateRuntimeError('an "otherwise" directive can only be '
                                        'used inside a "choose" directive',
-                                       self.filename, *stream.next()[2][1:])
+                                       self.filename, *(stream.next())[2][1:])
         if info[0]:
             return []
         info[0] = True

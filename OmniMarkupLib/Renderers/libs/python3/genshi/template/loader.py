@@ -46,7 +46,7 @@ class TemplateLoader(object):
     
     >>> import tempfile
     >>> fd, path = tempfile.mkstemp(suffix='.html', prefix='template')
-    >>> os.write(fd, u'<p>$var</p>'.encode('utf-8'))
+    >>> os.write(fd, '<p>$var</p>'.encode('utf-8'))
     11
     >>> os.close(fd)
     
@@ -283,7 +283,7 @@ class TemplateLoader(object):
         """
         def _load_from_directory(filename):
             filepath = os.path.join(path, filename)
-            fileobj = open(filepath, 'rbU')
+            fileobj = open(filepath, 'rb')
             mtime = os.path.getmtime(filepath)
             def _uptodate():
                 return mtime == os.path.getmtime(filepath)
@@ -317,9 +317,9 @@ class TemplateLoader(object):
         ...     app1 = lambda filename: ('app1', filename, None, None),
         ...     app2 = lambda filename: ('app2', filename, None, None)
         ... )
-        >>> print(load('app1/foo.html'))
+        >>> print((load('app1/foo.html')))
         ('app1', 'app1/foo.html', None, None)
-        >>> print(load('app2/bar.html'))
+        >>> print((load('app2/bar.html')))
         ('app2', 'app2/bar.html', None, None)
         
         :param delegates: mapping of path prefixes to loader functions
@@ -327,7 +327,7 @@ class TemplateLoader(object):
         :rtype: ``function``
         """
         def _dispatch_by_prefix(filename):
-            for prefix, delegate in delegates.items():
+            for prefix, delegate in list(delegates.items()):
                 if filename.startswith(prefix):
                     if isinstance(delegate, str):
                         delegate = directory(delegate)
@@ -342,3 +342,4 @@ class TemplateLoader(object):
 directory = TemplateLoader.directory
 package = TemplateLoader.package
 prefixed = TemplateLoader.prefixed
+

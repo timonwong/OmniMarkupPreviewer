@@ -30,7 +30,7 @@ class MarkupTemplateEnginePluginTestCase(unittest.TestCase):
 
     def test_init_no_options(self):
         plugin = MarkupTemplateEnginePlugin()
-        self.assertEqual('utf-8', plugin.default_encoding)
+        self.assertEqual(None, plugin.default_encoding)
         self.assertEqual('html', plugin.default_format)
         self.assertEqual(None, plugin.default_doctype)
 
@@ -165,7 +165,7 @@ class MarkupTemplateEnginePluginTestCase(unittest.TestCase):
     def test_helper_functions(self):
         plugin = MarkupTemplateEnginePlugin()
         tmpl = plugin.load_template(PACKAGE + '.templates.functions')
-        output = plugin.render({'snippet': '<b>Foo</b>'}, template=tmpl)
+        output = plugin.render({'snippet': u'<b>Foo</b>'}, template=tmpl)
         self.assertEqual("""<div>
 False
 bar
@@ -178,7 +178,7 @@ class TextTemplateEnginePluginTestCase(unittest.TestCase):
 
     def test_init_no_options(self):
         plugin = TextTemplateEnginePlugin()
-        self.assertEqual('utf-8', plugin.default_encoding)
+        self.assertEqual(None, plugin.default_encoding)
         self.assertEqual('text', plugin.default_format)
 
         self.assertEqual([], plugin.loader.search_path)

@@ -48,8 +48,10 @@ def _simplify(stream, with_attrs=False):
 
 def _transform(html, transformer, with_attrs=False):
     """Apply transformation returning simplified marked stream."""
-    if isinstance(html, basestring):
-        html = HTML(html)
+    if isinstance(html, basestring) and not isinstance(html, unicode):
+        html = HTML(html, encoding='utf-8')
+    elif isinstance(html, unicode):
+        html = HTML(html, encoding='utf-8')
     stream = transformer(html, keep_marks=True)
     return _simplify(stream, with_attrs)
 
@@ -57,7 +59,7 @@ def _transform(html, transformer, with_attrs=False):
 class SelectTest(unittest.TestCase):
     """Test .select()"""
     def _select(self, select):
-        html = HTML(FOOBAR)
+        html = HTML(FOOBAR, encoding='utf-8')
         if isinstance(select, basestring):
             select = [select]
         transformer = Transformer(select[0])
@@ -138,7 +140,7 @@ class SelectTest(unittest.TestCase):
 
     def test_select_text_context(self):
         self.assertEqual(
-            list(Transformer('.')(HTML('foo'), keep_marks=True)),
+            list(Transformer('.')(HTML(u'foo'), keep_marks=True)),
             [('OUTSIDE', ('TEXT', u'foo', (None, 1, 0)))],
             )
 
@@ -205,7 +207,7 @@ class InvertTest(unittest.TestCase):
 
     def test_invert_text_context(self):
         self.assertEqual(
-            _simplify(Transformer('.').invert()(HTML('foo'), keep_marks=True)),
+            _simplify(Transformer('.').invert()(HTML(u'foo'), keep_marks=True)),
             [(None, 'TEXT', u'foo')],
             )
 
@@ -271,7 +273,7 @@ class EmptyTest(unittest.TestCase):
 
     def test_empty_text_context(self):
         self.assertEqual(
-            _simplify(Transformer('.')(HTML('foo'), keep_marks=True)),
+            _simplify(Transformer('.')(HTML(u'foo'), keep_marks=True)),
             [(OUTSIDE, TEXT, u'foo')],
             )
 
@@ -656,9 +658,11 @@ class ContentTestMixin(object):
 
             def __iter__(self):
                 self.count += 1
-                return iter(HTML('CONTENT %i' % self.count))
+                return iter(HTML(u'CONTENT %i' % self.count))
 
-        if isinstance(html, basestring):
+        if isinstance(html, basestring) and not isinstance(html, unicode):
+            html = HTML(html, encoding='utf-8')
+        else:
             html = HTML(html)
         if content is None:
             content = Injector()

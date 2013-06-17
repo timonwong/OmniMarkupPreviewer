@@ -102,7 +102,7 @@ class Stream(object):
         
         >>> from genshi.filters import HTMLSanitizer
         >>> sanitizer = HTMLSanitizer()
-        >>> print(html | sanitizer)
+        >>> print((html | sanitizer))
         <p>Hello, world!</p>
         
         Filters can be any function that accepts and produces a stream (where
@@ -113,14 +113,14 @@ class Stream(object):
         ...         if kind is TEXT:
         ...             data = data.upper()
         ...         yield kind, data, pos
-        >>> print(html | sanitizer | uppercase)
+        >>> print((html | sanitizer | uppercase))
         <p>HELLO, WORLD!</p>
         
         Serializers can also be used with this notation:
         
         >>> from genshi.output import TextSerializer
         >>> output = TextSerializer()
-        >>> print(html | sanitizer | uppercase | output)
+        >>> print((html | sanitizer | uppercase | output))
         HELLO, WORLD!
         
         Commonly, serializers should be used at the end of the "pipeline";
@@ -189,9 +189,9 @@ class Stream(object):
         
         >>> from genshi import HTML
         >>> stream = HTML('<doc><elem>foo</elem><elem>bar</elem></doc>', encoding='utf-8')
-        >>> print(stream.select('elem'))
+        >>> print((stream.select('elem')))
         <elem>foo</elem><elem>bar</elem>
-        >>> print(stream.select('elem/text()'))
+        >>> print((stream.select('elem/text()')))
         foobar
         
         Note that the outermost element of the stream becomes the *context
@@ -199,13 +199,13 @@ class Stream(object):
         not match anything in the example above, because it only tests against
         child elements of the outermost element:
         
-        >>> print(stream.select('doc'))
+        >>> print((stream.select('doc')))
         <BLANKLINE>
         
         You can use the "." expression to match the context node itself
         (although that usually makes little sense):
         
-        >>> print(stream.select('.'))
+        >>> print((stream.select('.')))
         <doc><elem>foo</elem><elem>bar</elem></doc>
         
         :param path: a string containing the XPath expression
@@ -354,6 +354,7 @@ class Attrs(tuple):
         for attr, _ in self:
             if attr == name:
                 return True
+        return False
 
     def __getitem__(self, i):
         """Return an item or slice of the attributes list.
@@ -493,14 +494,14 @@ class Markup(str):
         it may contain (<, >, & and \").
         
         >>> escape('"1 < 2"')
-        <Markup u'&#34;1 &lt; 2&#34;'>
+        <Markup '&#34;1 &lt; 2&#34;'>
         
         If the `quotes` parameter is set to `False`, the \" character is left
         as is. Escaping quotes is generally only required for strings that are
         to be used in attribute values.
         
         >>> escape('"1 < 2"', quotes=False)
-        <Markup u'"1 &lt; 2"'>
+        <Markup '"1 &lt; 2"'>
         
         :param text: the text to escape
         :param quotes: if ``True``, double quote characters are escaped in
@@ -526,7 +527,7 @@ class Markup(str):
         """Reverse-escapes &, <, >, and \" and returns a `unicode` object.
         
         >>> Markup('1 &lt; 2').unescape()
-        u'1 < 2'
+        '1 < 2'
         
         :return: the unescaped string
         :rtype: `unicode`
@@ -576,7 +577,7 @@ def unescape(text):
     """Reverse-escapes &, <, >, and \" and returns a `unicode` object.
     
     >>> unescape(Markup('1 &lt; 2'))
-    u'1 < 2'
+    '1 < 2'
     
     If the provided `text` object is not a `Markup` instance, it is returned
     unchanged.
@@ -606,7 +607,7 @@ class Namespace(object):
     >>> html
     Namespace('http://www.w3.org/1999/xhtml')
     >>> html.uri
-    u'http://www.w3.org/1999/xhtml'
+    'http://www.w3.org/1999/xhtml'
     
     The `Namespace` object can than be used to generate `QName` objects with
     that namespace:
@@ -614,9 +615,9 @@ class Namespace(object):
     >>> html.body
     QName('http://www.w3.org/1999/xhtml}body')
     >>> html.body.localname
-    u'body'
+    'body'
     >>> html.body.namespace
-    u'http://www.w3.org/1999/xhtml'
+    'http://www.w3.org/1999/xhtml'
     
     The same works using item access notation, which is useful for element or
     attribute names that are not valid Python identifiers:
@@ -699,16 +700,16 @@ class QName(str):
     >>> qname
     QName('foo')
     >>> qname.localname
-    u'foo'
+    'foo'
     >>> qname.namespace
     
     >>> qname = QName('http://www.w3.org/1999/xhtml}body')
     >>> qname
     QName('http://www.w3.org/1999/xhtml}body')
     >>> qname.localname
-    u'body'
+    'body'
     >>> qname.namespace
-    u'http://www.w3.org/1999/xhtml'
+    'http://www.w3.org/1999/xhtml'
     """
     __slots__ = ['namespace', 'localname']
 
@@ -742,3 +743,4 @@ class QName(str):
     else:
         def __repr__(self):
             return '%s(%r)' % (type(self).__name__, self.lstrip('{'))
+

@@ -15,9 +15,9 @@ import doctest
 import unittest
 
 def suite():
-    from genshi.filters.tests import html, i18n, transform
+    from genshi.filters.tests import test_html, i18n, transform
     suite = unittest.TestSuite()
-    suite.addTest(html.suite())
+    suite.addTest(test_html.suite())
     suite.addTest(i18n.suite())
     if hasattr(doctest, 'NORMALIZE_WHITESPACE'):
         suite.addTest(transform.suite())

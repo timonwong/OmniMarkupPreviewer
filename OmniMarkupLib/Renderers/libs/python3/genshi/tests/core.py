@@ -66,7 +66,7 @@ class MarkupTestCase(unittest.TestCase):
 
     def test_repr(self):
         markup = Markup('foo')
-        self.assertEquals("<Markup u'foo'>", repr(markup))
+        self.assertEquals("<Markup 'foo'>", repr(markup))
 
     def test_escape(self):
         markup = escape('<b>"&"</b>')
@@ -83,6 +83,11 @@ class MarkupTestCase(unittest.TestCase):
         markup = Markup.escape(string)
         assert type(markup) is Markup
         self.assertEquals(string, unescape(markup))
+
+    def test_Markup_escape_None_noquotes(self):
+        markup = Markup.escape(None, False)
+        assert type(markup) is Markup
+        self.assertEquals('', markup)
 
     def test_add_str(self):
         markup = Markup('<b>foo</b>') + '<br/>'
@@ -159,7 +164,7 @@ class MarkupTestCase(unittest.TestCase):
         buf = BytesIO()
         pickle.dump(markup, buf, 2)
         buf.seek(0)
-        self.assertEquals("<Markup u'foo'>", repr(pickle.load(buf)))
+        self.assertEquals("<Markup 'foo'>", repr(pickle.load(buf)))
 
 
 class AttrsTestCase(unittest.TestCase):

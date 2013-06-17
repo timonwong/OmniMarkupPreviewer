@@ -915,6 +915,19 @@ class MsgDirectiveTestCase(unittest.TestCase):
           Voh
         </html>""", tmpl.generate().render())
 
+    def test_translate_i18n_msg_ticket_404(self):
+        tmpl = MarkupTemplate("""<html xmlns:py="http://genshi.edgewall.org/"
+            xmlns:i18n="http://genshi.edgewall.org/i18n">
+          <p i18n:msg="first,second">
+            $first <span>$second</span> KEPT <span>Inside a tag</span> tail
+          </p></html>""")
+        translator = Translator(DummyTranslations())
+        translator.setup(tmpl)
+        self.assertEqual("""<html>
+          <p>FIRST <span>SECOND</span> KEPT <span>Inside a tag</span> tail"""
+          """</p></html>""",
+          tmpl.generate(first="FIRST", second="SECOND").render())
+
 
 class ChooseDirectiveTestCase(unittest.TestCase):
 

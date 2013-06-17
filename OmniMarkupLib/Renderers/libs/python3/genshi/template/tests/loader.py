@@ -273,6 +273,29 @@ class TemplateLoaderTestCase(unittest.TestCase):
               <div>Included from sub</div>
             </html>""", tmpl.generate().render(encoding=None))
 
+    def test_absolute_include(self):
+        file1 = open(os.path.join(self.dirname, 'tmpl1.html'), 'w')
+        try:
+            file1.write("""<div>Included</div>""")
+        finally:
+            file1.close()
+
+        os.mkdir(os.path.join(self.dirname, 'sub'))
+        file2 = open(os.path.join(self.dirname, 'sub', 'tmpl2.html'), 'w')
+        try:
+            file2.write("""<html xmlns:xi="http://www.w3.org/2001/XInclude">
+              <xi:include href="%s/tmpl1.html" />
+            </html>""" % self.dirname)
+        finally:
+            file2.close()
+
+        loader = TemplateLoader()
+        tmpl = loader.load(os.path.abspath(os.path.join(self.dirname, 'sub',
+                                                        'tmpl2.html')))
+        self.assertEqual("""<html>
+              <div>Included</div>
+            </html>""", tmpl.generate().render(encoding=None))
+
     def test_abspath_caching(self):
         abspath = os.path.join(self.dirname, 'abs')
         os.mkdir(abspath)

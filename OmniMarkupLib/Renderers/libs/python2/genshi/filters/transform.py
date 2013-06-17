@@ -31,7 +31,8 @@ the ``<head>`` of the input document:
 ...  <body>
 ...    Some <em>body</em> text.
 ...  </body>
-... </html>''')
+... </html>''',
+... encoding='utf-8')
 >>> print(html | Transformer('body/em').map(unicode.upper, TEXT)
 ...                                    .unwrap().wrap(tag.u))
 <html>
@@ -136,7 +137,8 @@ class Transformer(object):
     mark.
 
     >>> html = HTML('<html><head><title>Some Title</title></head>'
-    ...             '<body>Some <em>body</em> text.</body></html>')
+    ...             '<body>Some <em>body</em> text.</body></html>',
+    ...             encoding='utf-8')
 
     Transformations act on selected stream events matching an XPath expression.
     Here's an example of removing some markup (the title, in this case)
@@ -215,7 +217,8 @@ class Transformer(object):
         ...             yield mark, (kind, data.upper(), pos)
         ...         else:
         ...             yield mark, (kind, data, pos)
-        >>> short_stream = HTML('<body>Some <em>test</em> text</body>')
+        >>> short_stream = HTML('<body>Some <em>test</em> text</body>',
+        ...                      encoding='utf-8')
         >>> print(short_stream | Transformer('.//em/text()').apply(upper))
         <body>Some <em>TEST</em> text</body>
         """
@@ -233,7 +236,7 @@ class Transformer(object):
         """Mark events matching the given XPath expression, within the current
         selection.
 
-        >>> html = HTML('<body>Some <em>test</em> text</body>')
+        >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
         >>> print(html | Transformer().select('.//em').trace())
         (None, ('START', (QName('body'), Attrs()), (None, 1, 0)))
         (None, ('TEXT', u'Some ', (None, 1, 6)))
@@ -257,7 +260,7 @@ class Transformer(object):
         Specificaly, all marks are converted to null marks, and all null marks
         are converted to OUTSIDE marks.
 
-        >>> html = HTML('<body>Some <em>test</em> text</body>')
+        >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
         >>> print(html | Transformer('//em').invert().trace())
         ('OUTSIDE', ('START', (QName('body'), Attrs()), (None, 1, 0)))
         ('OUTSIDE', ('TEXT', u'Some ', (None, 1, 6)))
@@ -277,7 +280,7 @@ class Transformer(object):
 
         Example:
 
-        >>> html = HTML('<body>Some <em>test</em> text</body>')
+        >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
         >>> print(html | Transformer('//em').end().trace())
         ('OUTSIDE', ('START', (QName('body'), Attrs()), (None, 1, 0)))
         ('OUTSIDE', ('TEXT', u'Some ', (None, 1, 6)))
@@ -301,7 +304,8 @@ class Transformer(object):
         Example:
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//em').empty())
         <html><head><title>Some Title</title></head><body>Some <em/>
         text.</body></html>
@@ -316,7 +320,8 @@ class Transformer(object):
         Example:
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//em').remove())
         <html><head><title>Some Title</title></head><body>Some
         text.</body></html>
@@ -333,7 +338,8 @@ class Transformer(object):
         Example:
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//em').unwrap())
         <html><head><title>Some Title</title></head><body>Some body
         text.</body></html>
@@ -346,7 +352,8 @@ class Transformer(object):
         """Wrap selection in an element.
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//em').wrap('strong'))
         <html><head><title>Some Title</title></head><body>Some
         <strong><em>body</em></strong> text.</body></html>
@@ -362,7 +369,8 @@ class Transformer(object):
         """Replace selection with content.
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//title/text()').replace('New Title'))
         <html><head><title>New Title</title></head><body>Some <em>body</em>
         text.</body></html>
@@ -380,7 +388,8 @@ class Transformer(object):
         tag:
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//em').before('emphasised '))
         <html><head><title>Some Title</title></head><body>Some emphasised
         <em>body</em> text.</body></html>
@@ -397,7 +406,8 @@ class Transformer(object):
         Here, we insert some text after the </em> closing tag:
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//em').after(' rock'))
         <html><head><title>Some Title</title></head><body>Some <em>body</em>
         rock text.</body></html>
@@ -414,7 +424,8 @@ class Transformer(object):
         Inserting some new text at the start of the <body>:
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//body').prepend('Some new body text. '))
         <html><head><title>Some Title</title></head><body>Some new body text.
         Some <em>body</em> text.</body></html>
@@ -429,7 +440,8 @@ class Transformer(object):
         """Insert content before the END event of the selection.
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//body').append(' Some new body text.'))
         <html><head><title>Some Title</title></head><body>Some <em>body</em>
         text. Some new body text.</body></html>
@@ -450,7 +462,7 @@ class Transformer(object):
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em class="before">body</em> <em>text</em>.</body>'
-        ...             '</html>')
+        ...             '</html>', encoding='utf-8')
         >>> print(html | Transformer('body/em').attr('class', None))
         <html><head><title>Some Title</title></head><body>Some <em>body</em>
         <em>text</em>.</body></html>
@@ -493,7 +505,8 @@ class Transformer(object):
         >>> from genshi.builder import tag
         >>> buffer = StreamBuffer()
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('head/title/text()').copy(buffer)
         ...     .end().select('body').prepend(tag.h1(buffer)))
         <html><head><title>Some Title</title></head><body><h1>Some
@@ -514,7 +527,8 @@ class Transformer(object):
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body><em>Some</em> <em class="before">body</em>'
-        ...             '<em>text</em>.</body></html>')
+        ...             '<em>text</em>.</body></html>',
+        ...             encoding='utf-8')
         >>> buffer = StreamBuffer()
         >>> def apply_attr(name, entry):
         ...     return list(buffer)[0][1][1].get('class')
@@ -546,7 +560,8 @@ class Transformer(object):
         >>> from genshi.builder import tag
         >>> buffer = StreamBuffer()
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...             '<body>Some <em>body</em> text.</body></html>')
+        ...             '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('.//em/text()').cut(buffer)
         ...     .end().select('.//em').after(tag.h1(buffer)))
         <html><head><title>Some Title</title></head><body>Some
@@ -577,7 +592,8 @@ class Transformer(object):
         top of the document:
 
         >>> doc = HTML('<doc><notes></notes><body>Some <note>one</note> '
-        ...            'text <note>two</note>.</body></doc>')
+        ...            'text <note>two</note>.</body></doc>',
+        ...             encoding='utf-8')
         >>> buffer = StreamBuffer()
         >>> print(doc | Transformer('body/note').cut(buffer, accumulate=True)
         ...     .end().buffer().select('notes').prepend(buffer))
@@ -595,7 +611,8 @@ class Transformer(object):
 
         >>> from genshi.filters.html import HTMLSanitizer
         >>> html = HTML('<html><body>Some text<script>alert(document.cookie)'
-        ...             '</script> and some more text</body></html>')
+        ...             '</script> and some more text</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('body/*').filter(HTMLSanitizer()))
         <html><body>Some text and some more text</body></html>
 
@@ -609,7 +626,8 @@ class Transformer(object):
         the selection.
 
         >>> html = HTML('<html><head><title>Some Title</title></head>'
-        ...               '<body>Some <em>body</em> text.</body></html>')
+        ...               '<body>Some <em>body</em> text.</body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('head/title').map(unicode.upper, TEXT))
         <html><head><title>SOME TITLE</title></head><body>Some <em>body</em>
         text.</body></html>
@@ -627,7 +645,8 @@ class Transformer(object):
 
         >>> html = HTML('<html><body>Some text, some more text and '
         ...             '<b>some bold text</b>\\n'
-        ...             '<i>some italicised text</i></body></html>')
+        ...             '<i>some italicised text</i></body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('body/b').substitute('(?i)some', 'SOME'))
         <html><body>Some text, some more text and <b>SOME bold text</b>
         <i>some italicised text</i></body></html>
@@ -649,7 +668,8 @@ class Transformer(object):
         """Rename matching elements.
 
         >>> html = HTML('<html><body>Some text, some more text and '
-        ...             '<b>some bold text</b></body></html>')
+        ...             '<b>some bold text</b></body></html>',
+        ...             encoding='utf-8')
         >>> print(html | Transformer('body/b').rename('strong'))
         <html><body>Some text, some more text and <strong>some bold text</strong></body></html>
         """
@@ -658,7 +678,7 @@ class Transformer(object):
     def trace(self, prefix='', fileobj=None):
         """Print events as they pass through the transform.
 
-        >>> html = HTML('<body>Some <em>test</em> text</body>')
+        >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
         >>> print(html | Transformer('em').trace())
         (None, ('START', (QName('body'), Attrs()), (None, 1, 0)))
         (None, ('TEXT', u'Some ', (None, 1, 6)))
@@ -1024,7 +1044,7 @@ class InjectorTransformation(object):
     ...             yield event
     ...         for event in stream:
     ...             yield event
-    >>> html = HTML('<body>Some <em>test</em> text</body>')
+    >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
     >>> print(html | Transformer('.//em').apply(Top('Prefix ')))
     Prefix <body>Some <em>test</em> text</body>
     """

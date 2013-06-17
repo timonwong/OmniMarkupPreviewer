@@ -27,7 +27,7 @@ if IS_PYTHON2:
         ascii = string.encode('ascii', 'backslashreplace')
         quoted = "'" +  ascii.replace("'", "\\'") + "'"
         if len(ascii) > len(string):
-            return '' + quoted
+            return 'u' + quoted
         return quoted
 else:
     def stringrepr(string):
@@ -38,9 +38,9 @@ else:
 # We need to differentiate between StringIO and BytesIO in places
 
 if IS_PYTHON2:
-    from io import StringIO
+    from StringIO import StringIO
     try:
-        from io import StringIO as BytesIO
+        from cStringIO import StringIO as BytesIO
     except ImportError:
         BytesIO = StringIO
 else:
@@ -93,7 +93,7 @@ try:
     next = next
 except NameError:
     def next(iterator):
-        return iterator.__next__()
+        return iterator.next()
 
 # Compatibility fallback implementations for Python < 2.5
 

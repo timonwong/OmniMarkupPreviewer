@@ -175,8 +175,8 @@ class Element(Fragment):
     arguments will be converted to strings and any special XML characters
     escaped:
 
-    >>> print(Element('textarea', rows=10, cols=60))
-    <textarea rows="10" cols="60"/>
+    >>> print(Element('textarea', rows=10))
+    <textarea rows="10"/>
     >>> print(Element('span', title='1 < 2'))
     <span title="1 &lt; 2"/>
     >>> print(Element('span', title='"baz"'))

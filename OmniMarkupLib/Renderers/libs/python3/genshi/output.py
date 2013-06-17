@@ -79,6 +79,30 @@ def get_serializer(method='xml', **kwargs):
     return method(**kwargs)
 
 
+def _prepare_cache(use_cache=True):
+    """Prepare a private token serialization cache.
+
+    :param use_cache: boolean indicating whether a real cache should
+                      be used or not. If not, the returned functions
+                      are no-ops.
+
+    :return: emit and get functions, for storing and retrieving
+             serialized values from the cache.
+    """
+    cache = {}
+    if use_cache:
+        def _emit(kind, input, output):
+            cache[kind, input] = output
+            return output
+        _get = cache.get
+    else:
+        def _emit(kind, input, output):
+            return output
+        def _get(key):
+            pass
+    return _emit, _get, cache
+
+
 class DocType(object):
     """Defines a number of commonly used DOCTYPE declarations as constants."""
 
@@ -174,7 +198,7 @@ class XMLSerializer(object):
     
     >>> from genshi.builder import tag
     >>> elem = tag.div(tag.a(href='foo'), tag.br, tag.hr(noshade=True))
-    >>> print(''.join(XMLSerializer()(elem.generate())))
+    >>> print((''.join(XMLSerializer()(elem.generate()))))
     <div><a href="foo"/><br/><hr noshade="True"/></div>
     """
 
@@ -204,27 +228,23 @@ class XMLSerializer(object):
             self.filters.append(DocTypeInserter(doctype))
         self.cache = cache
 
+    def _prepare_cache(self):
+        return _prepare_cache(self.cache)[:2]
+
     def __call__(self, stream):
         have_decl = have_doctype = False
         in_cdata = False
-
-        cache = {}
-        cache_get = cache.get
-        if self.cache:
-            def _emit(kind, input, output):
-                cache[kind, input] = output
-                return output
-        else:
-            def _emit(kind, input, output):
-                return output
+        _emit, _get = self._prepare_cache()
 
         for filter_ in self.filters:
             stream = filter_(stream)
         for kind, data, pos in stream:
-            cached = cache_get((kind, data))
+            if kind is TEXT and isinstance(data, Markup):
+                yield data
+                continue
+            cached = _get((kind, data))
             if cached is not None:
                 yield cached
-
             elif kind is START or kind is EMPTY:
                 tag, attrib = data
                 buf = ['<', tag]
@@ -287,7 +307,7 @@ class XHTMLSerializer(XMLSerializer):
     
     >>> from genshi.builder import tag
     >>> elem = tag.div(tag.a(href='foo'), tag.br, tag.hr(noshade=True))
-    >>> print(''.join(XHTMLSerializer()(elem.generate())))
+    >>> print((''.join(XHTMLSerializer()(elem.generate()))))
     <div><a href="foo"></a><br /><hr noshade="noshade" /></div>
     """
 
@@ -323,21 +343,15 @@ class XHTMLSerializer(XMLSerializer):
         drop_xml_decl = self.drop_xml_decl
         have_decl = have_doctype = False
         in_cdata = False
-
-        cache = {}
-        cache_get = cache.get
-        if self.cache:
-            def _emit(kind, input, output):
-                cache[kind, input] = output
-                return output
-        else:
-            def _emit(kind, input, output):
-                return output
+        _emit, _get = self._prepare_cache()
 
         for filter_ in self.filters:
             stream = filter_(stream)
         for kind, data, pos in stream:
-            cached = cache_get((kind, data))
+            if kind is TEXT and isinstance(data, Markup):
+                yield data
+                continue
+            cached = _get((kind, data))
             if cached is not None:
                 yield cached
 
@@ -415,7 +429,7 @@ class HTMLSerializer(XHTMLSerializer):
     
     >>> from genshi.builder import tag
     >>> elem = tag.div(tag.a(href='foo'), tag.br, tag.hr(noshade=True))
-    >>> print(''.join(HTMLSerializer()(elem.generate())))
+    >>> print((''.join(HTMLSerializer()(elem.generate()))))
     <div><a href="foo"></a><br><hr noshade></div>
     """
 
@@ -454,21 +468,15 @@ class HTMLSerializer(XHTMLSerializer):
         noescape_elems = self._NOESCAPE_ELEMS
         have_doctype = False
         noescape = False
-
-        cache = {}
-        cache_get = cache.get
-        if self.cache:
-            def _emit(kind, input, output):
-                cache[kind, input] = output
-                return output
-        else:
-            def _emit(kind, input, output):
-                return output
+        _emit, _get = self._prepare_cache()
 
         for filter_ in self.filters:
             stream = filter_(stream)
         for kind, data, _ in stream:
-            output = cache_get((kind, data))
+            if kind is TEXT and isinstance(data, Markup):
+                yield data
+                continue
+            output = _get((kind, data))
             if output is not None:
                 yield output
                 if (kind is START or kind is EMPTY) \
@@ -537,22 +545,22 @@ class TextSerializer(object):
     >>> elem = tag.div(tag.a('<Hello!>', href='foo'), tag.br)
     >>> print(elem)
     <div><a href="foo">&lt;Hello!&gt;</a><br/></div>
-    >>> print(''.join(TextSerializer()(elem.generate())))
+    >>> print((''.join(TextSerializer()(elem.generate()))))
     <Hello!>
 
     If text events contain literal markup (instances of the `Markup` class),
     that markup is by default passed through unchanged:
     
     >>> elem = tag.div(Markup('<a href="foo">Hello &amp; Bye!</a><br/>'))
-    >>> print(elem.generate().render(TextSerializer, encoding=None))
+    >>> print((elem.generate().render(TextSerializer, encoding=None)))
     <a href="foo">Hello &amp; Bye!</a><br/>
     
     You can use the ``strip_markup`` to change this behavior, so that tags and
     entities are stripped from the output (or in the case of entities,
     replaced with the equivalent character):
 
-    >>> print(elem.generate().render(TextSerializer, strip_markup=True,
-    ...                              encoding=None))
+    >>> print((elem.generate().render(TextSerializer, strip_markup=True,
+    ...                              encoding=None)))
     Hello & Bye!
     """
 
@@ -610,13 +618,13 @@ class NamespaceFlattener(object):
     ...   <two:item/>
     ... </doc>''')
     >>> for kind, data, pos in NamespaceFlattener()(xml):
-    ...     print('%s %r' % (kind, data))
-    START (u'doc', Attrs([('xmlns', u'NS1'), (u'xmlns:two', u'NS2')]))
-    TEXT u'\n  '
-    START (u'two:item', Attrs())
-    END u'two:item'
-    TEXT u'\n'
-    END u'doc'
+    ...     print(('%s %r' % (kind, data)))
+    START ('doc', Attrs([('xmlns', 'NS1'), ('xmlns:two', 'NS2')]))
+    TEXT '\n  '
+    START ('two:item', Attrs())
+    END 'two:item'
+    TEXT '\n'
+    END 'doc'
     """
 
     def __init__(self, prefixes=None, cache=True):
@@ -626,18 +634,9 @@ class NamespaceFlattener(object):
         self.cache = cache
 
     def __call__(self, stream):
-        cache = {}
-        cache_get = cache.get
-        if self.cache:
-            def _emit(kind, input, output, pos):
-                cache[kind, input] = output
-                return kind, output, pos
-        else:
-            def _emit(kind, input, output, pos):
-                return output
-
-        prefixes = dict([(v, [k]) for k, v in self.prefixes.items()])
+        prefixes = dict([(v, [k]) for k, v in list(self.prefixes.items())])
         namespaces = {XML_NAMESPACE.uri: ['xml']}
+        _emit, _get, cache = _prepare_cache(self.cache)
         def _push_ns(prefix, uri):
             namespaces.setdefault(uri, []).append(prefix)
             prefixes.setdefault(prefix, []).append(uri)
@@ -668,7 +667,10 @@ class NamespaceFlattener(object):
         _gen_prefix = _gen_prefix().__next__
 
         for kind, data, pos in stream:
-            output = cache_get((kind, data))
+            if kind is TEXT and isinstance(data, Markup):
+                yield kind, data, pos
+                continue
+            output = _get((kind, data))
             if output is not None:
                 yield kind, output, pos
 
@@ -701,7 +703,8 @@ class NamespaceFlattener(object):
                             attrname = '%s:%s' % (prefix, attrname)
                     new_attrs.append((attrname, value))
 
-                yield _emit(kind, data, (tagname, Attrs(ns_attrs + new_attrs)), pos)
+                data = _emit(kind, data, (tagname, Attrs(ns_attrs + new_attrs)))
+                yield kind, data, pos
                 del ns_attrs[:]
 
             elif kind is END:
@@ -711,7 +714,7 @@ class NamespaceFlattener(object):
                     prefix = namespaces[tagns][-1]
                     if prefix:
                         tagname = '%s:%s' % (prefix, tagname)
-                yield _emit(kind, data, tagname, pos)
+                yield kind, _emit(kind, data, tagname), pos
 
             elif kind is START_NS:
                 prefix, uri = data
@@ -836,3 +839,4 @@ class DocTypeInserter(object):
 
         if not doctype_inserted:
             yield self.doctype_event
+

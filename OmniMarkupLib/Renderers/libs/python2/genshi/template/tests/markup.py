@@ -15,11 +15,11 @@ import doctest
 import os
 import pickle
 import shutil
-from StringIO import StringIO
 import sys
 import tempfile
 import unittest
 
+from genshi.compat import BytesIO, StringIO
 from genshi.core import Markup
 from genshi.input import XML
 from genshi.template.base import BadDirectiveError, TemplateSyntaxError
@@ -43,7 +43,7 @@ class MarkupTemplateTestCase(unittest.TestCase):
     def test_pickle(self):
         stream = XML('<root>$var</root>')
         tmpl = MarkupTemplate(stream)
-        buf = StringIO()
+        buf = BytesIO()
         pickle.dump(tmpl, buf, 2)
         buf.seek(0)
         unpickled = pickle.load(buf)
@@ -731,6 +731,30 @@ class MarkupTemplateTestCase(unittest.TestCase):
               This replaces the other text.
             </body>
         </html>""", tmpl.generate().render(encoding=None))
+
+    def test_match_tail_handling(self): 
+        # See <http://genshi.edgewall.org/ticket/399> 
+        xml = ("""<rhyme xmlns:py="http://genshi.edgewall.org/">
+          <py:match path="*[@type]">
+            ${select('.')}
+          </py:match>
+
+          <lines>
+            <first type="one">fish</first>
+            <second type="two">fish</second>
+            <third type="red">fish</third>
+            <fourth type="blue">fish</fourth>
+          </lines>
+        </rhyme>""") 
+        tmpl = MarkupTemplate(xml, filename='test.html') 
+        self.assertEqual("""<rhyme>
+          <lines>
+            <first type="one">fish</first>
+            <second type="two">fish</second>
+            <third type="red">fish</third>
+            <fourth type="blue">fish</fourth>
+          </lines>
+        </rhyme>""", tmpl.generate().render(encoding=None)) 
 
 
 def suite():

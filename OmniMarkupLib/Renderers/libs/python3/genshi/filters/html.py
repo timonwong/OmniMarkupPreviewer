@@ -34,7 +34,7 @@ class HTMLFormFiller(object):
     ...   <p><input type="text" name="foo" /></p>
     ... </form>''', encoding='utf-8')
     >>> filler = HTMLFormFiller(data={'foo': 'bar'})
-    >>> print(html | filler)
+    >>> print((html | filler))
     <form>
       <p><input type="text" name="foo" value="bar"/></p>
     </form>
@@ -200,7 +200,7 @@ class HTMLSanitizer(object):
     
     >>> from genshi import HTML
     >>> html = HTML('<div><script>alert(document.cookie)</script></div>', encoding='utf-8')
-    >>> print(html | HTMLSanitizer())
+    >>> print((html | HTMLSanitizer()))
     <div/>
     
     The default set of safe tags and attributes can be modified when the filter
@@ -209,14 +209,14 @@ class HTMLSanitizer(object):
     
     >>> html = HTML('<div style="background: #000"></div>', encoding='utf-8')
     >>> sanitizer = HTMLSanitizer(safe_attrs=HTMLSanitizer.SAFE_ATTRS | set(['style']))
-    >>> print(html | sanitizer)
+    >>> print((html | sanitizer))
     <div style="background: #000"/>
     
     Note that even in this case, the filter *does* attempt to remove dangerous
     constructs from style attributes:
 
     >>> html = HTML('<div style="background: url(javascript:void); color: #000"></div>', encoding='utf-8')
-    >>> print(html | sanitizer)
+    >>> print((html | sanitizer))
     <div style="color: #000"/>
     
     This handles HTML entities, unicode escapes in CSS and Javascript text, as
@@ -239,7 +239,7 @@ class HTMLSanitizer(object):
         'hr', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'map',
         'menu', 'ol', 'optgroup', 'option', 'p', 'pre', 'q', 's', 'samp',
         'select', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'table',
-        'tbody', 'td', 'textarea', 'tfoot', 'th', 'thead', 'tr', 'tt', 'u',
+        'tbody', 'td', 'textarea', 'tfoot', 'th', 'thead', 'tr', 'tt', '',
         'ul', 'var'])
 
     SAFE_ATTRS = frozenset(['abbr', 'accept', 'accept-charset', 'accesskey',
@@ -254,13 +254,42 @@ class HTMLSanitizer(object):
         'span', 'src', 'start', 'summary', 'tabindex', 'target', 'title',
         'type', 'usemap', 'valign', 'value', 'vspace', 'width'])
 
+    SAFE_CSS = frozenset([
+        # CSS 3 properties <http://www.w3.org/TR/CSS/#properties>
+        'background', 'background-attachment', 'background-color',
+        'background-image', 'background-position', 'background-repeat',
+        'border', 'border-bottom', 'border-bottom-color',
+        'border-bottom-style', 'border-bottom-width', 'border-collapse',
+        'border-color', 'border-left', 'border-left-color',
+        'border-left-style', 'border-left-width', 'border-right',
+        'border-right-color', 'border-right-style', 'border-right-width',
+        'border-spacing', 'border-style', 'border-top', 'border-top-color',
+        'border-top-style', 'border-top-width', 'border-width', 'bottom',
+        'caption-side', 'clear', 'clip', 'color', 'content',
+        'counter-increment', 'counter-reset', 'cursor', 'direction', 'display',
+        'empty-cells', 'float', 'font', 'font-family', 'font-size',
+        'font-style', 'font-variant', 'font-weight', 'height', 'left',
+        'letter-spacing', 'line-height', 'list-style', 'list-style-image',
+        'list-style-position', 'list-style-type', 'margin', 'margin-bottom',
+        'margin-left', 'margin-right', 'margin-top', 'max-height', 'max-width',
+        'min-height', 'min-width', 'opacity', 'orphans', 'outline',
+        'outline-color', 'outline-style', 'outline-width', 'overflow',
+        'padding', 'padding-bottom', 'padding-left', 'padding-right',
+        'padding-top', 'page-break-after', 'page-break-before',
+        'page-break-inside', 'quotes', 'right', 'table-layout',
+        'text-align', 'text-decoration', 'text-indent', 'text-transform',
+        'top', 'unicode-bidi', 'vertical-align', 'visibility', 'white-space',
+        'widows', 'width', 'word-spacing', 'z-index',
+     ])
+
     SAFE_SCHEMES = frozenset(['file', 'ftp', 'http', 'https', 'mailto', None])
 
     URI_ATTRS = frozenset(['action', 'background', 'dynsrc', 'href', 'lowsrc',
         'src'])
 
     def __init__(self, safe_tags=SAFE_TAGS, safe_attrs=SAFE_ATTRS,
-                 safe_schemes=SAFE_SCHEMES, uri_attrs=URI_ATTRS):
+                 safe_schemes=SAFE_SCHEMES, uri_attrs=URI_ATTRS,
+                 safe_css=SAFE_CSS):
         """Create the sanitizer.
         
         The exact set of allowed elements and attributes can be configured.
@@ -271,13 +300,63 @@ class HTMLSanitizer(object):
         :param uri_attrs: a set of names of attributes that contain URIs
         """
         self.safe_tags = safe_tags
-        "The set of tag names that are considered safe."
+        # The set of tag names that are considered safe.
         self.safe_attrs = safe_attrs
-        "The set of attribute names that are considered safe."
+        # The set of attribute names that are considered safe.
+        self.safe_css = safe_css
+        # The set of CSS properties that are considered safe.
         self.uri_attrs = uri_attrs
-        "The set of names of attributes that may contain URIs."
+        # The set of names of attributes that may contain URIs.
         self.safe_schemes = safe_schemes
-        "The set of URI schemes that are considered safe."
+        # The set of URI schemes that are considered safe.
+
+    # IE6 <http://heideri.ch/jso/#80>
+    _EXPRESSION_SEARCH = re.compile("""
+        [eE
+         \uFF25 # FULLWIDTH LATIN CAPITAL LETTER E
+         \uFF45 # FULLWIDTH LATIN SMALL LETTER E
+        ]
+        [xX
+         \uFF38 # FULLWIDTH LATIN CAPITAL LETTER X
+         \uFF58 # FULLWIDTH LATIN SMALL LETTER X
+        ]
+        [pP
+         \uFF30 # FULLWIDTH LATIN CAPITAL LETTER P
+         \uFF50 # FULLWIDTH LATIN SMALL LETTER P
+        ]
+        [rR
+         \u0280 # LATIN LETTER SMALL CAPITAL R
+         \uFF32 # FULLWIDTH LATIN CAPITAL LETTER R
+         \uFF52 # FULLWIDTH LATIN SMALL LETTER R
+        ]
+        [eE
+         \uFF25 # FULLWIDTH LATIN CAPITAL LETTER E
+         \uFF45 # FULLWIDTH LATIN SMALL LETTER E
+        ]
+        [sS
+         \uFF33 # FULLWIDTH LATIN CAPITAL LETTER S
+         \uFF53 # FULLWIDTH LATIN SMALL LETTER S
+        ]{2}
+        [iI
+         \u026A # LATIN LETTER SMALL CAPITAL I
+         \uFF29 # FULLWIDTH LATIN CAPITAL LETTER I
+         \uFF49 # FULLWIDTH LATIN SMALL LETTER I
+        ]
+        [oO
+         \uFF2F # FULLWIDTH LATIN CAPITAL LETTER O
+         \uFF4F # FULLWIDTH LATIN SMALL LETTER O
+        ]
+        [nN
+         \u0274 # LATIN LETTER SMALL CAPITAL N
+         \uFF2E # FULLWIDTH LATIN CAPITAL LETTER N
+         \uFF4E # FULLWIDTH LATIN SMALL LETTER N
+        ]
+        """, re.VERBOSE).search
+
+    # IE6 <http://openmya.hacker.jp/hasegawa/security/expression.txt>
+    #     7) Particular bit of Unicode characters
+    _URL_FINDITER = re.compile(
+        '[Uu][Rr\u0280][Ll\u029F]\s*\(([^)]+)').finditer
 
     def __call__(self, stream):
         """Apply the filter to the given stream.
@@ -336,7 +415,7 @@ class HTMLSanitizer(object):
         :rtype: bool
         :since: version 0.6
         """
-        if propname == 'position':
+        if propname not in self.safe_css:
             return False
         if propname.startswith('margin') and '-' in value:
             # Negative margins can be used for phishing
@@ -395,21 +474,21 @@ class HTMLSanitizer(object):
         that is not considered safe are removed:
         
         >>> sanitizer = HTMLSanitizer()
-        >>> sanitizer.sanitize_css(u'''
+        >>> sanitizer.sanitize_css('''
         ...   background: url(javascript:alert("foo"));
         ...   color: #000;
         ... ''')
-        [u'color: #000']
+        ['color: #000']
         
         Also, the proprietary Internet Explorer function ``expression()`` is
         always stripped:
         
-        >>> sanitizer.sanitize_css(u'''
+        >>> sanitizer.sanitize_css('''
         ...   background: #fff;
         ...   color: #000;
         ...   width: e/**/xpression(alert("foo"));
         ... ''')
-        [u'background: #fff', u'color: #000']
+        ['background: #fff', 'color: #000']
         
         :param text: the CSS text; this is expected to be `unicode` and to not
                      contain any character or numeric references
@@ -430,9 +509,9 @@ class HTMLSanitizer(object):
             if not self.is_safe_css(propname.strip().lower(), value.strip()):
                 continue
             is_evil = False
-            if 'expression' in value:
+            if self._EXPRESSION_SEARCH(value):
                 is_evil = True
-            for match in re.finditer(r'url\s*\(([^)]+)', value):
+            for match in self._URL_FINDITER(value):
                 if not self.is_safe_uri(match.group(1)):
                     is_evil = True
                     break
@@ -441,14 +520,24 @@ class HTMLSanitizer(object):
         return decls
 
     _NORMALIZE_NEWLINES = re.compile(r'\r\n').sub
-    _UNICODE_ESCAPE = re.compile(r'\\([0-9a-fA-F]{1,6})\s?').sub
+    _UNICODE_ESCAPE = re.compile(
+        r"""\\([0-9a-fA-F]{1,6})\s?|\\([^\r\n\f0-9a-fA-F'"{};:()#*])""",
+        re.UNICODE).sub
 
     def _replace_unicode_escapes(self, text):
         def _repl(match):
-            return chr(int(match.group(1), 16))
+            t = match.group(1)
+            if t:
+                return chr(int(t, 16))
+            t = match.group(2)
+            if t == '\\':
+                return r'\\'
+            else:
+                return t
         return self._UNICODE_ESCAPE(_repl, self._NORMALIZE_NEWLINES('\n', text))
 
     _CSS_COMMENTS = re.compile(r'/\*.*?\*/').sub
 
     def _strip_css_comments(self, text):
         return self._CSS_COMMENTS('', text)
+

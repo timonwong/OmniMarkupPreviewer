@@ -61,7 +61,7 @@ class NewTextTemplate(Template):
     ...  * ${'Item %d' % item}
     ... {% end %}
     ... ''')
-    >>> print(tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None))
+    >>> print((tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None)))
     Dear Joe,
     <BLANKLINE>
     <BLANKLINE>
@@ -86,7 +86,7 @@ class NewTextTemplate(Template):
     ...  * $item
     ... {% end %}\
     ... ''')
-    >>> print(tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None))
+    >>> print((tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None)))
     Dear Joe,
     <BLANKLINE>
     We have the following items for you:
@@ -106,7 +106,7 @@ class NewTextTemplate(Template):
     ...  * $item
     ... {% end %}\
     ... ''')
-    >>> print(tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None))
+    >>> print((tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None)))
     Dear Joe,
     <BLANKLINE>
     {# This is a comment #}
@@ -248,7 +248,7 @@ class OldTextTemplate(Template):
     ... 
     ... All the best,
     ... Foobar''')
-    >>> print(tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None))
+    >>> print((tmpl.generate(name='Joe', items=[1, 2, 3]).render(encoding=None)))
     Dear Joe,
     <BLANKLINE>
     We have the following items for you:
@@ -331,3 +331,4 @@ class OldTextTemplate(Template):
 
 
 TextTemplate = OldTextTemplate
+

@@ -15,9 +15,9 @@
 
 from collections import deque
 import os
-from StringIO import StringIO
 import sys
 
+from genshi.compat import StringIO, BytesIO
 from genshi.core import Attrs, Stream, StreamEventKind, START, TEXT, _ensure
 from genshi.input import ParseError
 
@@ -247,6 +247,18 @@ class Context(object):
     def pop(self):
         """Pop the top-most scope from the stack."""
 
+    def copy(self):
+        """Create a copy of this Context object."""
+        # required to make f_locals a dict-like object
+        # See http://genshi.edgewall.org/ticket/249 for
+        # example use case in Twisted tracebacks
+        ctxt = Context()
+        ctxt.frames.pop()  # pop empty dummy context
+        ctxt.frames.extend(self.frames)
+        ctxt._match_templates.extend(self._match_templates)
+        ctxt._choice_stack.extend(self._choice_stack)
+        return ctxt
+
 
 def _apply_directives(stream, directives, ctxt, vars):
     """Apply the given directives to the stream.
@@ -398,10 +410,11 @@ class Template(DirectiveFactory):
         self._init_loader()
         self._prepared = False
 
-        if isinstance(source, basestring):
-            source = StringIO(source)
-        else:
-            source = source
+        if not isinstance(source, Stream) and not hasattr(source, 'read'):
+            if isinstance(source, unicode):
+                source = StringIO(source)
+            else:
+                source = BytesIO(source)
         try:
             self._stream = self._parse(source, encoding)
         except ParseError, e:

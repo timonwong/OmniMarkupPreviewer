@@ -17,6 +17,7 @@ try:
     reduce # builtin in Python < 3
 except NameError:
     from functools import reduce
+import sys
 from itertools import chain
 import operator
 
@@ -92,7 +93,7 @@ class Stream(object):
         Assume the following stream produced by the `HTML` function:
         
         >>> from genshi.input import HTML
-        >>> html = HTML('''<p onclick="alert('Whoa')">Hello, world!</p>''')
+        >>> html = HTML('''<p onclick="alert('Whoa')">Hello, world!</p>''', encoding='utf-8')
         >>> print(html)
         <p onclick="alert('Whoa')">Hello, world!</p>
         
@@ -153,7 +154,7 @@ class Stream(object):
         """
         return reduce(operator.or_, (self,) + filters)
 
-    def render(self, method=None, encoding='utf-8', out=None, **kwargs):
+    def render(self, method=None, encoding=None, out=None, **kwargs):
         """Return a string representation of the stream.
         
         Any additional keyword arguments are passed to the serializer, and thus
@@ -187,7 +188,7 @@ class Stream(object):
         XPath expression.
         
         >>> from genshi import HTML
-        >>> stream = HTML('<doc><elem>foo</elem><elem>bar</elem></doc>')
+        >>> stream = HTML('<doc><elem>foo</elem><elem>bar</elem></doc>', encoding='utf-8')
         >>> print(stream.select('elem'))
         <elem>foo</elem><elem>bar</elem>
         >>> print(stream.select('elem/text()'))
@@ -353,6 +354,7 @@ class Attrs(tuple):
         for attr, _ in self:
             if attr == name:
                 return True
+        return False
 
     def __getitem__(self, i):
         """Return an item or slice of the attributes list.
@@ -379,14 +381,19 @@ class Attrs(tuple):
 
     def __or__(self, attrs):
         """Return a new instance that contains the attributes in `attrs` in
-        addition to any already existing attributes.
+        addition to any already existing attributes. Any attributes in the new
+        set that have a value of `None` are removed.
         
         :return: a new instance with the merged attributes
         :rtype: `Attrs`
         """
-        repl = dict([(an, av) for an, av in attrs if an in self])
-        return Attrs([(sn, repl.get(sn, sv)) for sn, sv in self] +
-                     [(an, av) for an, av in attrs if an not in self])
+        remove = set([an for an, av in attrs if av is None])
+        replace = dict([(an, av) for an, av in attrs
+                        if an in self and av is not None])
+        return Attrs([(sn, replace.get(sn, sv)) for sn, sv in self
+                      if sn not in remove] +
+                     [(an, av) for an, av in attrs
+                      if an not in self and an not in remove])
 
     def __repr__(self):
         if not self:
@@ -507,7 +514,7 @@ class Markup(unicode):
         if type(text) is cls:
             return text
         if hasattr(text, '__html__'):
-            return Markup(text.__html__())
+            return cls(text.__html__())
 
         text = text.replace('&', '&amp;') \
                    .replace('<', '&lt;') \
@@ -662,8 +669,13 @@ class Namespace(object):
     def __hash__(self):
         return hash(self.uri)
 
-    def __repr__(self):
-        return '%s(%s)' % (type(self).__name__, stringrepr(self.uri))
+    if sys.version_info[0] == 2:
+        # Only use stringrepr in python 2
+        def __repr__(self):
+            return '%s(%s)' % (type(self).__name__, stringrepr(self.uri))
+    else:
+        def __repr__(self):
+            return '%s(%r)' % (type(self).__name__, self.uri)
 
     def __str__(self):
         return self.uri.encode('utf-8')
@@ -711,7 +723,8 @@ class QName(unicode):
         if type(qname) is cls:
             return qname
 
-        parts = qname.lstrip('{').split('}', 1)
+        qname = qname.lstrip('{')
+        parts = qname.split('}', 1)
         if len(parts) > 1:
             self = unicode.__new__(cls, '{%s' % qname)
             self.namespace, self.localname = map(unicode, parts)
@@ -723,5 +736,10 @@ class QName(unicode):
     def __getnewargs__(self):
         return (self.lstrip('{'),)
 
-    def __repr__(self):
-        return '%s(%s)' % (type(self).__name__, stringrepr(self.lstrip('{')))
+    if sys.version_info[0] == 2:
+        # Only use stringrepr in python 2
+        def __repr__(self):
+            return '%s(%s)' % (type(self).__name__, stringrepr(self.lstrip('{')))
+    else:
+        def __repr__(self):
+            return '%s(%r)' % (type(self).__name__, self.lstrip('{'))

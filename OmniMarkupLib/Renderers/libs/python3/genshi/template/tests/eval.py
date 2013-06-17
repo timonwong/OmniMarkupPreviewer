@@ -61,13 +61,13 @@ class ExpressionTestCase(unittest.TestCase):
         self.assertEqual('foo'.encode('utf-8'),
                          Expression(wrapped_bytes("b'foo'")).evaluate({}))
         self.assertEqual('foo', Expression("'''foo'''").evaluate({}))
-        self.assertEqual('foo', Expression("u'foo'").evaluate({}))
+        self.assertEqual('foo', Expression("'foo'").evaluate({}))
         self.assertEqual('foo', Expression("r'foo'").evaluate({}))
 
     def test_str_literal_non_ascii(self):
-        expr = Expression("u'\xfe'")
+        expr = Expression("'\xfe'")
         self.assertEqual('þ', expr.evaluate({}))
-        expr = Expression("u'\xfe'")
+        expr = Expression("'\xfe'")
         self.assertEqual('þ', expr.evaluate({}))
         # On Python2 strings are converted to unicode if they contained
         # non-ASCII characters.
@@ -588,7 +588,7 @@ x = smash(foo='abc', bar='def')
 """)
         data = {}
         suite.execute(data)
-        self.assertEqual(['fooabc', 'bardef'], data['x'])
+        self.assertEqual(['bardef', 'fooabc'], sorted(data['x']))
 
     def test_def_nested(self):
         suite = Suite("""
@@ -858,6 +858,29 @@ results.append(next(it))
 """)
             suite.execute(d)
             self.assertEqual([0, 3, 4], d['results'])
+
+    if sys.version_info >= (3, 3):
+        def test_with_statement_with_multiple_items(self):
+            fd, path = mkstemp()
+            f = os.fdopen(fd, "w")
+            try:
+                f.write('foo\n')
+                f.seek(0)
+                f.close()
+
+                d = {'path': path}
+                suite = Suite("""from __future__ import with_statement
+lines = []
+with open(path) as file1, open(path) as file2:
+    for line in file1:
+        lines.append(line)
+    for line in file2:
+        lines.append(line)
+""")
+                suite.execute(d)
+                self.assertEqual(['foo\n', 'foo\n'], d['lines'])
+            finally:
+                os.remove(path)
 
 
 def suite():

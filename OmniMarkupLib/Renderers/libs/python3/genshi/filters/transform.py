@@ -33,8 +33,8 @@ the ``<head>`` of the input document:
 ...  </body>
 ... </html>''',
 ... encoding='utf-8')
->>> print(html | Transformer('body/em').map(unicode.upper, TEXT)
-...                                    .unwrap().wrap(tag.u))
+>>> print((html | Transformer('body/em').map(str.upper, TEXT)
+...                                    .unwrap().wrap(tag.u)))
 <html>
   <head><title>Some Title</title></head>
   <body>
@@ -144,7 +144,7 @@ class Transformer(object):
     Here's an example of removing some markup (the title, in this case)
     selected by an expression:
 
-    >>> print(html | Transformer('head/title').remove())
+    >>> print((html | Transformer('head/title').remove()))
     <html><head/><body>Some <em>body</em> text.</body></html>
 
     Inserted content can be passed in the form of a string, or a markup event
@@ -152,7 +152,7 @@ class Transformer(object):
     `builder` module:
 
     >>> from genshi.builder import tag
-    >>> print(html | Transformer('body').prepend(tag.h1('Document Title')))
+    >>> print((html | Transformer('body').prepend(tag.h1('Document Title'))))
     <html><head><title>Some Title</title></head><body><h1>Document
     Title</h1>Some <em>body</em> text.</body></html>
 
@@ -162,8 +162,8 @@ class Transformer(object):
     copied text into the body as ``<h1>`` enclosed text:
 
     >>> buffer = StreamBuffer()
-    >>> print(html | Transformer('head/title/text()').copy(buffer)
-    ...     .end().select('body').prepend(tag.h1(buffer)))
+    >>> print((html | Transformer('head/title/text()').copy(buffer)
+    ...     .end().select('body').prepend(tag.h1(buffer))))
     <html><head><title>Some Title</title></head><body><h1>Some Title</h1>Some
     <em>body</em> text.</body></html>
 
@@ -172,7 +172,7 @@ class Transformer(object):
     transforms:
 
     >>> emphasis = Transformer('body//em').attr('class', 'emphasis')
-    >>> print(html | emphasis)
+    >>> print((html | emphasis))
     <html><head><title>Some Title</title></head><body>Some <em
     class="emphasis">body</em> text.</body></html>
     """
@@ -219,7 +219,7 @@ class Transformer(object):
         ...             yield mark, (kind, data, pos)
         >>> short_stream = HTML('<body>Some <em>test</em> text</body>',
         ...                      encoding='utf-8')
-        >>> print(short_stream | Transformer('.//em/text()').apply(upper))
+        >>> print((short_stream | Transformer('.//em/text()').apply(upper)))
         <body>Some <em>TEST</em> text</body>
         """
         transformer = Transformer()
@@ -237,13 +237,13 @@ class Transformer(object):
         selection.
 
         >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
-        >>> print(html | Transformer().select('.//em').trace())
+        >>> print((html | Transformer().select('.//em').trace()))
         (None, ('START', (QName('body'), Attrs()), (None, 1, 0)))
-        (None, ('TEXT', u'Some ', (None, 1, 6)))
+        (None, ('TEXT', 'Some ', (None, 1, 6)))
         ('ENTER', ('START', (QName('em'), Attrs()), (None, 1, 11)))
-        ('INSIDE', ('TEXT', u'test', (None, 1, 15)))
+        ('INSIDE', ('TEXT', 'test', (None, 1, 15)))
         ('EXIT', ('END', QName('em'), (None, 1, 19)))
-        (None, ('TEXT', u' text', (None, 1, 24)))
+        (None, ('TEXT', ' text', (None, 1, 24)))
         (None, ('END', QName('body'), (None, 1, 29)))
         <body>Some <em>test</em> text</body>
 
@@ -261,13 +261,13 @@ class Transformer(object):
         are converted to OUTSIDE marks.
 
         >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
-        >>> print(html | Transformer('//em').invert().trace())
+        >>> print((html | Transformer('//em').invert().trace()))
         ('OUTSIDE', ('START', (QName('body'), Attrs()), (None, 1, 0)))
-        ('OUTSIDE', ('TEXT', u'Some ', (None, 1, 6)))
+        ('OUTSIDE', ('TEXT', 'Some ', (None, 1, 6)))
         (None, ('START', (QName('em'), Attrs()), (None, 1, 11)))
-        (None, ('TEXT', u'test', (None, 1, 15)))
+        (None, ('TEXT', 'test', (None, 1, 15)))
         (None, ('END', QName('em'), (None, 1, 19)))
-        ('OUTSIDE', ('TEXT', u' text', (None, 1, 24)))
+        ('OUTSIDE', ('TEXT', ' text', (None, 1, 24)))
         ('OUTSIDE', ('END', QName('body'), (None, 1, 29)))
         <body>Some <em>test</em> text</body>
 
@@ -281,13 +281,13 @@ class Transformer(object):
         Example:
 
         >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
-        >>> print(html | Transformer('//em').end().trace())
+        >>> print((html | Transformer('//em').end().trace()))
         ('OUTSIDE', ('START', (QName('body'), Attrs()), (None, 1, 0)))
-        ('OUTSIDE', ('TEXT', u'Some ', (None, 1, 6)))
+        ('OUTSIDE', ('TEXT', 'Some ', (None, 1, 6)))
         ('OUTSIDE', ('START', (QName('em'), Attrs()), (None, 1, 11)))
-        ('OUTSIDE', ('TEXT', u'test', (None, 1, 15)))
+        ('OUTSIDE', ('TEXT', 'test', (None, 1, 15)))
         ('OUTSIDE', ('END', QName('em'), (None, 1, 19)))
-        ('OUTSIDE', ('TEXT', u' text', (None, 1, 24)))
+        ('OUTSIDE', ('TEXT', ' text', (None, 1, 24)))
         ('OUTSIDE', ('END', QName('body'), (None, 1, 29)))
         <body>Some <em>test</em> text</body>
 
@@ -306,7 +306,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//em').empty())
+        >>> print((html | Transformer('.//em').empty()))
         <html><head><title>Some Title</title></head><body>Some <em/>
         text.</body></html>
 
@@ -322,7 +322,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//em').remove())
+        >>> print((html | Transformer('.//em').remove()))
         <html><head><title>Some Title</title></head><body>Some
         text.</body></html>
 
@@ -340,7 +340,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//em').unwrap())
+        >>> print((html | Transformer('.//em').unwrap()))
         <html><head><title>Some Title</title></head><body>Some body
         text.</body></html>
 
@@ -354,7 +354,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//em').wrap('strong'))
+        >>> print((html | Transformer('.//em').wrap('strong')))
         <html><head><title>Some Title</title></head><body>Some
         <strong><em>body</em></strong> text.</body></html>
 
@@ -371,7 +371,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//title/text()').replace('New Title'))
+        >>> print((html | Transformer('.//title/text()').replace('New Title')))
         <html><head><title>New Title</title></head><body>Some <em>body</em>
         text.</body></html>
 
@@ -390,7 +390,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//em').before('emphasised '))
+        >>> print((html | Transformer('.//em').before('emphasised ')))
         <html><head><title>Some Title</title></head><body>Some emphasised
         <em>body</em> text.</body></html>
 
@@ -408,7 +408,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//em').after(' rock'))
+        >>> print((html | Transformer('.//em').after(' rock')))
         <html><head><title>Some Title</title></head><body>Some <em>body</em>
         rock text.</body></html>
 
@@ -426,7 +426,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//body').prepend('Some new body text. '))
+        >>> print((html | Transformer('.//body').prepend('Some new body text. ')))
         <html><head><title>Some Title</title></head><body>Some new body text.
         Some <em>body</em> text.</body></html>
 
@@ -442,7 +442,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//body').append(' Some new body text.'))
+        >>> print((html | Transformer('.//body').append(' Some new body text.')))
         <html><head><title>Some Title</title></head><body>Some <em>body</em>
         text. Some new body text.</body></html>
 
@@ -463,13 +463,13 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em class="before">body</em> <em>text</em>.</body>'
         ...             '</html>', encoding='utf-8')
-        >>> print(html | Transformer('body/em').attr('class', None))
+        >>> print((html | Transformer('body/em').attr('class', None)))
         <html><head><title>Some Title</title></head><body>Some <em>body</em>
         <em>text</em>.</body></html>
 
         Otherwise the attribute will be set to `value`:
 
-        >>> print(html | Transformer('body/em').attr('class', 'emphasis'))
+        >>> print((html | Transformer('body/em').attr('class', 'emphasis')))
         <html><head><title>Some Title</title></head><body>Some <em
         class="emphasis">body</em> <em class="emphasis">text</em>.</body></html>
 
@@ -481,8 +481,8 @@ class Transformer(object):
         ...     attrs = event[1][1]
         ...     print(attrs)
         ...     return attrs.get(name)
-        >>> print(html | Transformer('body/em').attr('class', print_attr))
-        Attrs([(QName('class'), u'before')])
+        >>> print((html | Transformer('body/em').attr('class', print_attr)))
+        Attrs([(QName('class'), 'before')])
         Attrs()
         <html><head><title>Some Title</title></head><body>Some <em
         class="before">body</em> <em>text</em>.</body></html>
@@ -507,17 +507,17 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('head/title/text()').copy(buffer)
-        ...     .end().select('body').prepend(tag.h1(buffer)))
+        >>> print((html | Transformer('head/title/text()').copy(buffer)
+        ...     .end().select('body').prepend(tag.h1(buffer))))
         <html><head><title>Some Title</title></head><body><h1>Some
         Title</h1>Some <em>body</em> text.</body></html>
 
         This example illustrates that only a single contiguous selection will
         be buffered:
 
-        >>> print(html | Transformer('head/title/text()').copy(buffer)
+        >>> print((html | Transformer('head/title/text()').copy(buffer)
         ...     .end().select('body/em').copy(buffer).end().select('body')
-        ...     .prepend(tag.h1(buffer)))
+        ...     .prepend(tag.h1(buffer))))
         <html><head><title>Some Title</title></head><body><h1>Some
         Title</h1>Some <em>body</em> text.</body></html>
         >>> print(buffer)
@@ -532,9 +532,9 @@ class Transformer(object):
         >>> buffer = StreamBuffer()
         >>> def apply_attr(name, entry):
         ...     return list(buffer)[0][1][1].get('class')
-        >>> print(html | Transformer('body/em[@class]/@class').copy(buffer)
+        >>> print((html | Transformer('body/em[@class]/@class').copy(buffer)
         ...     .end().buffer().select('body/em[not(@class)]')
-        ...     .attr('class', apply_attr))
+        ...     .attr('class', apply_attr)))
         <html><head><title>Some Title</title></head><body><em
         class="before">Some</em> <em class="before">body</em><em
         class="before">text</em>.</body></html>
@@ -562,8 +562,8 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...             '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('.//em/text()').cut(buffer)
-        ...     .end().select('.//em').after(tag.h1(buffer)))
+        >>> print((html | Transformer('.//em/text()').cut(buffer)
+        ...     .end().select('.//em').after(tag.h1(buffer))))
         <html><head><title>Some Title</title></head><body>Some
         <em/><h1>body</h1> text.</body></html>
 
@@ -595,8 +595,8 @@ class Transformer(object):
         ...            'text <note>two</note>.</body></doc>',
         ...             encoding='utf-8')
         >>> buffer = StreamBuffer()
-        >>> print(doc | Transformer('body/note').cut(buffer, accumulate=True)
-        ...     .end().buffer().select('notes').prepend(buffer))
+        >>> print((doc | Transformer('body/note').cut(buffer, accumulate=True)
+        ...     .end().buffer().select('notes').prepend(buffer)))
         <doc><notes><note>one</note><note>two</note></notes><body>Some  text
         .</body></doc>
 
@@ -613,7 +613,7 @@ class Transformer(object):
         >>> html = HTML('<html><body>Some text<script>alert(document.cookie)'
         ...             '</script> and some more text</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('body/*').filter(HTMLSanitizer()))
+        >>> print((html | Transformer('body/*').filter(HTMLSanitizer())))
         <html><body>Some text and some more text</body></html>
 
         :param filter: The stream filter to apply.
@@ -628,7 +628,7 @@ class Transformer(object):
         >>> html = HTML('<html><head><title>Some Title</title></head>'
         ...               '<body>Some <em>body</em> text.</body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('head/title').map(unicode.upper, TEXT))
+        >>> print((html | Transformer('head/title').map(str.upper, TEXT)))
         <html><head><title>SOME TITLE</title></head><body>Some <em>body</em>
         text.</body></html>
 
@@ -647,13 +647,13 @@ class Transformer(object):
         ...             '<b>some bold text</b>\\n'
         ...             '<i>some italicised text</i></body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('body/b').substitute('(?i)some', 'SOME'))
+        >>> print((html | Transformer('body/b').substitute('(?i)some', 'SOME')))
         <html><body>Some text, some more text and <b>SOME bold text</b>
         <i>some italicised text</i></body></html>
         >>> tags = tag.html(tag.body('Some text, some more text and\\n',
         ...      Markup('<b>some bold text</b>')))
-        >>> print(tags.generate() | Transformer('body').substitute(
-        ...     '(?i)some', 'SOME'))
+        >>> print((tags.generate() | Transformer('body').substitute(
+        ...     '(?i)some', 'SOME')))
         <html><body>SOME text, some more text and
         <b>SOME bold text</b></body></html>
 
@@ -670,7 +670,7 @@ class Transformer(object):
         >>> html = HTML('<html><body>Some text, some more text and '
         ...             '<b>some bold text</b></body></html>',
         ...             encoding='utf-8')
-        >>> print(html | Transformer('body/b').rename('strong'))
+        >>> print((html | Transformer('body/b').rename('strong')))
         <html><body>Some text, some more text and <strong>some bold text</strong></body></html>
         """
         return self.apply(RenameTransformation(name))
@@ -679,13 +679,13 @@ class Transformer(object):
         """Print events as they pass through the transform.
 
         >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
-        >>> print(html | Transformer('em').trace())
+        >>> print((html | Transformer('em').trace()))
         (None, ('START', (QName('body'), Attrs()), (None, 1, 0)))
-        (None, ('TEXT', u'Some ', (None, 1, 6)))
+        (None, ('TEXT', 'Some ', (None, 1, 6)))
         ('ENTER', ('START', (QName('em'), Attrs()), (None, 1, 11)))
-        ('INSIDE', ('TEXT', u'test', (None, 1, 15)))
+        ('INSIDE', ('TEXT', 'test', (None, 1, 15)))
         ('EXIT', ('END', QName('em'), (None, 1, 19)))
-        (None, ('TEXT', u' text', (None, 1, 24)))
+        (None, ('TEXT', ' text', (None, 1, 24)))
         (None, ('END', QName('body'), (None, 1, 29)))
         <body>Some <em>test</em> text</body>
 
@@ -1045,7 +1045,7 @@ class InjectorTransformation(object):
     ...         for event in stream:
     ...             yield event
     >>> html = HTML('<body>Some <em>test</em> text</body>', encoding='utf-8')
-    >>> print(html | Transformer('.//em').apply(Top('Prefix ')))
+    >>> print((html | Transformer('.//em').apply(Top('Prefix '))))
     Prefix <body>Some <em>test</em> text</body>
     """
     def __init__(self, content):
@@ -1328,3 +1328,4 @@ class CutTransformation(object):
                 yield mark, event
         if not broken and self.buffer:
             yield BREAK, (BREAK, None, None)
+

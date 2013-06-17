@@ -83,7 +83,33 @@ class AttrListTreeprocessor(Treeprocessor):
                 if isheader(elem):
                     # header: check for attrs at end of line
                     RE = self.HEADER_RE
-                if len(elem) and elem[-1].tail:
+                if len(elem) and elem.tag == 'li':
+                    # special case list items. children may include a ul.
+                    ul = None
+                    # find the ul position
+                    for i, child in enumerate(elem):
+                        if child.tag == 'ul':
+                            ul = i
+                            break
+                    if ul is None and elem[-1].tail:
+                        # use tail of last child. no ul.
+                        m = RE.search(elem[-1].tail)
+                        if m:
+                            self.assign_attrs(elem, m.group(1))
+                            elem[-1].tail = elem[-1].tail[:m.start()]
+                    if ul > 0 and elem[ul-1].tail:
+                        # use tail of last child before ul
+                        m = RE.search(elem[ul-1].tail)
+                        if m:
+                            self.assign_attrs(elem, m.group(1))
+                            elem[ul-1].tail = elem[ul-1].tail[:m.start()]
+                    elif elem.text:
+                        # use text. ul is first child.
+                        m = RE.search(elem.text)
+                        if m:
+                            self.assign_attrs(elem, m.group(1))
+                            elem.text = elem.text[:m.start()]
+                elif len(elem) and elem[-1].tail:
                     # has children. Get from tail of last child
                     m = RE.search(elem[-1].tail)
                     if m:

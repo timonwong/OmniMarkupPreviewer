@@ -361,7 +361,19 @@ class HTMLFormFillerTestCase(unittest.TestCase):
         </p></form>""", html.render())
 
 
+def StyleSanitizer():
+    safe_attrs = HTMLSanitizer.SAFE_ATTRS | frozenset(['style'])
+    return HTMLSanitizer(safe_attrs=safe_attrs)
+
+
 class HTMLSanitizerTestCase(unittest.TestCase):
+
+    def assert_parse_error_or_equal(self, expected, exploit):
+        try:
+            html = HTML(exploit)
+        except ParseError:
+            return
+        self.assertEquals(expected, (html | HTMLSanitizer()).render())
 
     def test_sanitize_unchanged(self):
         html = HTML('<a href="#">fo<br />o</a>')
@@ -403,9 +415,11 @@ class HTMLSanitizerTestCase(unittest.TestCase):
         self.assertEquals('', (html | HTMLSanitizer()).render())
         html = HTML('<SCRIPT SRC="http://example.com/"></SCRIPT>')
         self.assertEquals('', (html | HTMLSanitizer()).render())
-        self.assertRaises(ParseError, HTML, '<SCR\0IPT>alert("foo")</SCR\0IPT>')
-        self.assertRaises(ParseError, HTML,
-                          '<SCRIPT&XYZ SRC="http://example.com/"></SCRIPT>')
+        src = '<SCR\0IPT>alert("foo")</SCR\0IPT>'
+        self.assert_parse_error_or_equal('&lt;SCR\x00IPT&gt;alert("foo")', src)
+        src = '<SCRIPT&XYZ SRC="http://example.com/"></SCRIPT>'
+        self.assert_parse_error_or_equal('&lt;SCRIPT&amp;XYZ; '
+                                         'SRC="http://example.com/"&gt;', src)
 
     def test_sanitize_remove_onclick_attr(self):
         html = HTML('<div onclick=\'alert("foo")\' />')
@@ -420,7 +434,7 @@ class HTMLSanitizerTestCase(unittest.TestCase):
         self.assertEquals('<div/>', (html | HTMLSanitizer()).render())
 
     def test_sanitize_remove_style_scripts(self):
-        sanitizer = HTMLSanitizer(safe_attrs=HTMLSanitizer.SAFE_ATTRS | set(['style']))
+        sanitizer = StyleSanitizer()
         # Inline style with url() using javascript: scheme
         html = HTML('<DIV STYLE=\'background: url(javascript:alert("foo"))\'>')
         self.assertEquals('<div/>', (html | sanitizer).render())
@@ -453,7 +467,7 @@ class HTMLSanitizerTestCase(unittest.TestCase):
         self.assertEquals('<div/>', (html | sanitizer).render())
 
     def test_sanitize_remove_style_phishing(self):
-        sanitizer = HTMLSanitizer(safe_attrs=HTMLSanitizer.SAFE_ATTRS | set(['style']))
+        sanitizer = StyleSanitizer()
         # The position property is not allowed
         html = HTML('<div style="position:absolute;top:0"></div>')
         self.assertEquals('<div style="top:0"/>', (html | sanitizer).render())
@@ -476,8 +490,8 @@ class HTMLSanitizerTestCase(unittest.TestCase):
         html = HTML('<IMG SRC=\'JaVaScRiPt:alert("foo")\'>')
         self.assertEquals('<img/>', (html | HTMLSanitizer()).render())
         # Grave accents (not parsed)
-        self.assertRaises(ParseError, HTML,
-                          '<IMG SRC=`javascript:alert("RSnake says, \'foo\'")`>')
+        src = '<IMG SRC=`javascript:alert("RSnake says, \'foo\'")`>'
+        self.assert_parse_error_or_equal('<img/>', src)
         # Protocol encoded using UTF-8 numeric entities
         html = HTML('<IMG SRC=\'&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;'
                     '&#112;&#116;&#58;alert("foo")\'>')
@@ -499,6 +513,95 @@ class HTMLSanitizerTestCase(unittest.TestCase):
         # Embedded tab character in protocol, but encoded this time
         html = HTML('<IMG SRC=\'jav&#x09;ascript:alert("foo");\'>')
         self.assertEquals('<img/>', (html | HTMLSanitizer()).render())
+
+    def test_sanitize_expression(self):
+        html = HTML(r'<div style="top:expression(alert())">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_capital_expression(self):
+        html = HTML(r'<div style="top:EXPRESSION(alert())">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_url_with_javascript(self):
+        html = HTML('<div style="background-image:url(javascript:alert())">'
+                    'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_capital_url_with_javascript(self):
+        html = HTML('<div style="background-image:URL(javascript:alert())">'
+                    'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_unicode_escapes(self):
+        html = HTML(r'<div style="top:exp\72 ess\000069 on(alert())">'
+                    r'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_backslash_without_hex(self):
+        html = HTML(r'<div style="top:e\xp\ression(alert())">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+        html = HTML(r'<div style="top:e\\xp\\ression(alert())">XSS</div>')
+        self.assertEqual(r'<div style="top:e\\xp\\ression(alert())">'
+                         'XSS</div>',
+                         str(html | StyleSanitizer()))
+
+    def test_sanitize_unsafe_props(self):
+        html = HTML('<div style="POSITION:RELATIVE">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+        html = HTML('<div style="behavior:url(test.htc)">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+        html = HTML('<div style="-ms-behavior:url(test.htc) url(#obj)">'
+                    'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+        html = HTML("""<div style="-o-link:'javascript:alert(1)';"""
+                    """-o-link-source:current">XSS</div>""")
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+        html = HTML("""<div style="-moz-binding:url(xss.xbl)">XSS</div>""")
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_negative_margin(self):
+        html = HTML('<div style="margin-top:-9999px">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+        html = HTML('<div style="margin:0 -9999px">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_css_hack(self):
+        html = HTML('<div style="*position:static">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+        html = HTML('<div style="_margin:-10px">XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_property_name(self):
+        html = HTML('<div style="display:none;border-left-color:red;'
+                    'user_defined:1;-moz-user-selct:-moz-all">prop</div>')
+        self.assertEqual('<div style="display:none; border-left-color:red'
+                         '">prop</div>',
+                         str(html | StyleSanitizer()))
+
+    def test_sanitize_unicode_expression(self):
+        # Fullwidth small letters
+        html = HTML('<div style="top:ｅｘｐｒｅｓｓｉｏｎ(alert())">'
+                    'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+        # Fullwidth capital letters
+        html = HTML('<div style="top:ＥＸＰＲＥＳＳＩＯＮ(alert())">'
+                    'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+        # IPA extensions
+        html = HTML('<div style="top:expʀessɪoɴ(alert())">'
+                    'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
+
+    def test_sanitize_unicode_url(self):
+        # IPA extensions
+        html = HTML('<div style="background-image:uʀʟ(javascript:alert())">'
+                    'XSS</div>')
+        self.assertEqual('<div>XSS</div>', str(html | StyleSanitizer()))
 
 
 def suite():

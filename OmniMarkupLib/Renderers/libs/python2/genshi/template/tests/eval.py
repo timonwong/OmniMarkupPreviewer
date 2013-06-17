@@ -14,7 +14,6 @@
 import doctest
 import os
 import pickle
-from StringIO import StringIO
 import sys
 from tempfile import mkstemp
 import unittest
@@ -23,6 +22,7 @@ from genshi.core import Markup
 from genshi.template.base import Context
 from genshi.template.eval import Expression, Suite, Undefined, UndefinedError, \
                                  UNDEFINED
+from genshi.compat import BytesIO, IS_PYTHON2, wrapped_bytes
 
 
 class ExpressionTestCase(unittest.TestCase):
@@ -39,7 +39,7 @@ class ExpressionTestCase(unittest.TestCase):
 
     def test_pickle(self):
         expr = Expression('1 < 2')
-        buf = StringIO()
+        buf = BytesIO()
         pickle.dump(expr, buf, 2)
         buf.seek(0)
         unpickled = pickle.load(buf)
@@ -58,7 +58,8 @@ class ExpressionTestCase(unittest.TestCase):
     def test_str_literal(self):
         self.assertEqual('foo', Expression('"foo"').evaluate({}))
         self.assertEqual('foo', Expression('"""foo"""').evaluate({}))
-        self.assertEqual('foo', Expression("'foo'").evaluate({}))
+        self.assertEqual(u'foo'.encode('utf-8'),
+                         Expression(wrapped_bytes("b'foo'")).evaluate({}))
         self.assertEqual('foo', Expression("'''foo'''").evaluate({}))
         self.assertEqual('foo', Expression("u'foo'").evaluate({}))
         self.assertEqual('foo', Expression("r'foo'").evaluate({}))
@@ -68,14 +69,23 @@ class ExpressionTestCase(unittest.TestCase):
         self.assertEqual(u'þ', expr.evaluate({}))
         expr = Expression("u'\xfe'")
         self.assertEqual(u'þ', expr.evaluate({}))
-        expr = Expression("'\xc3\xbe'")
-        self.assertEqual(u'þ', expr.evaluate({}))
+        # On Python2 strings are converted to unicode if they contained
+        # non-ASCII characters.
+        # On Py3k, we have no need to do this as non-prefixed strings aren't
+        # raw.
+        expr = Expression(wrapped_bytes(r"b'\xc3\xbe'"))
+        if IS_PYTHON2:
+            self.assertEqual(u'þ', expr.evaluate({}))
+        else:
+            self.assertEqual(u'þ'.encode('utf-8'), expr.evaluate({}))
 
     def test_num_literal(self):
         self.assertEqual(42, Expression("42").evaluate({}))
-        self.assertEqual(42L, Expression("42L").evaluate({}))
+        if IS_PYTHON2:
+            self.assertEqual(42L, Expression("42L").evaluate({}))
         self.assertEqual(.42, Expression(".42").evaluate({}))
-        self.assertEqual(07, Expression("07").evaluate({}))
+        if IS_PYTHON2:
+            self.assertEqual(07, Expression("07").evaluate({}))
         self.assertEqual(0xF2, Expression("0xF2").evaluate({}))
         self.assertEqual(0XF2, Expression("0XF2").evaluate({}))
 
@@ -246,12 +256,15 @@ class ExpressionTestCase(unittest.TestCase):
     def test_lambda(self):
         data = {'items': range(5)}
         expr = Expression("filter(lambda x: x > 2, items)")
-        self.assertEqual([3, 4], expr.evaluate(data))
+        self.assertEqual([3, 4], list(expr.evaluate(data)))
 
     def test_lambda_tuple_arg(self):
+        # This syntax goes away in Python 3
+        if not IS_PYTHON2:
+            return
         data = {'items': [(1, 2), (2, 1)]}
         expr = Expression("filter(lambda (x, y): x > y, items)")
-        self.assertEqual([(2, 1)], expr.evaluate(data))
+        self.assertEqual([(2, 1)], list(expr.evaluate(data)))
 
     def test_list_comprehension(self):
         expr = Expression("[n for n in numbers if n < 2]")
@@ -470,7 +483,7 @@ class SuiteTestCase(unittest.TestCase):
 
     def test_pickle(self):
         suite = Suite('foo = 42')
-        buf = StringIO()
+        buf = BytesIO()
         pickle.dump(suite, buf, 2)
         buf.seek(0)
         unpickled = pickle.load(buf)
@@ -575,7 +588,7 @@ x = smash(foo='abc', bar='def')
 """)
         data = {}
         suite.execute(data)
-        self.assertEqual(['fooabc', 'bardef'], data['x'])
+        self.assertEqual(['bardef', 'fooabc'], sorted(data['x']))
 
     def test_def_nested(self):
         suite = Suite("""
@@ -645,26 +658,26 @@ x = create()
         assert 'plain' in data
 
     def test_import(self):
-        suite = Suite("from itertools import ifilter")
+        suite = Suite("from itertools import repeat")
         data = {}
         suite.execute(data)
-        assert 'ifilter' in data
+        assert 'repeat' in data
 
     def test_import_star(self):
         suite = Suite("from itertools import *")
         data = Context()
         suite.execute(data)
-        assert 'ifilter' in data
+        assert 'repeat' in data
 
     def test_import_in_def(self):
         suite = Suite("""def fun():
-    from itertools import ifilter
-    return ifilter(None, range(3))
+    from itertools import repeat
+    return repeat(1, 3)
 """)
         data = Context()
         suite.execute(data)
-        assert 'ifilter' not in data
-        self.assertEqual([1, 2], list(data['fun']()))
+        assert 'repeat' not in data
+        self.assertEqual([1, 1, 1], list(data['fun']()))
 
     def test_for(self):
         suite = Suite("""x = []
@@ -766,7 +779,7 @@ x = foo()""").execute(d)
         self.assertEqual("foo", d["k"])
 
     def test_exec(self):
-        suite = Suite("x = 1; exec d['k']; assert x == 42, x")
+        suite = Suite("x = 1; exec(d['k']); assert x == 42, x")
         suite.execute({"d": {"k": "x = 42"}})
 
     def test_return(self):
@@ -828,7 +841,8 @@ with open(path) as file:
 
         def test_yield_expression(self):
             d = {}
-            suite = Suite("""results = []
+            suite = Suite("""from genshi.compat import next
+results = []
 def counter(maximum):
     i = 0
     while i < maximum:
@@ -838,12 +852,35 @@ def counter(maximum):
         else:
             i += 1
 it = counter(5)
-results.append(it.next())
+results.append(next(it))
 results.append(it.send(3))
-results.append(it.next())
+results.append(next(it))
 """)
             suite.execute(d)
             self.assertEqual([0, 3, 4], d['results'])
+
+    if sys.version_info >= (3, 3):
+        def test_with_statement_with_multiple_items(self):
+            fd, path = mkstemp()
+            f = os.fdopen(fd, "w")
+            try:
+                f.write('foo\n')
+                f.seek(0)
+                f.close()
+
+                d = {'path': path}
+                suite = Suite("""from __future__ import with_statement
+lines = []
+with open(path) as file1, open(path) as file2:
+    for line in file1:
+        lines.append(line)
+    for line in file2:
+        lines.append(line)
+""")
+                suite.execute(d)
+                self.assertEqual(['foo\n', 'foo\n'], d['lines'])
+            finally:
+                os.remove(path)
 
 
 def suite():

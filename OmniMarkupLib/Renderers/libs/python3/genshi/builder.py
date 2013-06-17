@@ -155,7 +155,7 @@ class Fragment(object):
 def _kwargs_to_attrs(kwargs):
     attrs = []
     names = set()
-    for name, value in kwargs.items():
+    for name, value in list(kwargs.items()):
         name = name.rstrip('_').replace('_', '-')
         if value is not None and name not in names:
             attrs.append((QName(name), str(value)))
@@ -168,18 +168,18 @@ class Element(Fragment):
 
     Construct XML elements by passing the tag name to the constructor:
 
-    >>> print(Element('strong'))
+    >>> print((Element('strong')))
     <strong/>
 
     Attributes can be specified using keyword arguments. The values of the
     arguments will be converted to strings and any special XML characters
     escaped:
 
-    >>> print(Element('textarea', rows=10, cols=60))
-    <textarea rows="10" cols="60"/>
-    >>> print(Element('span', title='1 < 2'))
+    >>> print((Element('textarea', rows=10)))
+    <textarea rows="10"/>
+    >>> print((Element('span', title='1 < 2')))
     <span title="1 &lt; 2"/>
-    >>> print(Element('span', title='"baz"'))
+    >>> print((Element('span', title='"baz"')))
     <span title="&#34;baz&#34;"/>
 
     The " character is escaped using a numerical entity.
@@ -188,50 +188,50 @@ class Element(Fragment):
     If an attribute value evaluates to `None`, that attribute is not included
     in the output:
 
-    >>> print(Element('a', name=None))
+    >>> print((Element('a', name=None)))
     <a/>
 
     Attribute names that conflict with Python keywords can be specified by
     appending an underscore:
 
-    >>> print(Element('div', class_='warning'))
+    >>> print((Element('div', class_='warning')))
     <div class="warning"/>
 
     Nested elements can be added to an element using item access notation.
     The call notation can also be used for this and for adding attributes
     using keyword arguments, as one would do in the constructor.
 
-    >>> print(Element('ul')(Element('li'), Element('li')))
+    >>> print((Element('ul')(Element('li'), Element('li'))))
     <ul><li/><li/></ul>
-    >>> print(Element('a')('Label'))
+    >>> print((Element('a')('Label')))
     <a>Label</a>
-    >>> print(Element('a')('Label', href="target"))
+    >>> print((Element('a')('Label', href="target")))
     <a href="target">Label</a>
 
     Text nodes can be nested in an element by adding strings instead of
     elements. Any special characters in the strings are escaped automatically:
 
-    >>> print(Element('em')('Hello world'))
+    >>> print((Element('em')('Hello world')))
     <em>Hello world</em>
-    >>> print(Element('em')(42))
+    >>> print((Element('em')(42)))
     <em>42</em>
-    >>> print(Element('em')('1 < 2'))
+    >>> print((Element('em')('1 < 2')))
     <em>1 &lt; 2</em>
 
     This technique also allows mixed content:
 
-    >>> print(Element('p')('Hello ', Element('b')('world')))
+    >>> print((Element('p')('Hello ', Element('b')('world'))))
     <p>Hello <b>world</b></p>
 
     Quotes are not escaped inside text nodes:
-    >>> print(Element('p')('"Hello"'))
+    >>> print((Element('p')('"Hello"')))
     <p>"Hello"</p>
 
     Elements can also be combined with other elements or strings using the
     addition operator, which results in a `Fragment` object that contains the
     operands:
     
-    >>> print(Element('br') + 'some text' + Element('br'))
+    >>> print((Element('br') + 'some text' + Element('br')))
     <br/>some text<br/>
     
     Elements with a namespace can be generated using the `Namespace` and/or
@@ -239,7 +239,7 @@ class Element(Fragment):
     
     >>> from genshi.core import Namespace
     >>> xhtml = Namespace('http://www.w3.org/1999/xhtml')
-    >>> print(Element(xhtml.html, lang='en'))
+    >>> print((Element(xhtml.html, lang='en')))
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en"/>
     """
     __slots__ = ['tag', 'attrib']
@@ -285,28 +285,28 @@ class ElementFactory(object):
     attribute of the factory object:
     
     >>> factory = ElementFactory()
-    >>> print(factory.foo)
+    >>> print((factory.foo))
     <foo/>
-    >>> print(factory.foo(id=2))
+    >>> print((factory.foo(id=2)))
     <foo id="2"/>
     
     Markup fragments (lists of nodes without a parent element) can be created
     by calling the factory:
     
-    >>> print(factory('Hello, ', factory.em('world'), '!'))
+    >>> print((factory('Hello, ', factory.em('world'), '!')))
     Hello, <em>world</em>!
     
     A factory can also be bound to a specific namespace:
     
     >>> factory = ElementFactory('http://www.w3.org/1999/xhtml')
-    >>> print(factory.html(lang="en"))
+    >>> print((factory.html(lang="en")))
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en"/>
     
     The namespace for a specific element can be altered on an existing factory
     by specifying the new namespace using item access:
     
     >>> factory = ElementFactory()
-    >>> print(factory.html(factory['http://www.w3.org/2000/svg'].g(id=3)))
+    >>> print((factory.html(factory['http://www.w3.org/2000/svg'].g(id=3))))
     <html><g xmlns="http://www.w3.org/2000/svg" id="3"/></html>
     
     Usually, the `ElementFactory` class is not be used directly. Rather, the
@@ -357,3 +357,4 @@ tag = ElementFactory()
 
 :type: `ElementFactory`
 """
+
