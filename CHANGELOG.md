@@ -1,6 +1,11 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
+**v2.0.2 (06/17/2013)**
+
+* Update cherrypy server, add detail information if socket could not be created.
+* Add support for file URIs in images path.
+
 **v2.0.1 (05/12/2013)**
 
 * Strip YAML frontmatter for Markdown files automatically.

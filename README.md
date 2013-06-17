@@ -44,7 +44,7 @@ The easiest way to install OmniMarkupPreviewer is through [Package Control].
 
 [Package Control]: http://wbond.net/sublime_packages/package_control
 
-Once you have Package Control installed, restart Sublime Text 2.
+Once you have Package Control installed, restart Sublime Text.
 
 1. Bring up the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>
    on Windows and Linux. <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> on OS X).
@@ -104,6 +104,11 @@ What's New
 ----------
 
 **For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
+
+**v2.0.2 (06/17/2013)**
+
+* Update cherrypy server, add detail information if socket could not be created.
+* Add support for file URIs in images path.
 
 **v2.0.1 (05/12/2013)**
 
