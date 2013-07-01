@@ -59,7 +59,7 @@ if PY3K:
         from .OmniMarkupLib import OnDemandDownloader
     except:
         log.exception('Error on loading OnDemandDownloader')
-    from . import desktop
+    from .OmniMarkupLib import desktop
 else:
     exec('import OmniMarkupLib.LinuxModuleChecker')
     from OmniMarkupLib import log, Server
@@ -70,7 +70,7 @@ else:
         from OmniMarkupLib import OnDemandDownloader
     except:
         log.exception('Error on loading OnDemandDownloader')
-    import desktop
+    from OmniMarkupLib import desktop
 
 
 def launching_web_browser_for_url(url, success_msg_default=None, success_msg_user=None):
