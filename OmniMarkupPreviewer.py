@@ -302,13 +302,19 @@ class PluginEventListener(sublime_plugin.EventListener):
     def __del__(self):
         self.throttle.stop()
 
-    def on_close(self, view):
+    def on_query_context(self, view, key, operator, operand, match_all):
+        # `omp_is_enabled` for backwards compatibility
+        if key == 'omnimarkup_is_enabled' or key == 'omp_is_enabled':
+            return RendererManager.any_available_renderer_for_view(view)
+        return None
+
+    def _on_close(self, view):
         storage = RenderedMarkupCache.instance()
         entry = storage.get_entry(view.buffer_id())
         if entry is not None:
             entry.disconnected = True
 
-    def on_modified(self, view):
+    def _on_modified(self, view):
         # Prevent rare complaintion about slow callback
         def callback():
             setting = Setting.instance()
@@ -316,18 +322,24 @@ class PluginEventListener(sublime_plugin.EventListener):
                 return
             timeout = setting.refresh_on_modified_delay / 1000.0
             self.throttle.put(view, preemptive=False, timeout=timeout)
-        sublime.set_timeout(callback, 0)
+        if PY3K:
+            callback()
+        else:
+            sublime.set_timeout(callback, 0)
 
-    def on_post_save(self, view):
+    def _on_post_save(self, view):
         if not Setting.instance().refresh_on_saved:
             return
         self.throttle.put(view, preemptive=True)
 
-    def on_query_context(self, view, key, operator, operand, match_all):
-        # `omp_is_enabled` for backwards compatibility
-        if key == 'omnimarkup_is_enabled' or key == 'omp_is_enabled':
-            return RendererManager.any_available_renderer_for_view(view)
-        return None
+    if PY3K:
+        on_close_async = _on_close
+        on_modified_async = _on_modified
+        on_post_save_async = _on_post_save
+    else:
+        on_close = _on_close
+        on_modified = _on_modified
+        on_post_save = _on_post_save
 
 g_server = None
 
