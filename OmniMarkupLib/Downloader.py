@@ -215,7 +215,7 @@ class UrlLib2Downloader(object):
 
             except HTTPException as e:
                 log.warning('%s HTTP exception %s (%s) downloading %s.',
-                            error_message, e.__class__.__name__, e.message, url)
+                            error_message, e.__class__.__name__, str(e), url)
 
             except HTTPError as e:
                 # Bitbucket and Github ratelimit using 503 a decent amount
