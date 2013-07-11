@@ -70,7 +70,7 @@
         //   "tables": http://packages.python.org/Markdown/extensions/tables.html
         //   "smartstrong": http://packages.python.org/Markdown/extensions/smart_strong.html
         //   "codehilite": http://packages.python.org/Markdown/extensions/code_hilite.html
-        //   "metadata": http://packages.python.org/Markdown/extensions/meta_data.html
+        //   "meta": http://packages.python.org/Markdown/extensions/meta_data.html
         //   "toc": http://packages.python.org/Markdown/extensions/toc.html
         //   "nl2br": http://packages.python.org/Markdown/extensions/nl2br.html
         // - 3RD PARTY -
