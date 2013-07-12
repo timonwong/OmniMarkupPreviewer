@@ -60,7 +60,7 @@
     "renderer_options-MarkdownRenderer": {
         // Valid extensions:
         // - OFFICIAL (Python Markdown) -
-        //   "extra": Combines ["abbr", "attr_list", "def_list", "fenced_code", "footnotes", "tables", "smartstrong"]
+        //   "extra": Combines ["abbr", "attr_list", "def_list", "fenced_code", "footnotes", "tables", "smart_strong"]
         //            For PHP Markdown Extra(http://michelf.ca/projects/php-markdown/extra/)
         //   "abbr": http://packages.python.org/Markdown/extensions/abbreviations.html
         //   "attr_list": http://packages.python.org/Markdown/extensions/attr_list.html
@@ -68,7 +68,7 @@
         //   "fenced_code": http://packages.python.org/Markdown/extensions/fenced_code_blocks.html
         //   "footnotes": http://packages.python.org/Markdown/extensions/footnotes.html
         //   "tables": http://packages.python.org/Markdown/extensions/tables.html
-        //   "smartstrong": http://packages.python.org/Markdown/extensions/smart_strong.html
+        //   "smart_strong": http://packages.python.org/Markdown/extensions/smart_strong.html
         //   "codehilite": http://packages.python.org/Markdown/extensions/code_hilite.html
         //   "meta": http://packages.python.org/Markdown/extensions/meta_data.html
         //   "toc": http://packages.python.org/Markdown/extensions/toc.html
