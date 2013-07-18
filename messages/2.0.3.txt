@@ -1,0 +1,5 @@
+OmniMarkupPreviewer v2.0.3 Changelog:
+
+
+* Fix html exporting when file contains images in Sublime Text 3.
+* Fix "smart_strong" and "meta_data" extention name for markdown.
