@@ -309,8 +309,8 @@ class RendererManager(object):
                 local_path = os.path.normpath(os.path.join(dirname, entities_unescape(url)))
             mime_type, _ = mimetypes.guess_type(os.path.basename(local_path))
             if mime_type is not None:
-                data_uri = open(local_path, 'rb').read().encode('base64').replace('\n', '')
-                image_tag_src = 'data:%s;base64,%s' % (mime_type, data_uri)
+                data_uri = base64.b64encode(open(local_path, 'rb').read())
+                image_tag_src = 'data:%s;base64,%s' % (mime_type, data_uri.decode('ascii'))
             else:
                 image_tag_src = '[Invalid mime type]'
             return m.group(1) + image_tag_src + m.group(3)
