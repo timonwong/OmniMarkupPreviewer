@@ -34,7 +34,6 @@ If you find my work useful, please consider buying me a cup of coffee, all
 donations are much appreciated :)
 
 [![Donate via PayPal](https://dl.dropbox.com/u/2451120/donate-with-paypal.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TD4HF4X2R53NE)
-[![使用支付宝捐赠](https://dl.dropbox.com/u/2451120/donate-with-alipay.png)](https://me.alipay.com/timonwong)
 
 Installation
 ------------
