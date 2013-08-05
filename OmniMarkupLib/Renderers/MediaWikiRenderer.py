@@ -11,7 +11,7 @@ class MediaWikiRenderer(CommandlineRenderer):
     def __init__(self):
         super(MediaWikiRenderer, self).__init__(
             executable='ruby',
-            args=[os.path.join(__path__, 'bin/mw2html.rb')])
+            args=['-rubygems', os.path.join(__path__, 'bin/mw2html.rb')])
 
     @classmethod
     def is_enabled(cls, filename, syntax):

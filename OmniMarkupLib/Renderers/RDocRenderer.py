@@ -11,7 +11,7 @@ class RDocRenderer(CommandlineRenderer):
     def __init__(self):
         super(RDocRenderer, self).__init__(
             executable='ruby',
-            args=[os.path.join(__path__, 'bin/rdoc.rb')])
+            args=['-rubygems', os.path.join(__path__, 'bin/rdoc.rb')])
 
     @classmethod
     def is_enabled(cls, filename, syntax):

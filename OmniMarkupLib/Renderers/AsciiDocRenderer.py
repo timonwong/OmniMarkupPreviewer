@@ -11,7 +11,7 @@ class AsciiDocRenderer(CommandlineRenderer):
     def __init__(self):
         super(AsciiDocRenderer, self).__init__(
             executable='ruby',
-            args=[os.path.join(__path__, 'bin/asciidoc.rb')])
+            args=['-rubygems', os.path.join(__path__, 'bin/asciidoc.rb')])
 
     @classmethod
     def is_enabled(cls, filename, syntax):

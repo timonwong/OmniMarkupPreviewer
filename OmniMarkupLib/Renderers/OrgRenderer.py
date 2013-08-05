@@ -11,7 +11,7 @@ class OrgRenderer(CommandlineRenderer):
     def __init__(self):
         super(OrgRenderer, self).__init__(
             executable='ruby',
-            args=[os.path.join(__path__, 'bin/org.rb')])
+            args=['-rubygems', os.path.join(__path__, 'bin/org.rb')])
 
     @classmethod
     def is_enabled(cls, filename, syntax):

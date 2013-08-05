@@ -11,7 +11,7 @@ class LiterateHaskellRenderer(CommandlineRenderer):
     def __init__(self):
         super(LiterateHaskellRenderer, self).__init__(
             executable='ruby',
-            args=[os.path.join(__path__, 'bin/lhs2html.rb')])
+            args=['-rubygems', os.path.join(__path__, 'bin/lhs2html.rb')])
 
     @classmethod
     def is_enabled(cls, filename, syntax):
