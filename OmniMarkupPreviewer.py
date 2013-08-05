@@ -141,11 +141,11 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
         sublime.status_message('Exported result copied to clipboard')
 
     def write_to_file(self, html_content, setting):
-        target_folder = setting.export_options['target_folder']
+        target_folder = setting.export_options.get('target_folder', '.')
 
         if target_folder is not None:
             fullpath = self.view.file_name() or ''
-            timestamp_format = setting.export_options['timestamp_format']
+            timestamp_format = setting.export_options.get('timestamp_format', '_%y%m%d%H%M%S')
             timestr = time.strftime(timestamp_format, time.localtime())
 
             if (not os.path.exists(fullpath) and target_folder == '.') or \
@@ -183,11 +183,11 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
             html_fn = self.write_to_file(html_content, setting)
 
             # Copy contents to clipboard
-            if setting.export_options['copy_to_clipboard']:
+            if setting.export_options.get('copy_to_clipboard', False):
                 self.copy_to_clipboard(html_content)
 
             # Open output file if necessary
-            if setting.export_options['open_after_exporting']:
+            if setting.export_options.get('open_after_exporting', False):
                 log.info('Launching web browser for %s', html_fn)
                 launching_web_browser_for_url(html_fn)
 
