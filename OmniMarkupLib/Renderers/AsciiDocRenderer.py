@@ -15,5 +15,7 @@ class AsciiDocRenderer(CommandlineRenderer):
 
     @classmethod
     def is_enabled(cls, filename, syntax):
-        return (filename.endswith('.asc') or filename.endswith('adoc') or
-                filename.endswith('asciidoc'))
+        if syntax == 'text.html.asciidoc':
+            return True
+        return (filename.endswith('.asc') or filename.endswith('.adoc') or
+                filename.endswith('.asciidoc'))
