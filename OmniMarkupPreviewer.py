@@ -167,6 +167,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
 
         with codecs.open(html_fn, 'w', encoding='utf-8') as html_file:
             html_file.write(html_content)
+            log.info('Successfully exported to: %s', html_fn)
 
         return html_fn
 
@@ -194,6 +195,7 @@ class OmniMarkupExportCommand(sublime_plugin.TextCommand):
         except NotImplementedError:
             pass
         except:
+            sublime.error_message('Error while exporting, please check your console for more information.')
             log.exception('Error while exporting')
 
     def is_enabled(self):
