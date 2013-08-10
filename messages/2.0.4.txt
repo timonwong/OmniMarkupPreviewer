@@ -1,0 +1,6 @@
+OmniMarkupPreviewer v2.0.4 Changelog:
+
+
+* Fix ruby gems loading in OSX (Required by RDoc, AsciiDoc, Org Mode and MediaWiki).
+* Add AsciiDoc syntax support.
+* Ensure default setting for `export_options` when not available.

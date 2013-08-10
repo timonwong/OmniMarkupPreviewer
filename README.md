@@ -26,6 +26,7 @@ OmniMarkupPreviewer has builtin support following markups:
 * [Org Mode](http://orgmode.org) (Requires `ruby`, and gem `org-ruby` should be installed)
 * [MediaWiki](http://www.mediawiki.org/) (Requires `ruby`, as well as gem `wikicloth`)
 * [AsciiDoc](http://www.methods.co.nz/asciidoc/) (Requires `ruby`, as well as gem `asciidoctor`)
+* Literate Haskell
 
 
 ### Donation
@@ -60,15 +61,21 @@ up to date automatically.
 code, and extract to the Packages directory.
 
 **With Git:**
-Type the following command in your Sublime Text 2 Packages directory:
+Type the following command in your Sublime Text Packages directory:
 
 `git clone git://github.com/timonwong/OmniMarkupPreviewer.git`
 
-The "Packages" directory is located at:
+The "Packages" directory for Sublime Text 2 is located at:
 
 * **Windows:**  `%APPDATA%\Sublime Text 2\Packages\`
 * **Linux:**    `~/.config/sublime-text-2/Packages/`
 * **OS X:**     `~/Library/Application Support/Sublime Text 2/Packages/`
+
+And for the Sublime Text 3:
+
+* **Windows:**  `%APPDATA%\Sublime Text 3\Packages\`
+* **Linux:**    `~/.config/sublime-text-3/Packages/`
+* **OS X:**     `~/Library/Application Support/Sublime Text 3/Packages/`
 
 
 Usage
@@ -104,10 +111,16 @@ What's New
 
 **For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
 
+**v2.0.4 (08/10/2013)**
+
+* Fix ruby gems loading in OSX (Required by RDoc, AsciiDoc, Org Mode and MediaWiki).
+* Add AsciiDoc syntax support.
+* Ensure default setting for `export_options` when not available.
+
 **v2.0.3 (07/18/2013)**
 
 * Fix html exporting when file contains images in Sublime Text 3.
-* Fix "smart_strong" and "meta_data" extention name for markdown.
+* Fix `smart_strong` and `meta_data` extention name for markdown.
 
 **v2.0.2 (06/17/2013)**
 

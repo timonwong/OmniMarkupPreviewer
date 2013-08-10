@@ -4,5 +4,6 @@
     "description": "Live previewer/exporter for markup files (markdown, rst, creole, textile...).",
     "author": "timonwong",
     "homepage": "http://timonwong.github.io/OmniMarkupPreviewer/",
+    "details": "https://github.com/timonwong/OmniMarkupPreviewer",
     "platforms": ["*"]
 }

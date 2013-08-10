@@ -1,10 +1,16 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
+**v2.0.4 (08/10/2013)**
+
+* Fix ruby gems loading in OSX (Required by RDoc, AsciiDoc, Org Mode and MediaWiki).
+* Add AsciiDoc syntax support.
+* Ensure default setting for `export_options` when not available.
+
 **v2.0.3 (07/18/2013)**
 
 * Fix html exporting when file contains images in Sublime Text 3.
-* Fix "smart_strong" and "meta_data" extention name for markdown.
+* Fix `smart_strong` and `meta_data` extention name for markdown.
 
 **v2.0.2 (06/17/2013)**
 
