@@ -77,10 +77,11 @@
         //   "strikeout": Strikeout extension syntax - `This ~~is deleted text.~~`
         //   "subscript": Subscript extension syntax - `This is water: H~2~O`
         //   "superscript": Superscript extension syntax 0 `2^10^ = 1024`
-        //   "smartypants": Python-Markdown extension using smartypants to emit
+        //   "smarty": Python-Markdown extension using smartypants to emit
         //                   typographically nicer ("curly") quotes, proper
         //                   ("em" and "en") dashes, etc.
-        //                   See: https://bitbucket.org/jeunice/mdx_smartypants
+        //                   See: http://daringfireball.net/projects/smartypants/
+        //                   And: https://github.com/waylan/Python-Markdown/blob/master/docs/extensions/smarty.txt
         "extensions": ["tables", "strikeout", "fenced_code", "codehilite"]
     }
 }

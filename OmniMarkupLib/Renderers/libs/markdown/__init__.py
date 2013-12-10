@@ -100,7 +100,7 @@ class Markdown(object):
         * html_replacement_text: Text used when safe_mode is set to "replace".
         * tab_length: Length of tabs in the source. Default: 4
         * enable_attributes: Enable the conversion of attributes. Default: True
-        * smart_emphasis: Treat `_connected_words_` intelegently Default: True
+        * smart_emphasis: Treat `_connected_words_` intelligently Default: True
         * lazy_ol: Ignore number of first item of ordered lists. Default: True
 
         """
@@ -133,9 +133,9 @@ class Markdown(object):
 
         self.references = {}
         self.htmlStash = util.HtmlStash()
-        self.set_output_format(kwargs.get('output_format', 'xhtml1'))
         self.registerExtensions(extensions=kwargs.get('extensions', []),
                                 configs=kwargs.get('extension_configs', {}))
+        self.set_output_format(kwargs.get('output_format', 'xhtml1'))
         self.reset()
 
     def build_parser(self):
@@ -193,7 +193,7 @@ class Markdown(object):
             module_name = '.'.join(['markdown.extensions', ext_name])
 
         # Try loading the extension first from one place, then another
-        try: # New style (markdown.extensons.<extension>)
+        try: # New style (markdown.extensions.<extension>)
             module = __import__(module_name, {}, {}, [module_name.rpartition('.')[0]])
         except ImportError:
             module_name_old_style = '_'.join(['mdx', ext_name])
