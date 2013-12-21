@@ -82,6 +82,16 @@ import sys
 
 # Provide suitable process creation functions.
 
+PY3K = sys.version_info >= (3, 0, 0)
+
+if PY3K:
+    def _to_native_str(string):
+        return string.decode('utf-8')
+else:
+    def _to_native_str(string):
+        return string
+
+
 try:
     import subprocess
     def _run(cmd, shell, wait):
@@ -92,7 +102,7 @@ try:
     def _readfrom(cmd, shell):
         opener = subprocess.Popen(cmd, shell=shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         opener.stdin.close()
-        return opener.stdout.read()
+        return _to_native_str(opener.stdout.read())
 
     def _status(cmd, shell):
         opener = subprocess.Popen(cmd, shell=shell)
@@ -110,7 +120,7 @@ except ImportError:
         opener = popen2.Popen3(cmd)
         opener.tochild.close()
         opener.childerr.close()
-        return opener.fromchild.read()
+        return _to_native_str(opener.fromchild.read())
 
     def _status(cmd, shell):
         opener = popen2.Popen3(cmd)
@@ -137,7 +147,7 @@ def _is_xfce():
     # XFCE detection involves testing the output of a program.
 
     try:
-        return _readfrom(_get_x11_vars() + "xprop -root _DT_SAVE_MODE", shell=1).strip().decode("utf-8").endswith(' = "xfce4"')
+        return _readfrom(_get_x11_vars() + "xprop -root _DT_SAVE_MODE", shell=1).strip().endswith(' = "xfce4"')
     except OSError:
         return 0
 
