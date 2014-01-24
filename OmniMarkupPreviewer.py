@@ -55,10 +55,6 @@ if PY3K:
     from .OmniMarkupLib.Setting import Setting
     from .OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
     from .OmniMarkupLib.Common import Singleton
-    try:
-        from .OmniMarkupLib import OnDemandDownloader
-    except:
-        log.exception('Error on loading OnDemandDownloader')
     from .OmniMarkupLib import desktop
 else:
     exec('import OmniMarkupLib.LinuxModuleChecker')
@@ -66,10 +62,6 @@ else:
     from OmniMarkupLib.Setting import Setting
     from OmniMarkupLib.RendererManager import RenderedMarkupCache, RendererManager
     from OmniMarkupLib.Common import Singleton
-    try:
-        from OmniMarkupLib import OnDemandDownloader
-    except:
-        log.exception('Error on loading OnDemandDownloader')
     from OmniMarkupLib import desktop
 
 
@@ -368,8 +360,6 @@ class PluginManager(object):
         if need_server_restart:
             self.restart_server()
 
-        self.try_download_mathjax(setting)
-
     def subscribe_setting_events(self):
         Setting.instance().subscribe('changing', self.on_setting_changing)
         Setting.instance().subscribe('changed', self.on_setting_changed)
@@ -387,12 +377,6 @@ class PluginManager(object):
             g_server.stop()
             g_server = None
 
-    def try_download_mathjax(self, setting=None):
-        if setting is None:
-            setting = Setting.instance()
-        if setting.mathjax_enabled:
-            OnDemandDownloader.on_demand_download_mathjax(setting)
-
 
 def unload_handler():
     log.info('Unloading plugin...')
@@ -409,7 +393,6 @@ def plugin_loaded():
     PluginManager.instance().subscribe_setting_events()
     RendererManager.start()
     PluginManager.instance().restart_server()
-    PluginManager.instance().try_download_mathjax()
 
 if not PY3K:
     plugin_loaded()
