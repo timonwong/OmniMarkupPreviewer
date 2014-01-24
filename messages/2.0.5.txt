@@ -1,0 +1,6 @@
+OmniMarkupPreviewer v2.0.5 Changelog:
+
+
+* MathJax library is now bundled directly instead of on demand downloading.
+* Python-Markdown module now upgraded to v2.4.
+* Fix incompatibility when using Sublime Text 3 under XFCE.
