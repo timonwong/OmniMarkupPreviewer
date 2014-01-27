@@ -111,6 +111,16 @@ What's New
 
 **For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
 
+**v2.0.5.1 (01/27/2014)**
+
+* Fix Sublime Text 2 compatibility (markdown).
+
+**v2.0.5 (01/24/2014)**
+
+* MathJax library is now bundled directly instead of on demand downloading.
+* Python-Markdown module now upgraded to v2.4.
+* Fix incompatibility when using Sublime Text 3 under XFCE.
+
 **v2.0.4 (08/10/2013)**
 
 * Fix ruby gems loading in OSX (Required by RDoc, AsciiDoc, Org Mode and MediaWiki).
