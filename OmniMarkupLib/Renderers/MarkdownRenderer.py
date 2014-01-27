@@ -11,10 +11,11 @@ class MarkdownRenderer(MarkupRenderer):
     def load_settings(self, renderer_options, global_setting):
         super(MarkdownRenderer, self).load_settings(renderer_options, global_setting)
         if 'extensions' in renderer_options:
-            extensions = set(renderer_options['extensions'])
+            extensions = renderer_options['extensions']
         else:
             # Fallback to the default GFM style
-            extensions = {'tables', 'strikeout', 'fenced_code', 'codehilite'}
+            extensions = ['tables', 'strikeout', 'fenced_code', 'codehilite']
+        extensions = set(extensions)
         if global_setting.mathjax_enabled:
             if 'mathjax' not in extensions:
                 extensions.add('mathjax')
