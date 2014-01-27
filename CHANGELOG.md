@@ -1,7 +1,7 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
-**v2.0.5.1 (01/27/2014)**
+**v2.0.6 (01/27/2014)**
 
 * Fix Sublime Text 2 compatibility (markdown).
 
