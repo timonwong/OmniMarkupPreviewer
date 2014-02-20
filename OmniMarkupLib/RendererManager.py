@@ -368,7 +368,12 @@ class RendererManager(object):
         revivable_key = base64.b64decode(revivable_key).decode('utf-8')
         for window in sublime.windows():
             for view in window.views():
-                if filesystem_path_equals(view.file_name(), revivable_key):
+                file_name = view.file_name()
+                # NOTE: Since file_name is None for console view, so we just
+                # ignore it
+                if file_name is None:
+                    continue
+                if filesystem_path_equals(file_name, revivable_key):
                     return view.buffer_id()
         return None
 
