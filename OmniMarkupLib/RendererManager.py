@@ -451,7 +451,7 @@ class RendererManager(object):
         for renderer_classname, renderer in cls.RENDERERS:
             key = 'renderer_options-' + renderer_classname
             try:
-                renderer_options = setting._sublime_settings.get(key, {})
+                renderer_options = setting.get_setting(key, {})
                 renderer.load_settings(renderer_options, setting)
             except:
                 log.exception('Error on setting renderer options for %s', renderer_classname)

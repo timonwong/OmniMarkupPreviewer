@@ -1,0 +1,29 @@
+{
+    "html_template_name": "github",
+    "browser_command": [],
+    "refresh_on_saved": true,
+    "server_host": "127.0.0.1",
+    "refresh_on_modified_delay": 500,
+    "refresh_on_modified": true,
+    "server_port": 51004,
+    "ajax_polling_interval": 500,
+    "ignored_renderers": [
+        "LiterateHaskellRenderer"
+    ],
+    "export_options": {
+        "template_name": "github-export",
+        "target_folder": ".",
+        "open_after_exporting": false,
+        "timestamp_format": "_%y%m%d%H%M%S",
+        "copy_to_clipboard": false
+    },
+    "renderer_options-MarkdownRenderer": {
+        "extensions": [
+            "tables",
+            "strikeout",
+            "fenced_code",
+            "codehilite"
+        ]
+    },
+    "mathjax_enabled": false
+}

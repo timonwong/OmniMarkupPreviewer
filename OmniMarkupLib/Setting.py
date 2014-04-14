@@ -1,7 +1,14 @@
+import json
+import os
+
 import sublime
 
 from . import log
 from .Common import Singleton
+
+
+__file__ = os.path.normpath(os.path.abspath(__file__))
+__path__ = os.path.dirname(__file__)
 
 
 class SettingEventSource(object):
@@ -29,15 +36,17 @@ class SettingEventSource(object):
 
 @Singleton
 class Setting(SettingEventSource):
-    DEFAULT_EXPORT_OPTIONS = {
-        "target_folder": ".",
-        "timestamp_format": "_%y%m%d%H%M%S",
-        "copy_to_clipboard": False,
-        "open_after_exporting": False
-    }
-
     def __init__(self):
         SettingEventSource.__init__(self)
+
+    @staticmethod
+    def _read_default_settings():
+        default_settings_filename = os.path.join(
+            __path__, '../', 'default_settings.json')
+        default_settings_filename = os.path.normpath(default_settings_filename)
+        with open(default_settings_filename) as f:
+            settings_obj = json.load(f)
+        return settings_obj
 
     def load_setting(self):
         PLUGIN_NAME = 'OmniMarkupPreviewer'
@@ -46,21 +55,18 @@ class Setting(SettingEventSource):
         settings.add_on_change(PLUGIN_NAME, self.sublime_settings_on_change)
 
         self._sublime_settings = settings
-        self.server_host = settings.get("server_host", '127.0.0.1')
-        self.server_port = settings.get("server_port", 51004)
-        self.refresh_on_modified = settings.get("refresh_on_modified", True)
-        self.refresh_on_modified_delay = settings.get("refresh_on_modified_delay", 500)
-        self.refresh_on_saved = settings.get("refresh_on_saved", True)
-        self.browser_command = settings.get("browser_command", [])
-        self.html_template_name = settings.get("html_template_name", 'github')
-        self.ajax_polling_interval = settings.get("ajax_polling_interval", 500)
-        self.ignored_renderers = set(settings.get("ignored_renderers", []))
-        self.mathjax_enabled = settings.get("mathjax_enabled", False)
-        self.http_proxy = settings.get("http_proxy", None)
-        self.https_proxy = settings.get("https_proxy", None)
-        self.export_options = self.DEFAULT_EXPORT_OPTIONS.copy()
-        # Merge with the user defined export options
-        self.export_options.update(settings.get("export_options", {}))
+
+        # Merge new settings into the default settings
+        default_settings = self._read_default_settings()
+        for k, v in default_settings.items():
+            if isinstance(v, dict):
+                v.update(settings.get(k, {}))
+            else:
+                v = settings.get(k, v)
+            setattr(self, k, v)
+
+    def get_setting(self, k, default=None):
+        return getattr(self, k, default)
 
     def init(self):
         self.clear_subscribers()
