@@ -111,6 +111,12 @@ What's New
 
 **For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
 
+**v2.0.7 (04/14/2014)**
+
+* Fix unreliable default setting overriding, which confuses a lot of users when
+  customizing their settings.
+* Prevent preview from the console, which will simply lead to crash.
+
 **v2.0.6 (01/27/2014)**
 
 * Fix Sublime Text 2 compatibility (markdown).

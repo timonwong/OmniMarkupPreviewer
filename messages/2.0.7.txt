@@ -1,0 +1,6 @@
+OmniMarkupPreviewer v2.0.7 Changelog:
+
+
+* Fix unreliable default setting overriding, which confuses a lot of users when
+  customizing their settings.
+* Prevent preview from the console, which will simply lead to crash.
