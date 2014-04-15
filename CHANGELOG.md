@@ -1,6 +1,10 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
+**v2.0.8 (04/15/2014)**
+
+* Fix Sublime Text 2 compatibility (crash).
+
 **v2.0.7 (04/14/2014)**
 
 * Fix unreliable default setting overriding, which confuses a lot of users when

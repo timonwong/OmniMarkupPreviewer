@@ -1,0 +1,4 @@
+OmniMarkupPreviewer v2.0.8 Changelog:
+
+
+* Fix Sublime Text 2 compatibility (crash).
