@@ -48,6 +48,14 @@ class Setting(SettingEventSource):
             settings_obj = json.load(f)
         return settings_obj
 
+    def _fix_setting_type(self):
+        type_conversion_map = {
+            'ignored_renderers': set,
+        }
+        for attr, typ in type_conversion_map.items():
+            v = getattr(self, attr)
+            setattr(self, attr, typ(v))
+
     def load_setting(self):
         PLUGIN_NAME = 'OmniMarkupPreviewer'
         settings = sublime.load_settings(PLUGIN_NAME + '.sublime-settings')
@@ -64,6 +72,8 @@ class Setting(SettingEventSource):
             else:
                 v = settings.get(k, v)
             setattr(self, k, v)
+
+        self._fix_setting_type()
 
     def get_setting(self, k, default=None):
         return getattr(self, k, default)
