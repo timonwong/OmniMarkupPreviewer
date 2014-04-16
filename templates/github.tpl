@@ -7,7 +7,7 @@
   <head>
     <meta charset='utf-8'/>
     <title>{{filename}}—{{dirname}}</title>
-    <link rel="stylesheet" type="text/css" href="/public/github.min.css" />
+    <link rel="stylesheet" type="text/css" href="/public/github.css" />
   </head>
   <body>
     <div class="container">
@@ -31,7 +31,7 @@
   </script>
   <script type="text/javascript" src="/public/jquery-1.9.1.min.js"></script>
   <script type="text/javascript" src="/public/jquery.imagesloaded.min.js"></script>
-  <script type="text/javascript" src="/public/app.min.js"></script>
+  <script type="text/javascript" src="/public/app.js"></script>
   %if mathjax_enabled:
   <script type="text/x-mathjax-config">
     MathJax.Hub.Config({

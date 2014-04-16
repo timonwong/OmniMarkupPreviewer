@@ -88,7 +88,7 @@ def filesystem_path_equals(path1, path2):
         return path1.lower() == path2.lower()
 
 
-PathCreateFromUrlW  = None
+PathCreateFromUrlW = None
 if sys.platform == 'win32':
     import ctypes
 
@@ -201,8 +201,8 @@ class RendererWorker(threading.Thread):
             RenderedMarkupCache.instance().set_entry(item.buffer_id, entry)
         except NotImplementedError:
             pass
-        except:
-            log.exception("")
+        except Exception as err:
+            log.exception(err)
 
     def run(self):
         while True:
