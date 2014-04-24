@@ -6,8 +6,8 @@ Simple desktop integration for Python. This module provides desktop environment
 detection and resource opening support for a selection of common and
 standardised desktop environments.
 
-Copyright (C) 2005, 2006, 2007, 2008, 2009, 2012 Paul Boddie <paul@boddie.org.uk>
-Copyright (C) 2012 Jérôme Laheurte <fraca7@free.fr>
+Copyright (C) 2005, 2006, 2007, 2008, 2009, 2012, 2013 Paul Boddie <paul@boddie.org.uk>
+Copyright (C) 2012, 2013 Jérôme Laheurte <fraca7@free.fr>
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the Free
@@ -75,7 +75,7 @@ The desktop.dialog module provides support for opening dialogue boxes.
 The desktop.windows module permits the inspection of desktop windows.
 """
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 import os
 import sys
@@ -128,6 +128,8 @@ except ImportError:
         return opener.poll() == 0
 
 import subprocess
+from webbrowser import _iscommand
+
 
 # Private functions.
 
@@ -167,7 +169,7 @@ def get_desktop():
     """
 
     if "KDE_FULL_SESSION" in os.environ or \
-        "KDE_MULTIHEAD" in os.environ:
+       "KDE_MULTIHEAD" in os.environ:
         try:
             if int(os.environ.get("KDE_SESSION_VERSION", "3")) >= 4:
                 return "KDE4"
@@ -175,10 +177,10 @@ def get_desktop():
             pass
         return "KDE"
     elif "GNOME_DESKTOP_SESSION_ID" in os.environ or \
-        "GNOME_KEYRING_SOCKET" in os.environ:
+         "GNOME_KEYRING_SOCKET" in os.environ:
         return "GNOME"
     elif 'DESKTOP_SESSION' in os.environ and \
-        os.environ['DESKTOP_SESSION'].lower() == 'lubuntu':
+         os.environ['DESKTOP_SESSION'].lower() == 'lubuntu':
         return "GNOME"
     elif sys.platform == "darwin":
         return "Mac OS X"
@@ -278,6 +280,12 @@ def open(url, desktop=None, wait=0):
         # NOTE: This returns None in current implementations.
         return os.startfile(url)
 
+    elif desktop_in_use == "Mac OS X":
+        cmd = ["open", url]
+
+    elif _iscommand("xdg-open"):
+        cmd = ["xdg-open", url]
+
     elif desktop_in_use == "KDE4":
         cmd = ["kioclient", "exec", url]
 
@@ -285,13 +293,14 @@ def open(url, desktop=None, wait=0):
         cmd = ["kfmclient", "exec", url]
 
     elif desktop_in_use == "GNOME":
-        cmd = ["gnome-open", url]
+        if _iscommand("gvfs-open"):
+            cmd = ["gvfs-open"]
+        else:
+            cmd = ["gnome-open"]
+        cmd.append(url)
 
     elif desktop_in_use == "XFCE":
         cmd = ["exo-open", url]
-
-    elif desktop_in_use == "Mac OS X":
-        cmd = ["open", url]
 
     elif desktop_in_use == "X11" and "BROWSER" in os.environ:
         cmd = [os.environ["BROWSER"], url]
