@@ -78,7 +78,9 @@ The desktop.windows module permits the inspection of desktop windows.
 __version__ = "0.4.2"
 
 import os
+import subprocess
 import sys
+from webbrowser import _iscommand
 
 # Provide suitable process creation functions.
 
@@ -91,47 +93,21 @@ else:
     def _to_native_str(string):
         return string
 
-
-try:
-    import subprocess
-    def _run(cmd, shell, wait):
-        opener = subprocess.Popen(cmd, shell=shell)
-        if wait: opener.wait()
-        return opener.pid
-
-    def _readfrom(cmd, shell):
-        opener = subprocess.Popen(cmd, shell=shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        opener.stdin.close()
-        return _to_native_str(opener.stdout.read())
-
-    def _status(cmd, shell):
-        opener = subprocess.Popen(cmd, shell=shell)
-        opener.wait()
-        return opener.returncode == 0
-
-except ImportError:
-    import popen2
-    def _run(cmd, shell, wait):
-        opener = popen2.Popen3(cmd)
-        if wait: opener.wait()
-        return opener.pid
-
-    def _readfrom(cmd, shell):
-        opener = popen2.Popen3(cmd)
-        opener.tochild.close()
-        opener.childerr.close()
-        return _to_native_str(opener.fromchild.read())
-
-    def _status(cmd, shell):
-        opener = popen2.Popen3(cmd)
-        opener.wait()
-        return opener.poll() == 0
-
-import subprocess
-from webbrowser import _iscommand
-
-
 # Private functions.
+def _run(cmd, shell, wait):
+    opener = subprocess.Popen(cmd, shell=shell)
+    if wait: opener.wait()
+    return opener.pid
+
+def _readfrom(cmd, shell):
+    opener = subprocess.Popen(cmd, shell=shell, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    opener.stdin.close()
+    return _to_native_str(opener.stdout.read())
+
+def _status(cmd, shell):
+    opener = subprocess.Popen(cmd, shell=shell)
+    opener.wait()
+    return opener.returncode == 0
 
 def _get_x11_vars():
 
