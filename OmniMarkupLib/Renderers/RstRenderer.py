@@ -14,9 +14,9 @@ class GitHubHTMLTranslator(HTMLTranslator):
         if len(classes) >= 2 and classes[0] == 'code':
             language = classes[1]
             del classes[:]
-            self.body.append(self.starttag(node, 'pre', lang=language))
+            self.body.append(self.starttag(node, 'pre', lang=language, CLASS='codehilite'))
         else:
-            self.body.append(self.starttag(node, 'pre'))
+            self.body.append(self.starttag(node, 'pre', CLASS='codehilite'))
 
 
 @renderer
@@ -37,7 +37,7 @@ class RstRenderer(MarkupRenderer):
             'strip_comments': True,
             'doctitle_xform': False,
             'report_level': 5,
-            'syntax_highlight': 'none',
+            'syntax_highlight': 'short',
             'math_output': 'latex',
             'input_encoding': 'utf-8',
             'output_encoding': 'utf-8',
