@@ -1,6 +1,11 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
+**v2.0.9 (08/02/2014)**
+
+* Add syntax highlighting support for reStructureText.
+* Prefer to use `xdg-open` under linux environments.
+
 **v2.0.8 (04/15/2014)**
 
 * Fix Sublime Text 2 compatibility (crash).

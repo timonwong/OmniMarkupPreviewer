@@ -1,0 +1,5 @@
+OmniMarkupPreviewer v2.0.9 Changelog:
+
+
+* Add syntax highlighting support for reStructureText.
+* Prefer to use `xdg-open` under linux environments.

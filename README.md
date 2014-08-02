@@ -106,10 +106,19 @@ Available OmniMarkupPreviewer commands in the command palette:
 * `OmniMarkupPreviewer: Empty Cache`
 
 
+**NOTE** Command will not be available if current file syntax (or filename) doesn't match any
+of OmniMarkupPreviewer renderers.
+
+
 What's New
 ----------
 
 **For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
+
+**v2.0.9 (08/02/2014)**
+
+* Add syntax highlighting support for reStructureText.
+* Prefer to use `xdg-open` under linux environments.
 
 **v2.0.8 (04/15/2014)**
 
