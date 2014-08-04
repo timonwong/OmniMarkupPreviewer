@@ -26,7 +26,15 @@ class MarkdownRenderer(MarkupRenderer):
 
     @classmethod
     def is_enabled(cls, filename, syntax):
-        if syntax == "text.html.markdown":
+        """Looks for any syntax that begins with 'text.html.markdown'.
+
+        Common options are:
+
+        * text.html.markdown  # normal
+        * text.html.markdown.gfm  # github-flavored
+        * text.html.markdown.multimarkdown  # fletcherpenney.net/multimarkdown
+        """
+        if re.match(r'^text\.html\.markdown\S*', syntax):
             return True
         return cls.FILENAME_PATTERN_RE.search(filename) is not None
 
