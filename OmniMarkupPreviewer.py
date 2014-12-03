@@ -109,7 +109,7 @@ class OmniMarkupPreviewCommand(sublime_plugin.TextCommand):
         if not opened:
             RendererManager.enqueue_view(self.view, immediate=True)
 
-        url = 'http://localhost:%d/view/%d' % (Setting.instance().server_port, buffer_id)
+        url = 'http://%s:%d/view/%d' % (Setting.instance().server_host, Setting.instance().server_port, buffer_id)
         # Open with the default browser
         log.info('Launching web browser for %s', url)
         launching_web_browser_for_url(
