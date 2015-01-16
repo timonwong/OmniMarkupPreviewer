@@ -29,7 +29,7 @@
       mathjax_enabled: {{'true' if mathjax_enabled else 'false'}}
     };
   </script>
-  <script type="text/javascript" src="/public/jquery-1.9.1.min.js"></script>
+  <script type="text/javascript" src="/public/jquery-2.1.3.min.js"></script>
   <script type="text/javascript" src="/public/jquery.imagesloaded.min.js"></script>
   <script type="text/javascript" src="/public/app.js"></script>
   %if mathjax_enabled:
