@@ -1,0 +1,17 @@
+{
+  "asi": true,
+  "forin": true,
+  "noarg": true,
+  "noempty": true,
+  "eqeqeq": true,
+  "undef": true,
+  "unused": true,
+  "curly": true,
+  "browser": true,
+  "indent": 2,
+  "strict": true,
+  "maxerr": 50,
+  "devel": true,
+  "jquery": true,
+  "predef": ["MathJax"]
+}
