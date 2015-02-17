@@ -30,13 +30,13 @@ BLOCK_LEVEL_ELEMENTS = re.compile("^(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul"
                                   "|hr|hr/|style|li|dt|dd|thead|tbody"
                                   "|tr|th|td|section|footer|header|group|figure"
                                   "|figcaption|aside|article|canvas|output"
-                                  "|progress|video)$", re.IGNORECASE)
+                                  "|progress|video|nav)$", re.IGNORECASE)
 # Placeholders
 STX = '\u0002'  # Use STX ("Start of text") for start-of-placeholder
 ETX = '\u0003'  # Use ETX ("End of text") for end-of-placeholder
 INLINE_PLACEHOLDER_PREFIX = STX+"klzzwxh:"
 INLINE_PLACEHOLDER = INLINE_PLACEHOLDER_PREFIX + "%s" + ETX
-INLINE_PLACEHOLDER_RE = re.compile(INLINE_PLACEHOLDER % r'([0-9]{4})')
+INLINE_PLACEHOLDER_RE = re.compile(INLINE_PLACEHOLDER % r'([0-9]+)')
 AMP_SUBSTITUTE = STX+"amp"+ETX
 HTML_PLACEHOLDER = STX + "wzxhzdk:%s" + ETX
 HTML_PLACEHOLDER_RE = re.compile(HTML_PLACEHOLDER % r'([0-9]+)')
