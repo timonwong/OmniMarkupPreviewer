@@ -29,10 +29,8 @@ class SubscriptExtension(markdown.Extension):
         """ Replace subscript with SubscriptPattern """
         md.inlinePatterns.add('subscript', SimpleTagPattern(SUBSCRIPT_RE, 'sub'), '<not_strong')
 
-
-def makeExtension(configs=[]):
-    return SubscriptExtension(configs)
-
+def makeExtension(configs=None):
+    return SubscriptExtension(configs=configs)
 
 if __name__ == "__main__":
     import doctest

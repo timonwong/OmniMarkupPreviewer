@@ -11,6 +11,10 @@ convenience so that only one extension needs to be listed when
 initiating Markdown. See the documentation for each individual
 extension for specifics about that extension.
 
+In the event that one or more of the supported extensions are not
+available for import, Markdown will issue a warning and simply continue
+without that extension.
+
 There may be additional extensions that are distributed with
 Python-Markdown that are not included here in Extra. Those extensions
 are not part of PHP Markdown Extra, and therefore, not part of
@@ -19,13 +23,6 @@ additional extensions, we suggest creating your own clone of Extra
 under a differant name. You could also edit the `extensions` global
 variable defined below, but be aware that such changes may be lost
 when you upgrade to any future version of Python-Markdown.
-
-See <https://pythonhosted.org/Markdown/extensions/extra.html> 
-for documentation.
-
-Copyright The Python Markdown Project
-
-License: [BSD](http://www.opensource.org/licenses/bsd-license.php) 
 
 """
 
@@ -36,24 +33,18 @@ from ..blockprocessors import BlockProcessor
 from .. import util
 import re
 
-extensions = [
-    'markdown.extensions.smart_strong',
-    'markdown.extensions.fenced_code',
-    'markdown.extensions.footnotes',
-    'markdown.extensions.attr_list',
-    'markdown.extensions.def_list',
-    'markdown.extensions.tables',
-    'markdown.extensions.abbr'
-]
+extensions = ['smart_strong',
+              'fenced_code',
+              'footnotes',
+              'attr_list',
+              'def_list',
+              'tables',
+              'abbr',
+              ]
 
 
 class ExtraExtension(Extension):
     """ Add various extensions to Markdown class."""
-
-    def __init__(self, *args, **kwargs):
-        """ config is just a dumb holder which gets passed to actual ext later. """
-        self.config = kwargs.pop('configs', {})
-        self.config.update(kwargs)
 
     def extendMarkdown(self, md, md_globals):
         """ Register extension instances. """
@@ -69,8 +60,8 @@ class ExtraExtension(Extension):
                 r'^(p|h[1-6]|li|dd|dt|td|th|legend|address)$', re.IGNORECASE)
 
 
-def makeExtension(*args, **kwargs):
-    return ExtraExtension(*args, **kwargs)
+def makeExtension(configs={}):
+    return ExtraExtension(configs=dict(configs))
 
 
 class MarkdownInHtmlProcessor(BlockProcessor):
@@ -84,46 +75,54 @@ class MarkdownInHtmlProcessor(BlockProcessor):
         # Build list of indexes of each nest within the parent element.
         nest_index = []  # a list of tuples: (left index, right index)
         i = self.parser.blockprocessors.tag_counter + 1
-        while len(self._tag_data) > i and self._tag_data[i]['left_index']:
-            left_child_index = self._tag_data[i]['left_index']
-            right_child_index = self._tag_data[i]['right_index']
+        while len(self.parser.markdown.htmlStash.tag_data) > i and self.\
+                parser.markdown.htmlStash.tag_data[i]['left_index']:
+            left_child_index = \
+                self.parser.markdown.htmlStash.tag_data[i]['left_index']
+            right_child_index = \
+                self.parser.markdown.htmlStash.tag_data[i]['right_index']
             nest_index.append((left_child_index - 1, right_child_index))
             i += 1
 
         # Create each nest subelement.
-        for i, (left_index, right_index) in enumerate(nest_index[:-1]):
-            self.run(element, block[left_index:right_index],
-                     block[right_index:nest_index[i + 1][0]], True)
+        i = 0
+        for n in nest_index[:-1]:
+            self.run(element, block[n[0]:n[1]],
+                     block[n[1]:nest_index[i + 1][0]], True)
+            i += 1
         self.run(element, block[nest_index[-1][0]:nest_index[-1][1]],  # last
                  block[nest_index[-1][1]:], True)                      # nest
 
     def run(self, parent, blocks, tail=None, nest=False):
-        self._tag_data = self.parser.markdown.htmlStash.tag_data
-
         self.parser.blockprocessors.tag_counter += 1
-        tag = self._tag_data[self.parser.blockprocessors.tag_counter]
+        tag_data = self.parser.markdown.htmlStash.tag_data[
+            self.parser.blockprocessors.tag_counter]
 
         # Create Element
-        markdown_value = tag['attrs'].pop('markdown')
-        element = util.etree.SubElement(parent, tag['tag'], tag['attrs'])
+        markdown_value = tag_data['attrs'].pop('markdown')
+        element = util.etree.SubElement(parent, tag_data['tag'],
+                                        tag_data['attrs'])
 
         # Slice Off Block
         if nest:
             self.parser.parseBlocks(parent, tail)  # Process Tail
             block = blocks[1:]
         else:  # includes nests since a third level of nesting isn't supported
-            block = blocks[tag['left_index'] + 1: tag['right_index']]
-            del blocks[:tag['right_index']]
+            block = blocks[tag_data['left_index'] + 1:
+                           tag_data['right_index']]
+            del blocks[:tag_data['right_index']]
 
         # Process Text
         if (self.parser.blockprocessors.contain_span_tags.match(  # Span Mode
-                tag['tag']) and markdown_value != 'block') or \
+                tag_data['tag']) and markdown_value != 'block') or \
                 markdown_value == 'span':
             element.text = '\n'.join(block)
         else:                                                     # Block Mode
             i = self.parser.blockprocessors.tag_counter + 1
-            if len(self._tag_data) > i and self._tag_data[i]['left_index']:
-                first_subelement_index = self._tag_data[i]['left_index'] - 1
+            if len(self.parser.markdown.htmlStash.tag_data) > i and self.\
+                    parser.markdown.htmlStash.tag_data[i]['left_index']:
+                first_subelement_index = self.parser.markdown.htmlStash.\
+                    tag_data[i]['left_index'] - 1
                 self.parser.parseBlocks(
                     element, block[:first_subelement_index])
                 if not nest:

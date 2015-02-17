@@ -39,9 +39,8 @@ class SuperscriptExtension(markdown.Extension):
         """ Replace superscript with SuperscriptPattern """
         md.inlinePatterns.add('superscript', SimpleTagPattern(SUPERSCRIPT_RE, 'sup'), '<not_strong')
 
-
-def makeExtension(configs=[]):
-    return SuperscriptExtension(configs)
+def makeExtension(configs=None):
+    return SuperscriptExtension(configs=configs)
 
 if __name__ == "__main__":
     import doctest
