@@ -5,8 +5,9 @@ import markdown
 
 @renderer
 class MarkdownRenderer(MarkupRenderer):
-    FILENAME_PATTERN_RE = re.compile(r'\.(md|mkdn?|mdwn|mdown|markdown|litcoffee)$')
+    FILENAME_PATTERN_RE = re.compile(r'\.(md|mmd|mkdn?|mdwn|mdown|markdown|litcoffee)$')
     YAML_FRONTMATTER_RE = re.compile(r'\A---\s*\n.*?\n?^---\s*$\n?', re.DOTALL | re.MULTILINE)
+    MARKDOWN_SYNTAX_RE = re.compile(r'^text\.html\.markdown\S*')
 
     def load_settings(self, renderer_options, global_setting):
         super(MarkdownRenderer, self).load_settings(renderer_options, global_setting)
@@ -34,7 +35,7 @@ class MarkdownRenderer(MarkupRenderer):
         * text.html.markdown.gfm  # github-flavored
         * text.html.markdown.multimarkdown  # fletcherpenney.net/multimarkdown
         """
-        if re.match(r'^text\.html\.markdown\S*', syntax):
+        if cls.MARKDOWN_SYNTAX_RE.match(syntax):
             return True
         return cls.FILENAME_PATTERN_RE.search(filename) is not None
 
