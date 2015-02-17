@@ -13,5 +13,5 @@ class StrikeoutExtension(markdown.Extension):
         md.inlinePatterns.add('del', SimpleTagPattern(STRIKEOUT_RE, 'del'), '<not_strong')
 
 
-def makeExtension(configs=None):
-    return StrikeoutExtension(configs=configs)
+def makeExtension(configs=[]):
+    return StrikeoutExtension(configs)
