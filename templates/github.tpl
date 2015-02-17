@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8">
     <title>{{filename}}—{{dirname}}</title>
-    <link rel="stylesheet" type="text/css" href="/public/github-v1.css">
+    <link rel="stylesheet" type="text/css" href="/public/github.css">
   </head>
   <body>
     <div class="container">
