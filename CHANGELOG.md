@@ -1,6 +1,13 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
+**v3.0.0 (TBD)**
+
+* Upgrade `Python-Markdown` package to v2.4.1 final.
+* Add `.mmd` file extension support (MultiMarkdown).
+* Upgrade jQuery to 2.1.3 (Say good bye to IE8).
+* `server_host` setting is now taken into account when launching preview in browser.
+
 **v2.0.9 (08/02/2014)**
 
 * Add syntax highlighting support for reStructureText.
