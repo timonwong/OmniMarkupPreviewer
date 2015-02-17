@@ -117,6 +117,7 @@ What's New
 
 **v3.0.0 (TBD)**
 
+* Use new flat github style (old style renamed to github-v1).
 * Upgrade `Python-Markdown` package to v2.4.1 final.
 * Add `.mmd` file extension support (MultiMarkdown).
 * Upgrade jQuery to 2.1.3 (Say good bye to IE8).
