@@ -1,0 +1,10 @@
+OmniMarkupPreviewer v3.0.0 Changelog:
+
+**NOTE:** Restarting Sublime Text may required after upgrading.
+
+* Use new flat github style (old style renamed to github-v1).
+* Upgrade pygments library to v2.0.2, with more lexers.
+* Upgrade `Python-Markdown` package to v2.4.1 final.
+* Add `.mmd` file extension support (MultiMarkdown).
+* Upgrade jQuery to 2.1.3 (Say good bye to IE8).
+* `server_host` setting is now taken into account when launching preview in browser.

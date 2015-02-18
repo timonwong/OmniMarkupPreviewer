@@ -7,8 +7,8 @@ Description
 OmniMarkupPreviewer is a plugin for both [Sublime Text 2] and [Sublime Text 3]
 that preview markups in web browsers. OmniMarkupPreviewer renders markups into
 htmls and send it to web browser in the backgound, which enables a live preview.
-Besides, OmniMarkupPreviewer provide support for exporting result to
-html file as well.
+Besides, OmniMarkupPreviewer provide support for exporting result to html file 
+as well.
 
 [Sublime Text 2]: http://www.sublimetext.com/2
 [Sublime Text 3]: http://www.sublimetext.com/3
@@ -106,8 +106,8 @@ Available OmniMarkupPreviewer commands in the command palette:
 * `OmniMarkupPreviewer: Empty Cache`
 
 
-**NOTE** Command will not be available if current file syntax (or filename) doesn't match any
-of OmniMarkupPreviewer renderers.
+**NOTE** Command will not be available (greyed out) if current file syntax 
+(or filename) doesn't match any of OmniMarkupPreviewer renderers.
 
 
 What's New
@@ -115,9 +115,10 @@ What's New
 
 **For a complete list of changes, see [CHANGELOG.md](./CHANGELOG.md)**
 
-**v3.0.0 (TBD)**
+**v3.0.0 (02/28/2015)**
 
 * Use new flat github style (old style renamed to github-v1).
+* Upgrade pygments library to v2.0.2, with more lexers.
 * Upgrade `Python-Markdown` package to v2.4.1 final.
 * Add `.mmd` file extension support (MultiMarkdown).
 * Upgrade jQuery to 2.1.3 (Say good bye to IE8).
@@ -201,7 +202,7 @@ License
 
 This plugin released under MIT License:
 
-    Copyright (c) 2013 Timon Wong
+    Copyright © 2012 - 2015 Timon Wong
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of
     this software and associated documentation files (the "Software"), to deal in

@@ -1,9 +1,10 @@
 OmniMarkupPreviewer Changes
 ---------------------------
 
-**v3.0.0 (TBD)**
+**v3.0.0 (02/28/2015)**
 
 * Use new flat github style (old style renamed to github-v1).
+* Upgrade pygments library to v2.0.2, with more lexers.
 * Upgrade `Python-Markdown` package to v2.4.1 final.
 * Add `.mmd` file extension support (MultiMarkdown).
 * Upgrade jQuery to 2.1.3 (Say good bye to IE8).
