@@ -23,6 +23,9 @@ class MarkdownRenderer(MarkupRenderer):
         if 'smartypants' in extensions:
             extensions.remove('smartypants')
             extensions.add('smarty')
+        if 'codehilite' in extensions:
+            extensions.remove('codehilite')
+            extensions.add('codehilite(guess_lang=False)')
         self.extensions = list(extensions)
 
     @classmethod
