@@ -28,16 +28,16 @@
       </header>
       <section>
         <h1>
-<a name="omnimarkuppreviewer" class="anchor" href="#omnimarkuppreviewer"><span class="octicon octicon-link"></span></a>OmniMarkupPreviewer</h1>
+<a id="omnimarkuppreviewer" class="anchor" href="#omnimarkuppreviewer" aria-hidden="true"><span class="octicon octicon-link"></span></a>OmniMarkupPreviewer</h1>
 
 <h2>
-<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>Description</h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
 
 <p>OmniMarkupPreviewer is a plugin for both <a href="http://www.sublimetext.com/2">Sublime Text 2</a> and <a href="http://www.sublimetext.com/3">Sublime Text 3</a>
 that preview markups in web browsers. OmniMarkupPreviewer renders markups into
 htmls and send it to web browser in the backgound, which enables a live preview.
-Besides, OmniMarkupPreviewer provide support for exporting result to
-html file as well.</p>
+Besides, OmniMarkupPreviewer provide support for exporting result to html file 
+as well.</p>
 
 <p>OmniMarkupPreviewer has builtin support following markups:</p>
 
@@ -58,8 +58,11 @@ installed from <code>CPAN</code>.)</li>
 <a href="http://www.mediawiki.org/">MediaWiki</a> (Requires <code>ruby</code>, as well as gem <code>wikicloth</code>)</li>
 <li>
 <a href="http://www.methods.co.nz/asciidoc/">AsciiDoc</a> (Requires <code>ruby</code>, as well as gem <code>asciidoctor</code>)</li>
-</ul><h3>
-<a name="donation" class="anchor" href="#donation"><span class="octicon octicon-link"></span></a>Donation</h3>
+<li>Literate Haskell</li>
+</ul>
+
+<h3>
+<a id="donation" class="anchor" href="#donation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Donation</h3>
 
 <p>If you find my work useful, please consider buying me a cup of coffee, all
 donations are much appreciated :)</p>
@@ -67,10 +70,10 @@ donations are much appreciated :)</p>
 <p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=TD4HF4X2R53NE"><img src="https://dl.dropbox.com/u/2451120/donate-with-paypal.png" alt="Donate via PayPal"></a></p>
 
 <h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
 <h3>
-<a name="with-the-package-control-plugin" class="anchor" href="#with-the-package-control-plugin"><span class="octicon octicon-link"></span></a>With the Package Control plugin</h3>
+<a id="with-the-package-control-plugin" class="anchor" href="#with-the-package-control-plugin" aria-hidden="true"><span class="octicon octicon-link"></span></a>With the Package Control plugin</h3>
 
 <p>The easiest way to install OmniMarkupPreviewer is through <a href="http://wbond.net/sublime_packages/package_control">Package Control</a>.</p>
 
@@ -81,22 +84,24 @@ donations are much appreciated :)</p>
 on Windows and Linux. <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> on OS X).</li>
 <li>Type "Install" and select "Package Control: Install Package".</li>
 <li>Select "OmniMarkupPreviewer" from list.</li>
-</ol><p>The advantage of using Package Control is that it will keep OmniMarkupPreviewer
+</ol>
+
+<p>The advantage of using Package Control is that it will keep OmniMarkupPreviewer
 up to date automatically.</p>
 
 <h3>
-<a name="manual-install" class="anchor" href="#manual-install"><span class="octicon octicon-link"></span></a>Manual Install</h3>
+<a id="manual-install" class="anchor" href="#manual-install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Manual Install</h3>
 
 <p><strong>Without Git:</strong>
 <a href="https://github.com/timonwong/OmniMarkupPreviewer">Download</a> the latest source
 code, and extract to the Packages directory.</p>
 
 <p><strong>With Git:</strong>
-Type the following command in your Sublime Text 2 Packages directory:</p>
+Type the following command in your Sublime Text Packages directory:</p>
 
 <p><code>git clone git://github.com/timonwong/OmniMarkupPreviewer.git</code></p>
 
-<p>The "Packages" directory is located at:</p>
+<p>The "Packages" directory for Sublime Text 2 is located at:</p>
 
 <ul>
 <li>
@@ -108,11 +113,27 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 <li>
 <strong>OS X:</strong>     <code>~/Library/Application Support/Sublime Text 2/Packages/</code>
 </li>
-</ul><h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+</ul>
+
+<p>And for the Sublime Text 3:</p>
+
+<ul>
+<li>
+<strong>Windows:</strong>  <code>%APPDATA%\Sublime Text 3\Packages\</code>
+</li>
+<li>
+<strong>Linux:</strong>    <code>~/.config/sublime-text-3/Packages/</code>
+</li>
+<li>
+<strong>OS X:</strong>     <code>~/Library/Application Support/Sublime Text 3/Packages/</code>
+</li>
+</ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <h3>
-<a name="key-bindings" class="anchor" href="#key-bindings"><span class="octicon octicon-link"></span></a>Key Bindings</h3>
+<a id="key-bindings" class="anchor" href="#key-bindings" aria-hidden="true"><span class="octicon octicon-link"></span></a>Key Bindings</h3>
 
 <p>The default key bindings:</p>
 
@@ -125,7 +146,9 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>X</kbd>: Export Markup as HTML.</li>
 <li>
 <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup as HTML.</li>
-</ul><p><strong>OSX:</strong></p>
+</ul>
+
+<p><strong>OSX:</strong></p>
 
 <ul>
 <li>
@@ -134,8 +157,10 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>X</kbd>: Export Markup as HTML.</li>
 <li>
 <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>: Copy Markup as HTML.</li>
-</ul><h3>
-<a name="command-palette" class="anchor" href="#command-palette"><span class="octicon octicon-link"></span></a>Command Palette</h3>
+</ul>
+
+<h3>
+<a id="command-palette" class="anchor" href="#command-palette" aria-hidden="true"><span class="octicon octicon-link"></span></a>Command Palette</h3>
 
 <p>Available OmniMarkupPreviewer commands in the command palette:</p>
 
@@ -143,27 +168,93 @@ Type the following command in your Sublime Text 2 Packages directory:</p>
 <li><code>OmniMarkupPreviewer: Preview Current Markup in Browser</code></li>
 <li><code>OmniMarkupPreviewer: Export Current Markup as HTML</code></li>
 <li><code>OmniMarkupPreviewer: Empty Cache</code></li>
-</ul><h2>
-<a name="whats-new" class="anchor" href="#whats-new"><span class="octicon octicon-link"></span></a>What's New</h2>
+</ul>
+
+<p><strong>NOTE</strong> Command will not be available (greyed out) if current file syntax 
+(or filename) doesn't match any of OmniMarkupPreviewer renderers.</p>
+
+<h2>
+<a id="whats-new" class="anchor" href="#whats-new" aria-hidden="true"><span class="octicon octicon-link"></span></a>What's New</h2>
 
 <p><strong>For a complete list of changes, see <a href="./CHANGELOG.md">CHANGELOG.md</a></strong></p>
+
+<p><strong>v3.0.0 (02/28/2015)</strong></p>
+
+<ul>
+<li>Use new flat github style (old style renamed to github-v1).</li>
+<li>Upgrade pygments library to v2.0.2, with more lexers.</li>
+<li>Upgrade <code>Python-Markdown</code> package to v2.4.1 final.</li>
+<li>Add <code>.mmd</code> file extension support (MultiMarkdown).</li>
+<li>Upgrade jQuery to 2.1.3 (Say good bye to IE8).</li>
+<li>
+<code>server_host</code> setting is now taken into account when launching preview in browser.</li>
+</ul>
+
+<p><strong>v2.0.9 (08/02/2014)</strong></p>
+
+<ul>
+<li>Add syntax highlighting support for reStructureText.</li>
+<li>Prefer to use <code>xdg-open</code> under linux environments.</li>
+</ul>
+
+<p><strong>v2.0.8 (04/15/2014)</strong></p>
+
+<ul>
+<li>Fix Sublime Text 2 compatibility (crash).</li>
+</ul>
+
+<p><strong>v2.0.7 (04/14/2014)</strong></p>
+
+<ul>
+<li>Fix unreliable default setting overriding, which confuses a lot of users when
+customizing their settings.</li>
+<li>Prevent preview from the console, which will simply lead to crash.</li>
+</ul>
+
+<p><strong>v2.0.6 (01/27/2014)</strong></p>
+
+<ul>
+<li>Fix Sublime Text 2 compatibility (markdown).</li>
+</ul>
+
+<p><strong>v2.0.5 (01/24/2014)</strong></p>
+
+<ul>
+<li>MathJax library is now bundled directly instead of on demand downloading.</li>
+<li>Python-Markdown module now upgraded to v2.4.</li>
+<li>Fix incompatibility when using Sublime Text 3 under XFCE.</li>
+</ul>
+
+<p><strong>v2.0.4 (08/10/2013)</strong></p>
+
+<ul>
+<li>Fix ruby gems loading in OSX (Required by RDoc, AsciiDoc, Org Mode and MediaWiki).</li>
+<li>Add AsciiDoc syntax support.</li>
+<li>Ensure default setting for <code>export_options</code> when not available.</li>
+</ul>
 
 <p><strong>v2.0.3 (07/18/2013)</strong></p>
 
 <ul>
 <li>Fix html exporting when file contains images in Sublime Text 3.</li>
-<li>Fix "smart_strong" and "meta_data" extention name for markdown.</li>
-</ul><p><strong>v2.0.2 (06/17/2013)</strong></p>
+<li>Fix <code>smart_strong</code> and <code>meta_data</code> extention name for markdown.</li>
+</ul>
+
+<p><strong>v2.0.2 (06/17/2013)</strong></p>
 
 <ul>
 <li>Update cherrypy server, add detail information if socket could not be created.</li>
 <li>Add support for file URIs in images path.</li>
-</ul><p><strong>v2.0.1 (05/12/2013)</strong></p>
+</ul>
+
+<p><strong>v2.0.1 (05/12/2013)</strong></p>
 
 <ul>
 <li>Strip YAML frontmatter for Markdown files automatically.</li>
 <li>Check syntax name as well as filename extension for MediaWiki files.</li>
-</ul><p><strong>v2.0 (03/31/2013)</strong></p>
+</ul>
+
+<p><strong>v2.0 (03/31/2013)</strong></p>
 
 <ul>
 <li>Added support for <a href="http://orgmode.org">Org Mode</a> (Requires ruby, and gem
@@ -177,24 +268,30 @@ as well as gem <code>asciidoctor</code>).</li>
 <code>.sublime-package</code> (zip archive).</li>
 <li>Fixed broken <code>ignored_renderer</code> setting.</li>
 <li>Improved Sublime Text 3 compatibility.</li>
-</ul><p><strong>v1.20 (03/15/2013)</strong></p>
+</ul>
+
+<p><strong>v1.20 (03/15/2013)</strong></p>
 
 <ul>
 <li>Add support Sublime Text 3 (Experimental).</li>
 <li>Add new context command <code>Copy Markup as HTML</code>.</li>
 <li>Remove unused command <code>Sweep Cache (Remove Unused)</code>.</li>
 <li>Auto scroll now works correctly for documents contain images and MathJax equations.</li>
-</ul><p><strong>v1.12 (03/13/2013)</strong></p>
+</ul>
+
+<p><strong>v1.12 (03/13/2013)</strong></p>
 
 <ul>
 <li>Renderes are now loaded asynchronously on startup (faster Sublime Text 2 startup).</li>
 <li>Add litcoffee support.</li>
-</ul><h2>
-<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+</ul>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
 
 <p>This plugin released under MIT License:</p>
 
-<pre><code>Copyright (c) 2013 Timon Wong
+<pre><code>Copyright © 2012 - 2015 Timon Wong
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -216,7 +313,7 @@ SOFTWARE.
 </code></pre>
 
 <h2>
-<a name="donors" class="anchor" href="#donors"><span class="octicon octicon-link"></span></a>Donors</h2>
+<a id="donors" class="anchor" href="#donors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Donors</h2>
 
 <p><a href="./DONORS.md">DONORS.md</a></p>
       </section>
