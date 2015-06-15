@@ -25,7 +25,7 @@ class MarkdownRenderer(MarkupRenderer):
             extensions.add('smarty')
         if 'codehilite' in extensions:
             extensions.remove('codehilite')
-            extensions.add('codehilite(guess_lang=False)')
+            extensions.add('codehilite(linenums=False,guess_lang=False)')
         self.extensions = list(extensions)
 
     @classmethod
